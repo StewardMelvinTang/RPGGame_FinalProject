@@ -1,0 +1,3 @@
+PlayerName: PLAYER
+SFXVolume: 1.0f
+BGMVolume: 1.0f
