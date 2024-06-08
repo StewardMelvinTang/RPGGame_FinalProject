@@ -16,6 +16,7 @@
 #include "SettingsScene.hpp"
 #include "StageSelectScene.hpp"
 #include "ScoreBoardScene.hpp"
+#include "GameScene_Hall.hpp"
 #include "Scene/StartScene.h"
 
 // ! For save
@@ -84,8 +85,6 @@ void StartScene::Initialize() {
 
 
 void StartScene::InitializeProfileMenu(){
-    
-    // TXT_Profile = new Engine::Label("Profile Menu", "pixel-font.ttf", 50, 95, 35, 255, 255, 255, 255, 0, 0);
     IMG_ProfileBG = new Engine::Image("bg/ProfileScreen_Game.png", 0, 0, 1600, 832, 0, 0);
     BTN_Back = new Engine::ImageButton("btn/back_normal.png", "btn/back_hover.png", 432, 223, 70, 70);
     BTN_Back->SetOnClickCallback(bind(&StartScene::Profile_BackBtnClick, this));
@@ -115,7 +114,6 @@ void StartScene::Profile_DoneBtnClick(){
 
 void StartScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
-    // cout << keyCode << endl;
 
     if (drawProfileMenu == true && recordingPlayerName == true){
         if (keyCode == 59) { // * Escape
@@ -167,19 +165,19 @@ void StartScene::VirtualDraw() const {
 }
 
 void StartScene::Terminate() {
-    // if (TXT_Profile) delete TXT_Profile;
-    // if (IMG_ProfileBG) delete IMG_ProfileBG;
-    // if (BTN_Back) delete BTN_Back;
-    // if (BTN_Done) delete BTN_Done;
-    // if (NameTextBox) delete NameTextBox;
-    
     IScene::Terminate();
 }
 void StartScene::PlayOnClick(int stage) {
     if (drawProfileMenu) return;
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
-    StageSelectScene *scene = dynamic_cast<StageSelectScene *>(Engine::GameEngine::GetInstance().GetScene("stage-select"));
-    if (scene != nullptr) scene->bgmInstance = this->bgmInstance;
+    // Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+    Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
+    GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
+    if (bgmInstance){
+        AudioHelper::StopSample(bgmInstance);
+        bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+    }
+    // StageSelectScene *scene = dynamic_cast<StageSelectScene *>(Engine::GameEngine::GetInstance().GetScene("stage-select"));
+    // if (scene != nullptr) scene->bgmInstance = this->bgmInstance;
 }
 void StartScene::SettingsOnClick(int stage) {
     if (drawProfileMenu) return;
@@ -213,24 +211,8 @@ void openBrowser(const std::string& url) {
 
 void StartScene::CreditBtn(){
     
-    // if (drawProfileMenu) return;
-    // playerName = ok ? "Kontol" : "Melvin";
-    // cout << playerName << endl;
-    
-    // // for (auto obj : GetObjects()){
-    // //     if (obj == TXT_Name){
-    // //         cout << "Found !" << endl;
-    // //         RemoveObject(obj->GetObjectIterator());
-    // //     }
-    // // }
 
-    // RemoveObject(TXT_Name->GetObjectIterator());
-
-    // TXT_Name = new Engine::Label(playerName, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
-    // AddNewObject(TXT_Name);
-    // ok = !ok;
-
-    openBrowser("https://docs.google.com/document/d/1zvZ2EW1jFqdQMtwXJ28hzIIh0uHgJxsPPQYok0K_8JQ/edit?usp=sharing");
+    //openBrowser("https://docs.google.com/document/d/1zvZ2EW1jFqdQMtwXJ28hzIIh0uHgJxsPPQYok0K_8JQ/edit?usp=sharing");
 }
 
 void StartScene::ScoreBoardBtn(){

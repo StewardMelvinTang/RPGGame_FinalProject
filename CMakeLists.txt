@@ -72,6 +72,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Enemy/PlaneEnemy.hpp
         Scene/PlayScene.cpp
         Scene/PlayScene.hpp
+        Scene/GameScene_Hall.hpp
+        Scene/GameScene_Hall.cpp
         Engine/Point.cpp
         Engine/Point.hpp
         Engine/Resources.cpp

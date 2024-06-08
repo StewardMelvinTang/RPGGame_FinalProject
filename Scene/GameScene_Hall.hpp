@@ -1,5 +1,5 @@
-#ifndef PLAYSCENE_HPP
-#define PLAYSCENE_HPP
+#ifndef GAMESCENE_HALL_HPP
+#define GAMESCENE_HALL_HPP
 #include <allegro5/allegro_audio.h>
 #include <list>
 #include <memory>
@@ -9,15 +9,39 @@
 #include "Engine/IScene.hpp"
 #include "Engine/Point.hpp"
 
-class Turret;
-namespace Engine {
-	class Group;
-	class Image;
-	class Label;
-	class Sprite;
-}  // namespace Engine
+using namespace std;
 
-class PlayScene final : public Engine::IScene {
+
+// * HANDLE CURRENT PROFILE' PLAYER STATS
+struct PlayerStats
+{
+    string name = "PLAYER";
+    float currentHP =- 100, maxHP = 100;
+    int gold = 0;
+
+    string weaponName = "Sword";
+    float attackDMG = 15.0f;
+    float attackCooldown = 1.0f;
+};
+
+// * CHARACTER DRAWING DATA HANDLING
+enum Enum_Direction{
+    DIRECTION_LEFT, // 0
+    DIRECTION_RIGHT, // 1
+    DIRECTION_UP, // 2
+    DIRECTION_DOWN // 3
+};
+struct Character{
+public:
+    float x = 0, y = 0;
+    float size = 64;
+    float speed = 2.0;
+
+    Enum_Direction directionFacing = DIRECTION_DOWN;
+};
+
+
+class GameSceneHall final : public Engine::IScene {
 private:
 	enum TileType {
 		TILE_DIRT, // 0
@@ -32,47 +56,38 @@ private:
 	ALLEGRO_SAMPLE_ID bgmId;
 	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
 protected:
-	int lives;
-	int money;
 	int SpeedMult;
 public:
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
 	static const int MapWidth, MapHeight;
 	static const int BlockSize;
-	static const float DangerTime;
 	static Engine::Point SpawnGridPoint;
 	static const Engine::Point EndGridPoint;
-	static const std::vector<int> code;
-	int MapId;
+
 	float ticks;
 	float deathCountDown;
 
-	// * Stats
-	int enemyKilled = 0;
-	int score = 0;
-	int towerBuilt = 0;
-	// Map tiles.
+    string currentMapID;
+
+	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
 	Group* GroundEffectGroup;
-	Group* DebugIndicatorGroup;
-	Group* BulletGroup;
-	Group* TowerGroup;
-	Group* EnemyGroup;
 	Group* EffectGroup;
 	Group* UIGroup;
+    Group* CharacterSpriteGroup;
 	Engine::Label* UIMoney;
 	Engine::Label* UILives;
 	Engine::Image* imgTarget;
-	Engine::Sprite* dangerIndicator;
-	Turret* preview;
 	std::vector<std::vector<TileType>> mapState;
 	std::vector<std::vector<int>> mapDistance;
-	std::list<std::pair<int, float>> enemyWaveData;
 	std::list<int> keyStrokes;
 
 	static Engine::Point GetClientSize();
-	explicit PlayScene() = default;
+
+
+    // * Default Function Initialization
+	explicit GameSceneHall() = default;
 	void Initialize() override;
 	void Terminate() override;
 	void Update(float deltaTime) override;
@@ -81,27 +96,23 @@ public:
 	void OnMouseMove(int mx, int my) override;
 	void OnMouseUp(int button, int mx, int my) override;
 	void OnKeyDown(int keyCode) override;
-	void Hit();
-	int GetMoney() const;
-	void EarnMoney(int money);
-	void ReadMap();
-	void ReadEnemyWave();
-	void ConstructUI();
-	void UIBtnClicked(int id);
-	bool CheckSpaceValid(int x, int y);
-	std::vector<std::vector<int>> CalculateBFSDistance();
+    void OnKeyUp(int keyCode) override;
 
-	Engine::Point FindEnemySpawnPoint();
+	void ReadMap();
+	void ConstructUI();
+
+    // * Generative Tile Maps
 	void ConstructGenerativePathTile(int, int);
 	void ConstructGenerativeGrassTile(int, int);
 	int ClampMapPos(int, int);
 
-	bool PathFindingIsValid(int curr);
-	// void ModifyReadMapTiles();
-	bool fastForward = false;
-	void FastForwardButtonPress();
-	void BackHome();
+    // * Character Initialization
+    IObject * charSpriteObj;
+    Character charSpriteData;
+    void InitializeCharacter();
+    void DrawCharacter() const;
+    void UpdateCharacterDirection(Character &character, bool keys[4]);
+    bool CollisionCheck(Character &character);
 
-	void AddScore(int val);
 };
 #endif // PLAYSCENE_HPP

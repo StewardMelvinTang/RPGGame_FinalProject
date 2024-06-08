@@ -19,7 +19,7 @@ namespace Engine {
 		// 	 DynamicBG2 = new Engine::Image("bg/DynamicBG.png", 0, -832, 1600, 832, 0, 0);
 		// }
 		
-		al_clear_to_color(al_map_rgb(136, 93, 55));
+		al_clear_to_color(al_map_rgb(36, 40, 59));
 		// DynamicBG->Draw();
 		// DynamicBG2->Draw();
 		// // DynamicBG->Position.x += posX;

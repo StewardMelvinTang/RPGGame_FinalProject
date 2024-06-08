@@ -169,6 +169,7 @@ void PlayScene::Update(float deltaTime) {
 		if (ticks < current.second)
 			continue;
 		ticks -= current.second;
+		
 		enemyWaveData.pop_front();
 		const Engine::Point SpawnCoordinate = Engine::Point(SpawnGridPoint.x * BlockSize + BlockSize / 2, SpawnGridPoint.y * BlockSize + BlockSize / 2);
 		Enemy* enemy;
