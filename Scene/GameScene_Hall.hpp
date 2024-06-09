@@ -9,8 +9,8 @@
 #include "Engine/IScene.hpp"
 #include "Engine/Point.hpp"
 
+#include "PlayerCharacter/PlayerCharacter.hpp"
 using namespace std;
-
 
 // * HANDLE CURRENT PROFILE' PLAYER STATS
 struct PlayerStats
@@ -24,21 +24,6 @@ struct PlayerStats
     float attackCooldown = 1.0f;
 };
 
-// * CHARACTER DRAWING DATA HANDLING
-enum Enum_Direction{
-    DIRECTION_LEFT, // 0
-    DIRECTION_RIGHT, // 1
-    DIRECTION_UP, // 2
-    DIRECTION_DOWN // 3
-};
-struct Character{
-public:
-    float x = 0, y = 0;
-    float size = 64;
-    float speed = 2.0;
-
-    Enum_Direction directionFacing = DIRECTION_DOWN;
-};
 
 
 class GameSceneHall final : public Engine::IScene {
@@ -85,6 +70,7 @@ public:
 
 	static Engine::Point GetClientSize();
 
+	PlayerCharacter * playerChar = nullptr;
 
     // * Default Function Initialization
 	explicit GameSceneHall() = default;
@@ -106,13 +92,6 @@ public:
 	void ConstructGenerativeGrassTile(int, int);
 	int ClampMapPos(int, int);
 
-    // * Character Initialization
-    IObject * charSpriteObj;
-    Character charSpriteData;
-    void InitializeCharacter();
-    void DrawCharacter() const;
-    void UpdateCharacterDirection(Character &character, bool keys[4]);
-    bool CollisionCheck(Character &character);
 
 };
 #endif // PLAYSCENE_HPP
