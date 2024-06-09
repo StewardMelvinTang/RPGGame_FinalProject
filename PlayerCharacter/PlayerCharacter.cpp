@@ -90,6 +90,7 @@ bool PlayerCharacter::CollisionCheck(){
 }
 
 // * Make sure to include this in all scene OnkeyDown and OnKeyUp
+// ok boss, linji steven bayarin ya
 void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
     switch(keycode){
         case KEYBOARD_W:
