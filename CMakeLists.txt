@@ -106,6 +106,9 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Scene/ScoreBoardScene.cpp
 #        UI/Component/TextInput.cpp
 #        UI/Component/TextInput.hpp
+
+        PlayerCharacter/PlayerCharacter.hpp
+        PlayerCharacter/PlayerCharacter.cpp
 )
 
 IF (WIN32)

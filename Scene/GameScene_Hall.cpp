@@ -18,6 +18,8 @@
 #include "UI/Component/Label.hpp"
 #include "Engine/Resources.hpp"
 
+#include "PlayerCharacter/PlayerCharacter.hpp"
+
 #include "GameScene_Hall.hpp"
 
 #include <allegro5/allegro_image.h>
@@ -31,7 +33,6 @@ using namespace std;
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
 
-bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding status)
 
 bool GameSceneHall::DebugMode = false;
 const std::vector<Engine::Point> GameSceneHall::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
@@ -44,115 +45,25 @@ Engine::Point GameSceneHall::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
 void GameSceneHall::Initialize() {
-    
     currentMapID = "hall";
 	mapState.clear();
 	keyStrokes.clear();
 	ticks = 0;
 	SpeedMult = 1;
-	std::srand(static_cast<unsigned int>(std::time(nullptr))); // * Initialize Srand
-	// Add groups from bottom to top.
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+	// * Group Initialization
 	AddNewObject(TileMapGroup = new Group());
-	// AddNewObject(GroundEffectGroup = new Group());
-	// AddNewObject(EffectGroup = new Group());
-	// Should support buttons.
 	AddNewControlObject(UIGroup = new Group());
 	AddNewControlObject(CharacterSpriteGroup = new Group());
 
 	ReadMap();
 	ConstructUI();
-    InitializeCharacter();
-	// imgTarget = new Engine::Image("play/target.png", 0, 0);
-	// imgTarget->Visible = false;
-	// UIGroup->AddNewObject(imgTarget);
-	// Preload Lose Scene
-	// deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
-	// Engine::Resources::GetInstance().GetBitmap("lose/benjamin-happy.png");
-	// Start BGM.
+	playerChar = new PlayerCharacter(0, 0, 2.0, 100, 50);
 
-    cout << "MAp Initialized\n";
 	bgmId = AudioHelper::PlayBGM("play.ogg");
-    cout << "Audio Played\n";
-
 }
 
-void GameSceneHall::InitializeCharacter(){
-    charSpriteObj = new Engine::Image("char/char_idle_down.png", charSpriteData.x, charSpriteData.y, charSpriteData.size, charSpriteData.size);
-}
-
-void GameSceneHall::DrawCharacter() const{
-    if (!charSpriteObj) return;
-    charSpriteObj->Draw();
-}
-
-bool GameSceneHall::CollisionCheck(Character &character){
-    int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
-    int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
-    if (character.x < 0 || character.x > w || character.y < 0 || character.y > h) {
-        if (character.x <= 0) {
-            character.x = 0;
-        }
-        if (character.y <= 0) {
-            character.y = 0;
-        }
-
-        if (character.x >= w){
-            character.x = w;
-        }
-
-        if (character.y >= h){
-            character.y = h;
-        }
-
-        return false;
-    }
-
-    return true;
-}
-
-void GameSceneHall::UpdateCharacterDirection(Character &character, bool keys[4]){
-    if (keys[0] && CollisionCheck(character)) { // W key
-        character.y -= character.speed;
-        character.directionFacing = DIRECTION_UP;
-        //character.rotation = 0;
-    }
-    if (keys[1]&& CollisionCheck(character)) { // S key
-        character.y += character.speed;
-        character.directionFacing = DIRECTION_DOWN;
-        //character.rotation = ALLEGRO_PI; // 180 degrees
-    }
-    if (keys[2]&& CollisionCheck(character)) { // A key
-        character.x -= character.speed;
-        character.directionFacing = DIRECTION_LEFT;
-        //character.rotation = -ALLEGRO_PI / 2; // -90 degrees
-    }
-    if (keys[3]&& CollisionCheck(character)) { // D key
-        character.x += character.speed;
-        character.directionFacing = DIRECTION_RIGHT;
-        //character.rotation = ALLEGRO_PI / 2; // 90 degrees
-    }
-
-    // * Update Sprite Based on DIRECTION ENUM
-    string charSpritePath = "char/char_idle_down.png";
-    switch (character.directionFacing){
-        case DIRECTION_DOWN:
-            charSpritePath = "char/char_idle_down.png";
-        break;
-
-        case DIRECTION_UP:
-            charSpritePath = "char/char_idle_up.png";
-        break;
-
-        case DIRECTION_RIGHT:
-            charSpritePath = "char/char_idle_right.png";
-        break;
-
-        case DIRECTION_LEFT:
-            charSpritePath = "char/char_idle_left.png";
-        break;
-    }
-    charSpriteObj = new Engine::Image(charSpritePath, character.x, character.y, character.size, character.size);
-}
 
 void GameSceneHall::Terminate() {
 	AudioHelper::StopBGM(bgmId);
@@ -161,12 +72,11 @@ void GameSceneHall::Terminate() {
 	IScene::Terminate();
 }
 void GameSceneHall::Update(float deltaTime) {
-    UpdateCharacterDirection(charSpriteData, keys);
+    if (playerChar != nullptr) playerChar->UpdateCharacterDirection();
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
-    DrawCharacter();
-    
+    if (playerChar != nullptr) playerChar->Draw(); 
 }
 void GameSceneHall::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
@@ -175,48 +85,18 @@ void GameSceneHall::OnMouseMove(int mx, int my) {
 	IScene::OnMouseMove(mx, my);
 	const int x = mx / BlockSize;
 	const int y = my / BlockSize;
-	// imgTarget->Visible = true;
-	// imgTarget->Position.x = x * BlockSize;
-	// imgTarget->Position.y = y * BlockSize;
 }
+
 void GameSceneHall::OnMouseUp(int button, int mx, int my) {
 	IScene::OnMouseUp(button, mx, my);
 }
 void GameSceneHall::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
-
-    switch(keyCode){
-        case KEYBOARD_W:
-            keys[0] = true;
-        break;
-        case KEYBOARD_S:
-            keys[1] = true;
-        break;
-        case KEYBOARD_A:
-            keys[2] = true;
-        break;
-        case KEYBOARD_D:
-            keys[3] = true;
-        break;
-    }
-
+	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {
-    switch(keyCode){
-        case KEYBOARD_W:
-            keys[0] = false;
-        break;
-        case KEYBOARD_S:
-            keys[1] = false;
-        break;
-        case KEYBOARD_A:
-            keys[2] = false;
-        break;
-        case KEYBOARD_D:
-            keys[3] = false;
-        break;
-    }
+	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, false);
 }
 
 int GameSceneHall::ClampMapPos(int pos, int max){
@@ -225,7 +105,7 @@ int GameSceneHall::ClampMapPos(int pos, int max){
 	} else return pos;
 }
 void GameSceneHall::ConstructGenerativeGrassTile(int locX, int locY){
-	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return; // ! Invalid
+	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	int tileRandom = rand() % 10; // 10 % Grasses, 10% Flower, 60% Default Grass Tile
 	string grassTilePath = "play/grass_1.png";
 	switch (tileRandom) {

@@ -1,0 +1,44 @@
+#ifndef PLAYERCHARACTER_HPP
+#define PLAYERCHARACTER_HPP
+#include <list>
+#include <vector>
+#include <string>
+
+#include "Engine/Point.hpp"
+#include "Engine/Sprite.hpp"
+
+class Bullet;
+class PlayScene;
+
+enum Enum_Direction{
+    DIRECTION_LEFT, // 0
+    DIRECTION_RIGHT, // 1
+    DIRECTION_UP, // 2
+    DIRECTION_DOWN // 3
+};
+
+class PlayerCharacter : public Engine::Sprite {
+protected:
+	float speedMultiplier = 1.0f;
+	int gold;
+
+    float x = 0, y = 0;
+    float size = 64;
+    float speed = 2.0;
+    float currentHP = 100, maxHP = 100;
+
+    Enum_Direction directionFacing = DIRECTION_DOWN;
+    IObject * charSpriteObj;
+
+    std::string imgPath[3]; // * 0 down, 1 up, 2 right, 3 left
+public:
+	PlayerCharacter(float x, float y, float speed, float hp, int money);
+	void Update(float deltaTime) override;
+	void Draw() const override;
+
+	// virtual void VirtualUpdate(float deltatime) = 0;
+    void UpdateCharacterDirection();
+    bool CollisionCheck();
+    void SetMovementState(int keycode, bool keyDown);
+};
+#endif // ENEMY_HPP
