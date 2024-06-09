@@ -14,7 +14,11 @@ enum Enum_Direction{
     DIRECTION_LEFT, // 0
     DIRECTION_RIGHT, // 1
     DIRECTION_UP, // 2
-    DIRECTION_DOWN // 3
+    DIRECTION_DOWN, // 3
+    DIRECTION_UPLEFT, // 4
+    DIRECTION_UPRIGHT,// 5
+    DIRECTION_DOWNLEFT,// 6
+    DIRECTION_DOWNRIGHT// 7
 };
 
 class PlayerCharacter : public Engine::Sprite {

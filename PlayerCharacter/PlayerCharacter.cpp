@@ -54,7 +54,27 @@ void PlayerCharacter::UpdateCharacterDirection(){
         this->x += this->speed;
         this->directionFacing = DIRECTION_RIGHT;
     }
-
+    // Diagonal Keys
+    if(keys[0] && keys[2] && CollisionCheck()){ // W & A key
+        this->y -= this->speed/2;
+        this->x -= this->speed/2;
+        this->directionFacing = DIRECTION_UPLEFT;
+    }
+    if(keys[0] && keys[3] && CollisionCheck()){ // W & D key
+        this->y -= this->speed/2;
+        this->x -= this->speed/2;
+        this->directionFacing = DIRECTION_UPRIGHT;
+    }
+    if(keys[1] && keys[2] && CollisionCheck()){ // S & A key
+        this->y += this->speed/2;
+        this->x += this->speed/2;
+        this->directionFacing = DIRECTION_DOWNLEFT;
+    }
+    if(keys[1] && keys[3] && CollisionCheck()){ // S & D key
+        this->y += this->speed/2;
+        this->x += this->speed/2;
+        this->directionFacing = DIRECTION_DOWNRIGHT;
+    }
     // * Update Sprite Based on DIRECTION ENUM
     string charSpritePath = "char/char_idle_down.png";
     switch (this->directionFacing){
@@ -72,6 +92,23 @@ void PlayerCharacter::UpdateCharacterDirection(){
 
         case DIRECTION_LEFT:
             charSpritePath = "char/char_idle_left.png";
+        break;
+
+        // Diagonal Directions
+        case DIRECTION_UPLEFT:
+            charSpritePath = "char/char_idle_upleft.png";
+        break;
+
+        case DIRECTION_UPRIGHT:
+            charSpritePath = "char/char_idle_upright.png";
+        break;
+
+        case DIRECTION_DOWNLEFT:
+            charSpritePath = "char/char_idle_downleft.png";
+        break;
+
+        case DIRECTION_DOWNRIGHT:
+            charSpritePath = "char/char_idle_downright.png";
         break;
     }
     charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
