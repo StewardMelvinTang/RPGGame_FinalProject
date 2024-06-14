@@ -25,7 +25,7 @@ enum Enum_Direction{
 class PlayerCharacter : public Engine::Sprite {
 protected:
 	float speedMultiplier = 1.0f;
-	int gold;
+	int money = 0;
 
     float x = 0, y = 0;
     float size = 64;
@@ -47,8 +47,16 @@ public:
     bool CollisionCheck(float newX, float newY);
     void SetMovementState(int keycode, bool keyDown);
 
+    // * helper function & getter setter
     Engine::Point GetPlayerPositionAtMap();
-
+    float GetCurrentHP() {return currentHP;}
+    void SetCurrentHP(float newVal, bool shouldClamp = true);
+    float GetPlayerSpeed() {return speed;}
+    void SetPlayerSpeed(float newSpeed) {speed = newSpeed;}
+    float GetMaxHP() {return maxHP;}
+    void SetMaxHP(float newMaxHP) {maxHP = newMaxHP;}
+    int GetMoney() {return money;}
+    void SetMoney(int newAmount) {money = newAmount;}
 
     // * Player HUD (UI) RESOURCES
     IObject * HP_BarBG = nullptr;
@@ -58,8 +66,5 @@ public:
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
 
-
-    float GetCurrentHP() {return currentHP;}
-    void SetCurrentHP(float newVal, bool shouldClamp = true);
 };
 #endif // ENEMY_HPP

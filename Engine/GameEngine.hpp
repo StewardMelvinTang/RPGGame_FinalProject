@@ -170,6 +170,8 @@ namespace Engine {
 		/// </summary>
 		/// <returns>Get mouse position.</returns>
 		Point GetMousePosition() const;
+
+		Point GridToXYPosition(int gridY, int gridX, int blockSize) const;
 		/// <summary>
 		/// Get key state.
 		/// </summary>

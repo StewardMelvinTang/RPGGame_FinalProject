@@ -26,7 +26,7 @@ int w,h;
 
 PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize) : Engine::Sprite("char/char_idle_down.png", x, y){
     this->x = x; this->y = y; // Set Position in screen
-    this->speed = speed; this->gold = money;
+    this->speed = speed; this->money = money;
     charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
     
 
@@ -38,7 +38,7 @@ PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int mo
 
 void PlayerCharacter::ConstructPlayerHUD(){
     // * Size 282 x 40, 282 * (maxHP / currHP) to track progressbar percent
-    HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 770, 282, 40);
+    HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 770, 282, 40 );
     HP_BarFILL = new Engine::Image("bg/progressbar_fill.png", 16, 770, 282, 40);
     TXT_HPVal = new Engine::Label("HP: " + to_string(static_cast<int>(round(currentHP))), "pixel-font.ttf", 30, 20, 790, 255, 255, 255, 255, 0.0, 0.5);
 }
@@ -84,8 +84,8 @@ void PlayerCharacter::UpdateCharacterDirection() {
 
     // Check for diagonal movement first to ensure correct priority
     if (keys[0] && keys[2]) { // W & A key
-        newX -= this->speed / 2;
-        newY -= this->speed / 2;
+        newX -= this->speed * 0.6;
+        newY -= this->speed * 0.6;
         if (CollisionCheck(newX, newY)) {
             this->x = newX;
             this->y = newY;
@@ -94,8 +94,8 @@ void PlayerCharacter::UpdateCharacterDirection() {
         }
     }
     else if (keys[0] && keys[3]) { // W & D key
-        newX += this->speed / 2;
-        newY -= this->speed / 2;
+        newX += this->speed * 0.6;
+        newY -= this->speed * 0.6;
         if (CollisionCheck(newX, newY)) {
             this->x = newX;
             this->y = newY;
@@ -104,8 +104,8 @@ void PlayerCharacter::UpdateCharacterDirection() {
         }
     }
     else if (keys[1] && keys[2]) { // S & A key
-        newX -= this->speed / 2;
-        newY += this->speed / 2;
+        newX -= this->speed * 0.6;
+        newY += this->speed * 0.6;
         if (CollisionCheck(newX, newY)) {
             this->x = newX;
             this->y = newY;
@@ -114,8 +114,8 @@ void PlayerCharacter::UpdateCharacterDirection() {
         }
     }
     else if (keys[1] && keys[3]) { // S & D key
-        newX += this->speed / 2;
-        newY += this->speed / 2;
+        newX += this->speed * 0.6;
+        newY += this->speed * 0.6;
         if (CollisionCheck(newX, newY)) {
             this->x = newX;
             this->y = newY;
@@ -186,14 +186,14 @@ void PlayerCharacter::UpdateCharacterDirection() {
                 charSpritePath = "char/char_idle_downright.png";
                 break;
         }
-        if (charSpriteObj) delete charSpriteObj;  // Deleting old sprite object if necessary
+        if (charSpriteObj) delete charSpriteObj; 
         charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
     }
 }
 
 bool PlayerCharacter::CollisionCheck(float newX, float newY) {
-    int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
-    int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
+    int w = Engine::GameEngine::GetInstance().GetScreenSize().x - size;
+    int h = Engine::GameEngine::GetInstance().GetScreenSize().y - size;
     if (newX < 0 || newX > w || newY < 0 || newY > h) {
         if (newX <= 0) newX = 0;
         if (newY <= 0) newY = 0;

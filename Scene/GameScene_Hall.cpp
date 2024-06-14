@@ -40,8 +40,6 @@ bool GameSceneHall::DebugMode = false;
 const std::vector<Engine::Point> GameSceneHall::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
 const int GameSceneHall::MapWidth = 25, GameSceneHall::MapHeight = 13;
 const int GameSceneHall::BlockSize = 64;
-Engine::Point GameSceneHall::SpawnGridPoint = Engine::Point(-1, 1);
-const Engine::Point GameSceneHall::EndGridPoint = Engine::Point(MapWidth, MapHeight - 1);
 
 Engine::Point GameSceneHall::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
@@ -61,7 +59,9 @@ void GameSceneHall::Initialize() {
 
 	ReadMap();
 	ConstructUI();
-	playerChar = new PlayerCharacter(0, 0, 2.0, 100, 50, BlockSize);
+
+	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
+	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
 
 	bgmId = AudioHelper::PlayBGM("play.ogg");
 }
