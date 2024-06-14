@@ -6,6 +6,7 @@
 
 #include "Engine/Point.hpp"
 #include "Engine/Sprite.hpp"
+#include "UI/Component/Label.hpp"
 
 class Bullet;
 class PlayScene;
@@ -34,7 +35,10 @@ protected:
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
 public:
+
+
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize);
+    ~PlayerCharacter();
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
@@ -44,5 +48,18 @@ public:
     void SetMovementState(int keycode, bool keyDown);
 
     Engine::Point GetPlayerPositionAtMap();
+
+
+    // * Player HUD (UI) RESOURCES
+    IObject * HP_BarBG = nullptr;
+    IObject * HP_BarFILL = nullptr;
+    Engine::Label * TXT_HPVal = nullptr;
+    void ConstructPlayerHUD();
+    void DrawPlayerHUD() const;
+    void DestroyPlayerHUD();
+
+
+    float GetCurrentHP() {return currentHP;}
+    void SetCurrentHP(float newVal, bool shouldClamp = true);
 };
 #endif // ENEMY_HPP

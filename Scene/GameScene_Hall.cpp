@@ -78,7 +78,9 @@ void GameSceneHall::Update(float deltaTime) {
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
-    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false)) playerChar->Draw(); 
+    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false)){
+		playerChar->Draw();
+	} 
 }
 void GameSceneHall::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
@@ -100,6 +102,10 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
 		activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
 		cout << "Dialog Screen Initialized\n";
+	}
+
+	if (keyCode == 28 && playerChar){
+		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
 	}
 }
 

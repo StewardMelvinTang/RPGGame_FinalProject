@@ -32,17 +32,49 @@ PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int mo
 
     w = Engine::GameEngine::GetInstance().GetScreenSize().x / blockSize;
     h = Engine::GameEngine::GetInstance().GetScreenSize().y / blockSize;
+
+    ConstructPlayerHUD();
+}
+
+void PlayerCharacter::ConstructPlayerHUD(){
+    // * Size 282 x 40, 282 * (maxHP / currHP) to track progressbar percent
+    HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 770, 282, 40);
+    HP_BarFILL = new Engine::Image("bg/progressbar_fill.png", 16, 770, 282, 40);
+    TXT_HPVal = new Engine::Label("HP: " + to_string(static_cast<int>(round(currentHP))), "pixel-font.ttf", 30, 20, 790, 255, 255, 255, 255, 0.0, 0.5);
+}
+
+void PlayerCharacter::DrawPlayerHUD() const{
+    if (HP_BarBG) HP_BarBG->Draw();
+
+    if (HP_BarFILL) {
+        HP_BarFILL->Draw(); 
+        HP_BarFILL->Size.x = 282 * (currentHP / maxHP); 
+    }
+
+    if (TXT_HPVal) {
+        TXT_HPVal->Draw();
+    }
+}
+
+void PlayerCharacter::DestroyPlayerHUD(){
+    delete HP_BarBG; delete HP_BarFILL; delete TXT_HPVal;
 }
 
 void PlayerCharacter::Update(float deltaTime) {
     UpdateCharacterDirection();
-    cout << "Char Pos Y : " << GetPlayerPositionAtMap().y << " X : " << GetPlayerPositionAtMap().x << endl;
+    // cout << "Char Pos Y : " << GetPlayerPositionAtMap().y << " X : " << GetPlayerPositionAtMap().x << endl;
+}
+
+PlayerCharacter::~PlayerCharacter(){
+    DestroyPlayerHUD();
 }
 
 void PlayerCharacter::Draw() const {
     if (charSpriteObj) {
         charSpriteObj->Draw();
     }
+
+    DrawPlayerHUD(); // CALL DRAW PLAYER HUD IN SCENE
 }
 
 void PlayerCharacter::UpdateCharacterDirection() {
@@ -191,5 +223,24 @@ void PlayerCharacter::SetMovementState(int keycode, bool keyDown) {
 }
 
 Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
-    return Engine::Point(x / w, y / h);
+    return Engine::Point(round(x / w), round(y / h));
+}
+
+void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
+    if (shouldClamp == false){
+        this->currentHP = newVal;
+    } else {
+        if (newVal < 0) newVal = 0;
+        else if (newVal > maxHP) newVal = maxHP;
+        this->currentHP = newVal;
+    }
+
+    // * Update Health Text
+    if (TXT_HPVal){
+        TXT_HPVal->Text = "HP: " + to_string(static_cast<int>(round(currentHP)));
+    }
+
+    if (this->currentHP <= 0){
+        // ! Dead
+    }
 }
