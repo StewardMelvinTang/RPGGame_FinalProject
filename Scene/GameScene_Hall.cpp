@@ -61,7 +61,7 @@ void GameSceneHall::Initialize() {
 
 	ReadMap();
 	ConstructUI();
-	playerChar = new PlayerCharacter(0, 0, 2.0, 100, 50);
+	playerChar = new PlayerCharacter(0, 0, 2.0, 100, 50, BlockSize);
 
 	bgmId = AudioHelper::PlayBGM("play.ogg");
 }
@@ -74,7 +74,7 @@ void GameSceneHall::Terminate() {
 	IScene::Terminate();
 }
 void GameSceneHall::Update(float deltaTime) {
-    if (playerChar != nullptr) playerChar->UpdateCharacterDirection();
+    if (playerChar != nullptr) playerChar->Update(deltaTime);
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();

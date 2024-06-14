@@ -27,7 +27,8 @@ int main(int argc, char **argv) {
 	
 	game.AddNewScene("score-board", new ScoreBoardScene());
 
-	game.Start("start-scene", 60, 1600, 832);
+	game.Start("start-scene", 60, 1600, 832); // 1600 / blockSize = 25
+	
 	//game.Start("settings", 60, 1600, 832);
 	return 0;
 }

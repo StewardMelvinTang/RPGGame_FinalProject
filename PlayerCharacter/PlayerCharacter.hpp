@@ -34,7 +34,7 @@ protected:
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
 public:
-	PlayerCharacter(float x, float y, float speed, float hp, int money);
+	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize);
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
@@ -42,5 +42,7 @@ public:
     void UpdateCharacterDirection();
     bool CollisionCheck(float newX, float newY);
     void SetMovementState(int keycode, bool keyDown);
+
+    Engine::Point GetPlayerPositionAtMap();
 };
 #endif // ENEMY_HPP

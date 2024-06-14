@@ -22,15 +22,21 @@ using namespace std;
 #define KEYBOARD_D 4
 
 bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding)
+int w,h;
 
-PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money) : Engine::Sprite("char/char_idle_down.png", x, y){
+PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize) : Engine::Sprite("char/char_idle_down.png", x, y){
     this->x = x; this->y = y; // Set Position in screen
     this->speed = speed; this->gold = money;
     charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
+    
+
+    w = Engine::GameEngine::GetInstance().GetScreenSize().x / blockSize;
+    h = Engine::GameEngine::GetInstance().GetScreenSize().y / blockSize;
 }
 
 void PlayerCharacter::Update(float deltaTime) {
     UpdateCharacterDirection();
+    cout << "Char Pos Y : " << GetPlayerPositionAtMap().y << " X : " << GetPlayerPositionAtMap().x << endl;
 }
 
 void PlayerCharacter::Draw() const {
@@ -182,4 +188,8 @@ void PlayerCharacter::SetMovementState(int keycode, bool keyDown) {
             keys[3] = keyDown;
             break;
     }
+}
+
+Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
+    return Engine::Point(x / w, y / h);
 }
