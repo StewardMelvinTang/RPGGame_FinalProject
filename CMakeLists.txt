@@ -36,6 +36,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Engine/IControl.cpp
         Engine/IControl.hpp
         UI/Component/Image.cpp
+        UI/Dialog/DialogScreen.hpp
+        UI/Dialog/DialogScreen.cpp
         UI/Component/Image.hpp
         UI/Component/ImageButton.cpp
         UI/Component/ImageButton.hpp

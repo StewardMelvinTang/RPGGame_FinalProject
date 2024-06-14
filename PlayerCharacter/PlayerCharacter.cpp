@@ -21,125 +21,165 @@ using namespace std;
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
 
-bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding 
+bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding)
 
 PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money) : Engine::Sprite("char/char_idle_down.png", x, y){
     this->x = x; this->y = y; // Set Position in screen
     this->speed = speed; this->gold = money;
-
+    charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
 }
+
 void PlayerCharacter::Update(float deltaTime) {
-
+    UpdateCharacterDirection();
 }
+
 void PlayerCharacter::Draw() const {
-    if (charSpriteObj){
+    if (charSpriteObj) {
         charSpriteObj->Draw();
     }
 }
 
-void PlayerCharacter::UpdateCharacterDirection(){
-    if (keys[0] && CollisionCheck()) { // W key
-        this->y -= this->speed;
-        this->directionFacing = DIRECTION_UP;
-    }
-    if (keys[1]&& CollisionCheck()) { // S key
-        this->y += this->speed;
-        this->directionFacing = DIRECTION_DOWN;
-    }
-    if (keys[2]&& CollisionCheck()) { // A key
-        this->x -= this->speed;
-        this->directionFacing = DIRECTION_LEFT;
-    }
-    if (keys[3]&& CollisionCheck()) { // D key
-        this->x += this->speed;
-        this->directionFacing = DIRECTION_RIGHT;
-    }
-    // Diagonal Keys
-    if(keys[0] && keys[2] && CollisionCheck()){ // W & A key
-        this->y -= this->speed/2;
-        this->x -= this->speed/2;
-        this->directionFacing = DIRECTION_UPLEFT;
-    }
-    if(keys[0] && keys[3] && CollisionCheck()){ // W & D key
-        this->y -= this->speed/2;
-        this->x -= this->speed/2;
-        this->directionFacing = DIRECTION_UPRIGHT;
-    }
-    if(keys[1] && keys[2] && CollisionCheck()){ // S & A key
-        this->y += this->speed/2;
-        this->x += this->speed/2;
-        this->directionFacing = DIRECTION_DOWNLEFT;
-    }
-    if(keys[1] && keys[3] && CollisionCheck()){ // S & D key
-        this->y += this->speed/2;
-        this->x += this->speed/2;
-        this->directionFacing = DIRECTION_DOWNRIGHT;
-    }
-    // * Update Sprite Based on DIRECTION ENUM
-    string charSpritePath = "char/char_idle_down.png";
-    switch (this->directionFacing){
-        case DIRECTION_DOWN:
-            charSpritePath = "char/char_idle_down.png";
-        break;
+void PlayerCharacter::UpdateCharacterDirection() {
+    bool moved = false;
+    float newX = this->x;
+    float newY = this->y;
 
-        case DIRECTION_UP:
-            charSpritePath = "char/char_idle_up.png";
-        break;
-
-        case DIRECTION_RIGHT:
-            charSpritePath = "char/char_idle_right.png";
-        break;
-
-        case DIRECTION_LEFT:
-            charSpritePath = "char/char_idle_left.png";
-        break;
-
-        // Diagonal Directions
-        case DIRECTION_UPLEFT:
-            charSpritePath = "char/char_idle_upleft.png";
-        break;
-
-        case DIRECTION_UPRIGHT:
-            charSpritePath = "char/char_idle_upright.png";
-        break;
-
-        case DIRECTION_DOWNLEFT:
-            charSpritePath = "char/char_idle_downleft.png";
-        break;
-
-        case DIRECTION_DOWNRIGHT:
-            charSpritePath = "char/char_idle_downright.png";
-        break;
+    // Check for diagonal movement first to ensure correct priority
+    if (keys[0] && keys[2]) { // W & A key
+        newX -= this->speed / 2;
+        newY -= this->speed / 2;
+        if (CollisionCheck(newX, newY)) {
+            this->x = newX;
+            this->y = newY;
+            this->directionFacing = DIRECTION_UPLEFT;
+            moved = true;
+        }
     }
-    charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
+    else if (keys[0] && keys[3]) { // W & D key
+        newX += this->speed / 2;
+        newY -= this->speed / 2;
+        if (CollisionCheck(newX, newY)) {
+            this->x = newX;
+            this->y = newY;
+            this->directionFacing = DIRECTION_UPRIGHT;
+            moved = true;
+        }
+    }
+    else if (keys[1] && keys[2]) { // S & A key
+        newX -= this->speed / 2;
+        newY += this->speed / 2;
+        if (CollisionCheck(newX, newY)) {
+            this->x = newX;
+            this->y = newY;
+            this->directionFacing = DIRECTION_DOWNLEFT;
+            moved = true;
+        }
+    }
+    else if (keys[1] && keys[3]) { // S & D key
+        newX += this->speed / 2;
+        newY += this->speed / 2;
+        if (CollisionCheck(newX, newY)) {
+            this->x = newX;
+            this->y = newY;
+            this->directionFacing = DIRECTION_DOWNRIGHT;
+            moved = true;
+        }
+    }
+    // Single Key Directions
+    else if (keys[0]) { // W key
+        newY -= this->speed;
+        if (CollisionCheck(this->x, newY)) {
+            this->y = newY;
+            this->directionFacing = DIRECTION_UP;
+            moved = true;
+        }
+    }
+    else if (keys[1]) { // S key
+        newY += this->speed;
+        if (CollisionCheck(this->x, newY)) {
+            this->y = newY;
+            this->directionFacing = DIRECTION_DOWN;
+            moved = true;
+        }
+    }
+    else if (keys[2]) { // A key
+        newX -= this->speed;
+        if (CollisionCheck(newX, this->y)) {
+            this->x = newX;
+            this->directionFacing = DIRECTION_LEFT;
+            moved = true;
+        }
+    }
+    else if (keys[3]) { // D key
+        newX += this->speed;
+        if (CollisionCheck(newX, this->y)) {
+            this->x = newX;
+            this->directionFacing = DIRECTION_RIGHT;
+            moved = true;
+        }
+    }
+
+    // Update Sprite Based on DIRECTION ENUM if character moved
+    if (moved) {
+        std::string charSpritePath;
+        switch (this->directionFacing) {
+            case DIRECTION_DOWN:
+                charSpritePath = "char/char_idle_down.png";
+                break;
+            case DIRECTION_UP:
+                charSpritePath = "char/char_idle_up.png";
+                break;
+            case DIRECTION_RIGHT:
+                charSpritePath = "char/char_idle_right.png";
+                break;
+            case DIRECTION_LEFT:
+                charSpritePath = "char/char_idle_left.png";
+                break;
+            case DIRECTION_UPLEFT:
+                charSpritePath = "char/char_idle_upleft.png";
+                break;
+            case DIRECTION_UPRIGHT:
+                charSpritePath = "char/char_idle_upright.png";
+                break;
+            case DIRECTION_DOWNLEFT:
+                charSpritePath = "char/char_idle_downleft.png";
+                break;
+            case DIRECTION_DOWNRIGHT:
+                charSpritePath = "char/char_idle_downright.png";
+                break;
+        }
+        if (charSpriteObj) delete charSpriteObj;  // Deleting old sprite object if necessary
+        charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
+    }
 }
-bool PlayerCharacter::CollisionCheck(){
+
+bool PlayerCharacter::CollisionCheck(float newX, float newY) {
     int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
     int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
-    if (x < 0 || x > w || y < 0 || y > h) {
-        if (x <= 0) x = 0;
-        if (y <= 0) y = 0;
-        if (x >= w) x = w;
-        if (y >= h) y = h;
+    if (newX < 0 || newX > w || newY < 0 || newY > h) {
+        if (newX <= 0) newX = 0;
+        if (newY <= 0) newY = 0;
+        if (newX >= w) newX = w;
+        if (newY >= h) newY = h;
         return false;
     }
     return true;
 }
 
-// * Make sure to include this in all scene OnkeyDown and OnKeyUp
-void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
-    switch(keycode){
+// * Make sure to include this in all scene OnKeyDown and OnKeyUp
+void PlayerCharacter::SetMovementState(int keycode, bool keyDown) {
+    switch(keycode) {
         case KEYBOARD_W:
             keys[0] = keyDown;
-        break;
+            break;
         case KEYBOARD_S:
             keys[1] = keyDown;
-        break;
+            break;
         case KEYBOARD_A:
             keys[2] = keyDown;
-        break;
+            break;
         case KEYBOARD_D:
             keys[3] = keyDown;
-        break;
+            break;
     }
 }

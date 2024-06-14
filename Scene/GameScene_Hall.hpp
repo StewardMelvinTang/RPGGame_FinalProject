@@ -7,7 +7,9 @@
 #include <vector>
 
 #include "Engine/IScene.hpp"
+#include "Engine/GameEngine.hpp"
 #include "Engine/Point.hpp"
+#include "UI/Dialog/DialogScreen.hpp"
 
 #include "PlayerCharacter/PlayerCharacter.hpp"
 using namespace std;
@@ -72,6 +74,8 @@ public:
 
 	PlayerCharacter * playerChar = nullptr;
 
+	Engine::DialogScreen * activeDialog;
+
     // * Default Function Initialization
 	explicit GameSceneHall() = default;
 	void Initialize() override;
@@ -91,6 +95,8 @@ public:
 	void ConstructGenerativePathTile(int, int);
 	void ConstructGenerativeGrassTile(int, int);
 	int ClampMapPos(int, int);
+
+	void DestroyCurrentActiveDialog(IControl * currActiveDialog);
 
 
 };

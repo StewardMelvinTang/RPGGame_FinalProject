@@ -32,9 +32,7 @@ protected:
     float currentHP = 100, maxHP = 100;
 
     Enum_Direction directionFacing = DIRECTION_DOWN;
-    IObject * charSpriteObj;
-
-    std::string imgPath[3]; // * 0 down, 1 up, 2 right, 3 left
+    IObject * charSpriteObj = nullptr;
 public:
 	PlayerCharacter(float x, float y, float speed, float hp, int money);
 	void Update(float deltaTime) override;
@@ -42,7 +40,7 @@ public:
 
 	// virtual void VirtualUpdate(float deltatime) = 0;
     void UpdateCharacterDirection();
-    bool CollisionCheck();
+    bool CollisionCheck(float newX, float newY);
     void SetMovementState(int keycode, bool keyDown);
 };
 #endif // ENEMY_HPP

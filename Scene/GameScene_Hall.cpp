@@ -17,6 +17,7 @@
 #include "Engine/Group.hpp"
 #include "UI/Component/Label.hpp"
 #include "Engine/Resources.hpp"
+#include "UI/Dialog/DialogScreen.hpp"
 
 #include "PlayerCharacter/PlayerCharacter.hpp"
 
@@ -24,6 +25,7 @@
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+// #include "GameScene_Hall.hpp"
 using namespace std;
 
 
@@ -76,7 +78,7 @@ void GameSceneHall::Update(float deltaTime) {
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
-    if (playerChar != nullptr) playerChar->Draw(); 
+    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false)) playerChar->Draw(); 
 }
 void GameSceneHall::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
@@ -93,6 +95,12 @@ void GameSceneHall::OnMouseUp(int button, int mx, int my) {
 void GameSceneHall::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
+
+	if (keyCode == 27){ // * Debug Spawn Dialog
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
+		cout << "Dialog Screen Initialized\n";
+	}
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {
@@ -228,16 +236,12 @@ void GameSceneHall::ConstructUI() {
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int shift = 135 + 25;
-
-	// Background
-	//UIGroup->AddNewObject(new Engine::Image((MapId == 3 ? "bg/PlayerHUDSTG3_Game.png" : "bg/PlayerHUD_Game.png"), 0, 0, 1600, 832));
-	// UIGroup->AddNewObject(new Engine::I)
-	// Text
-	// UIGroup->AddNewObject(new Engine::Label(std::string("Stage ") + std::to_string(MapId), "pixel-font.ttf", 48, 1306, 25, 255, 226, 182));
-	// UIGroup->AddNewObject(UIMoney = new Engine::Label(std::to_string(money), "pixel-font.ttf", 35, 1359, 85, 255, 224, 78));
-	// UIGroup->AddNewObject(UILives = new Engine::Label(std::to_string(lives), "pixel-font.ttf", 35, 1359, 138, 255, 255, 255));
-
-
 	
+}
+
+void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
+	if (currActiveDialog == nullptr) return;
+	RemoveControl(currActiveDialog->controlIterator);
+	currActiveDialog = nullptr;
 }
 
