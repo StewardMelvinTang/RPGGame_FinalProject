@@ -57,6 +57,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Engine/LOG.hpp
         Scene/LoseScene.cpp
         Scene/LoseScene.hpp
+        Scene/Loading/LoadingScene.hpp
+        Scene/Loading/LoadingScene.cpp
         Turret/MachineGunTurret.cpp
         Turret/MachineGunTurret.hpp
         main.cpp

@@ -69,9 +69,11 @@ void GameSceneHall::Initialize() {
 
 void GameSceneHall::Terminate() {
 	AudioHelper::StopBGM(bgmId);
-	AudioHelper::StopSample(deathBGMInstance);
-	deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+	// AudioHelper::StopSample(deathBGMInstance);
+	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+	cout << "Terminated\n";
 	IScene::Terminate();
+
 }
 void GameSceneHall::Update(float deltaTime) {
     if (playerChar != nullptr) playerChar->Update(deltaTime);

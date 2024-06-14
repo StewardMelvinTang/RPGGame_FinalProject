@@ -43,9 +43,12 @@ public:
 	void Draw() const override;
 
 	// virtual void VirtualUpdate(float deltatime) = 0;
+
+    // * Player Functionalities
     void UpdateCharacterDirection();
     bool CollisionCheck(float newX, float newY);
     void SetMovementState(int keycode, bool keyDown);
+    void OnPlayerDead();
 
     // * helper function & getter setter
     Engine::Point GetPlayerPositionAtMap();
@@ -65,6 +68,8 @@ public:
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
+
+    
 
 };
 #endif // ENEMY_HPP

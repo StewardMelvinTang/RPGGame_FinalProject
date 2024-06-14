@@ -12,7 +12,7 @@ using namespace std;
 #include "Engine/Group.hpp"
 #include "Engine/IScene.hpp"
 #include "Engine/LOG.hpp"
-
+#include "Scene/Loading/LoadingScene.hpp"
 #include "PlayerCharacter.hpp"
 
 // * Keyboard Shortcut Redefinition (for easier use)
@@ -226,6 +226,13 @@ Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
     return Engine::Point(round(x / w), round(y / h));
 }
 
+void PlayerCharacter::OnPlayerDead(){
+    cout << "You Died\n";
+    LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+    loadingScene->InitLoadingScreen("start-scene", 5.0f);
+    Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+}
+
 void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
     if (shouldClamp == false){
         this->currentHP = newVal;
@@ -242,5 +249,6 @@ void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
 
     if (this->currentHP <= 0){
         // ! Dead
+        OnPlayerDead();
     }
 }

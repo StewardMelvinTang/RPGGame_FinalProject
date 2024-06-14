@@ -11,6 +11,7 @@
 #include "Scene/SettingsScene.hpp"
 #include "Scene/ScoreBoardScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
+#include "Scene/Loading/LoadingScene.hpp"
                                            
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
@@ -24,6 +25,8 @@ int main(int argc, char **argv) {
 	game.AddNewScene("win", new WinScene());
 	game.AddNewScene("stage-select", new StageSelectScene());
 	game.AddNewScene("start-scene", new StartScene());
+
+	game.AddNewScene("loading-scene", new LoadingScene());
 	
 	game.AddNewScene("score-board", new ScoreBoardScene());
 
