@@ -11,7 +11,10 @@
 #include "Scene/SettingsScene.hpp"
 #include "Scene/ScoreBoardScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
+//Loading Scene
 #include "Scene/Loading/LoadingScene.hpp"
+//Death Scene
+#include "Scene/Death/DeathScene.hpp"
                                            
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
@@ -25,12 +28,14 @@ int main(int argc, char **argv) {
 	game.AddNewScene("win", new WinScene());
 	game.AddNewScene("stage-select", new StageSelectScene());
 	game.AddNewScene("start-scene", new StartScene());
-
+	//Loading Scene
 	game.AddNewScene("loading-scene", new LoadingScene());
 	
 	game.AddNewScene("score-board", new ScoreBoardScene());
-
-	game.Start("start-scene", 60, 1600, 832); // 1600 / blockSize = 25
+	//Death Scene
+	game.AddNewScene("death-scene", new DeathScene());
+	
+	game.Start("gamescene_hall", 60, 1600, 832); // 1600 / blockSize = 25
 	
 	//game.Start("settings", 60, 1600, 832);
 	return 0;

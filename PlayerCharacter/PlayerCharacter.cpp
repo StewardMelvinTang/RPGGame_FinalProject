@@ -230,7 +230,9 @@ void PlayerCharacter::OnPlayerDead(){
     cout << "You Died\n";
     LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     loadingScene->InitLoadingScreen("start-scene", 5.0f);
-    Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+    // Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+    // Change After Death Scene is created:
+    Engine::GameEngine::GetInstance().ChangeScene("death-scene");
 }
 
 void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){

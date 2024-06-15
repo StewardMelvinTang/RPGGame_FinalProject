@@ -40,7 +40,7 @@ void StartScene::InitializeAudioEngine(){
     Engine::GameEngine::playerName = saveData.playerName;
     oldName = Engine::GameEngine::playerName;
 
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+    bgmInstance = AudioHelper::PlaySample("NewMenu_Theme.ogg", true, AudioHelper::BGMVolume);
     AudioHelper::SetMainMenuMusicPlaying(true);
 }
 
