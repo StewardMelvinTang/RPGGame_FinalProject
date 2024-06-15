@@ -34,6 +34,7 @@ using namespace std;
 #define KEYBOARD_S 19
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
+#define KEYBOARD_ESC 59
 
 
 bool GameSceneHall::DebugMode = false;
@@ -63,7 +64,7 @@ void GameSceneHall::Initialize() {
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
 
-	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
+	bgmId = AudioHelper::PlayBGM("play.ogg");
 }
 
 
@@ -80,7 +81,7 @@ void GameSceneHall::Update(float deltaTime) {
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
-    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false)){
+    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false) && !isGamePaused){
 		playerChar->Draw();
 	} 
 }
@@ -109,7 +110,10 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	if (keyCode == 28 && playerChar){
 		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
 	}
-	
+
+	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
+		ToogleGamePaused(!isGamePaused);
+	}
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {
@@ -252,5 +256,38 @@ void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
 	if (currActiveDialog == nullptr) return;
 	RemoveControl(currActiveDialog->controlIterator);
 	currActiveDialog = nullptr;
+}
+
+void GameSceneHall::ToogleGamePaused(bool newState){
+	if (isGameOver == true || playerChar) return;
+	this->isGamePaused = newState;
+
+	if (newState){
+		AddNewObject(IMG_PauseMenuBG = new Engine::Image("bg/PauseMenu_bg.png", 0, 0, 1600, 832));
+		AddNewControlObject(BTNPause_Resume = new Engine::ImageButton("btn/btn_resumegame_normal.png", "btn/btn_resumegame_hover.png", 681, 234, 238, 57));
+		AddNewControlObject(BTNPause_LoadCP = new Engine::ImageButton("btn/btn_loadcheckpoint_normal.png", "btn/btn_loadcheckpoint_hover.png", 681, 311, 238, 57));
+		AddNewControlObject(BTNPause_BackMenu = new Engine::ImageButton("btn/btn_mainmenu_normal.png", "btn/btn_mainmenu_hover.png", 681, 388, 238, 57));
+
+		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
+		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
+		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
+	} else {
+		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
+		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
+		if (BTNPause_BackMenu) RemoveObject(BTNPause_BackMenu->GetObjectIterator());
+		if (BTNPause_Resume) RemoveObject(BTNPause_Resume->GetObjectIterator());
+		IMG_PauseMenuBG = nullptr; BTNPause_BackMenu = nullptr; BTNPause_LoadCP = nullptr; BTNPause_Resume = nullptr;
+	}
+	
+}
+
+void GameSceneHall::OnClickBTNResume(){
+	ToogleGamePaused(false);
+}
+void GameSceneHall::OnClickBTNBackMenu(){
+	Engine::GameEngine::GetInstance().ChangeScene("start-scene");
+}
+void GameSceneHall::OnClickBTNLoadCheckpoint(){
+
 }
 
