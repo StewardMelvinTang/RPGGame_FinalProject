@@ -53,6 +53,7 @@ void GameSceneHall::Initialize() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// * Group Initialization
+	AddNewObject(BlockGroup = new Group());
 	AddNewObject(TileMapGroup = new Group());
 	AddNewControlObject(UIGroup = new Group());
 	AddNewControlObject(CharacterSpriteGroup = new Group());
@@ -165,6 +166,12 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 	
 }
 
+void GameSceneHall::ConstructBlock(int locX, int locY) {
+	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
+	string blockImgPath = "play/Base_block.png";
+	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+}
+
 void GameSceneHall::ReadMap() {
 	std::string filename = std::string("Resource/map") + currentMapID + ".txt";
 	// Read map file.
@@ -180,6 +187,7 @@ void GameSceneHall::ReadMap() {
 		case '4': mapData.push_back(TILE_CORNERBTMRIGHT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '5': mapData.push_back(TILE_CORNERTOPLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '6': mapData.push_back(TILE_CORNERBTMLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
+		case '8': mapData.push_back(TILE_BLOCK); break;
 		case '\n':
 		case '\r':
 			if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -206,6 +214,7 @@ void GameSceneHall::ReadMap() {
 				case 4: mapState[i][j] = TILE_CORNERBTMRIGHT; break;
 				case 5: mapState[i][j] = TILE_CORNERTOPLEFT; break;
 				case 6: mapState[i][j] = TILE_CORNERBTMLEFT; break;
+				case 8: mapState[i][j] = TILE_BLOCK; break;
 			}
 		}
 	}
@@ -216,7 +225,9 @@ void GameSceneHall::ReadMap() {
 			if (mapState[i][j] == TILE_FLOOR){
 				// TileMapGroup->AddNewObject(new Engine::Image("play/floor.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
 				ConstructGenerativeGrassTile(j , i);
-			} else {
+			} 
+			else if(mapState[i][j] == TILE_BLOCK) ConstructBlock(j, i);	
+			else {
 				ConstructGenerativePathTile(j , i);
 			}
 		}

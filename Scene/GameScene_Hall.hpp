@@ -36,7 +36,8 @@ private:
 		TILE_CORNERBTMRIGHT, // 4
 		TILE_CORNERTOPLEFT, // 5
 		TILE_CORNERBTMLEFT, // 6
-		TILE_HOUSE // 7
+		TILE_HOUSE, // 7
+		TILE_BLOCK // 8
 	};
 	ALLEGRO_SAMPLE_ID bgmId;
 	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
@@ -57,6 +58,7 @@ public:
 
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
+	Group* BlockGroup;
 	Group* GroundEffectGroup;
 	Group* EffectGroup;
 	Group* UIGroup;
@@ -90,6 +92,7 @@ public:
     // * Generative Tile Maps
 	void ConstructGenerativePathTile(int, int);
 	void ConstructGenerativeGrassTile(int, int);
+	void ConstructBlock(int, int);
 	int ClampMapPos(int, int);
 
 
