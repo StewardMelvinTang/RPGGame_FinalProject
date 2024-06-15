@@ -19,6 +19,6 @@ namespace Engine {
 	void IScene::Draw() const {
 		al_clear_to_color(al_map_rgb(36, 40, 59));
 		Group::Draw();
-		VirtualDraw();
+		VirtualDraw(); //STEWARD MELVIN TANG //NICHOLAS ALBERT ATKLIN
 	}
 }

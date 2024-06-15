@@ -5,8 +5,11 @@
 #include <string>
 
 #include "Engine/Point.hpp"
+#include "Engine/Group.hpp"
 #include "Engine/Sprite.hpp"
 #include "UI/Component/Label.hpp"
+#include "Engine/IScene.hpp"
+#include "Engine/GameEngine.hpp"
 
 class Bullet;
 class PlayScene;
@@ -68,8 +71,5 @@ public:
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
-
-    
-
 };
 #endif // ENEMY_HPP

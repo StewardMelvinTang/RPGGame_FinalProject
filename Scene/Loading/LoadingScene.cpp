@@ -20,7 +20,7 @@ void LoadingScene::Initialize() {
 	int halfW = w / 2;
 	int halfH = h / 2;
 	AddNewObject(new Engine::Image("bg/blackscreen_bg.png", 0 ,0 , 1600, 832, 0.0, 0.0));
-
+    
 	AddNewObject(new Engine::Label("Loading...", "pixel-font.ttf", 42, 25, h - 100, 255, 255, 255, 255, 0, 0));
     AddNewObject(new Engine::Image("bg/progressbar_bg.png", 25, h - 50, w - 25, 30));
     AddNewObject(loadingProgressBar = new Engine::Image("bg/pbLong_fill.png", 25, h - 50, w - 25, 30));
