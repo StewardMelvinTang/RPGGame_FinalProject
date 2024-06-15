@@ -64,7 +64,7 @@ void GameSceneHall::Initialize() {
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
 
-	bgmId = AudioHelper::PlayBGM("play.ogg");
+	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
 }
 
 
@@ -112,6 +112,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
+		std::cout << "Paused Game!\n";
 		ToogleGamePaused(!isGamePaused);
 	}
 }
@@ -259,9 +260,9 @@ void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
 }
 
 void GameSceneHall::ToogleGamePaused(bool newState){
-	if (isGameOver == true || playerChar) return;
+	if (isGameOver == true || !playerChar) return;
 	this->isGamePaused = newState;
-
+	std::cout << "Paused Function Called!\n";
 	if (newState){
 		AddNewObject(IMG_PauseMenuBG = new Engine::Image("bg/PauseMenu_bg.png", 0, 0, 1600, 832));
 		AddNewControlObject(BTNPause_Resume = new Engine::ImageButton("btn/btn_resumegame_normal.png", "btn/btn_resumegame_hover.png", 681, 234, 238, 57));
@@ -271,12 +272,14 @@ void GameSceneHall::ToogleGamePaused(bool newState){
 		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
 		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
 		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
+		std::cout << "Created Paused Menu!\n";
 	} else {
 		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
 		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
 		if (BTNPause_BackMenu) RemoveObject(BTNPause_BackMenu->GetObjectIterator());
 		if (BTNPause_Resume) RemoveObject(BTNPause_Resume->GetObjectIterator());
 		IMG_PauseMenuBG = nullptr; BTNPause_BackMenu = nullptr; BTNPause_LoadCP = nullptr; BTNPause_Resume = nullptr;
+		std::cout << "Destroyed Paused Menu!\n";
 	}
 	
 }
