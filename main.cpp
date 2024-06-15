@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 	//Death Scene
 	game.AddNewScene("death-scene", new DeathScene());
 	
-	game.Start("gamescene_hall", 60, 1600, 832); // 1600 / blockSize = 25
+	game.Start("death-scene", 60, 1600, 832); // 1600 / blockSize = 25
 	
 	//game.Start("settings", 60, 1600, 832);
 	return 0;
