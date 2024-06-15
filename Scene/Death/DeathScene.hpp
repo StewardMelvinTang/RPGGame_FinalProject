@@ -20,6 +20,8 @@ public:
     void InitLoadingScreen(std::string nextScene, float duration);
     // New Inits
     void BackOnClick();
+private:
+    ALLEGRO_SAMPLE_ID bgmId;
 };
 
 #endif // LOSESCENE_HPP

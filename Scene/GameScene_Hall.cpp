@@ -63,7 +63,7 @@ void GameSceneHall::Initialize() {
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
 
-	bgmId = AudioHelper::PlayBGM("play.ogg");
+	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
 }
 
 
@@ -109,6 +109,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	if (keyCode == 28 && playerChar){
 		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
 	}
+	
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {
