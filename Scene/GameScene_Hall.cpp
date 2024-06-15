@@ -17,6 +17,7 @@
 #include "Engine/Group.hpp"
 #include "UI/Component/Label.hpp"
 #include "Engine/Resources.hpp"
+#include "UI/Dialog/DialogScreen.hpp"
 
 #include "PlayerCharacter/PlayerCharacter.hpp"
 
@@ -24,6 +25,7 @@
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+// #include "GameScene_Hall.hpp"
 using namespace std;
 
 
@@ -32,14 +34,13 @@ using namespace std;
 #define KEYBOARD_S 19
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
+#define KEYBOARD_ESC 59
 
 
 bool GameSceneHall::DebugMode = false;
 const std::vector<Engine::Point> GameSceneHall::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
 const int GameSceneHall::MapWidth = 25, GameSceneHall::MapHeight = 13;
 const int GameSceneHall::BlockSize = 64;
-Engine::Point GameSceneHall::SpawnGridPoint = Engine::Point(-1, 1);
-const Engine::Point GameSceneHall::EndGridPoint = Engine::Point(MapWidth, MapHeight - 1);
 
 Engine::Point GameSceneHall::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
@@ -60,24 +61,30 @@ void GameSceneHall::Initialize() {
 
 	ReadMap();
 	ConstructUI();
-	playerChar = new PlayerCharacter(0, 0, 2.0, 100, 50);
 
-	bgmId = AudioHelper::PlayBGM("play.ogg");
+	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
+	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
+
+	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
 }
 
 
 void GameSceneHall::Terminate() {
 	AudioHelper::StopBGM(bgmId);
-	AudioHelper::StopSample(deathBGMInstance);
-	deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+	// AudioHelper::StopSample(deathBGMInstance);
+	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+	cout << "Terminated\n";
 	IScene::Terminate();
+
 }
 void GameSceneHall::Update(float deltaTime) {
-    if (playerChar != nullptr) playerChar->UpdateCharacterDirection();
+    if (playerChar != nullptr) playerChar->Update(deltaTime);
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
-    if (playerChar != nullptr) playerChar->Draw(); 
+    if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false) && !isGamePaused){
+		playerChar->Draw();
+	} 
 }
 void GameSceneHall::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
@@ -94,6 +101,21 @@ void GameSceneHall::OnMouseUp(int button, int mx, int my) {
 void GameSceneHall::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
+
+	if (keyCode == 27){ // * Debug Spawn Dialog
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
+		cout << "Dialog Screen Initialized\n";
+	}
+
+	if (keyCode == 28 && playerChar){
+		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
+	}
+
+	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
+		std::cout << "Paused Game!\n";
+		ToogleGamePaused(!isGamePaused);
+	}
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {
@@ -239,16 +261,47 @@ void GameSceneHall::ConstructUI() {
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int shift = 135 + 25;
-
-	// Background
-	//UIGroup->AddNewObject(new Engine::Image((MapId == 3 ? "bg/PlayerHUDSTG3_Game.png" : "bg/PlayerHUD_Game.png"), 0, 0, 1600, 832));
-	// UIGroup->AddNewObject(new Engine::I)
-	// Text
-	// UIGroup->AddNewObject(new Engine::Label(std::string("Stage ") + std::to_string(MapId), "pixel-font.ttf", 48, 1306, 25, 255, 226, 182));
-	// UIGroup->AddNewObject(UIMoney = new Engine::Label(std::to_string(money), "pixel-font.ttf", 35, 1359, 85, 255, 224, 78));
-	// UIGroup->AddNewObject(UILives = new Engine::Label(std::to_string(lives), "pixel-font.ttf", 35, 1359, 138, 255, 255, 255));
-
-
 	
+}
+
+void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
+	if (currActiveDialog == nullptr) return;
+	RemoveControl(currActiveDialog->controlIterator);
+	currActiveDialog = nullptr;
+}
+
+void GameSceneHall::ToogleGamePaused(bool newState){
+	if (isGameOver == true || !playerChar) return;
+	this->isGamePaused = newState;
+	std::cout << "Paused Function Called!\n";
+	if (newState){
+		AddNewObject(IMG_PauseMenuBG = new Engine::Image("bg/PauseMenu_bg.png", 0, 0, 1600, 832));
+		AddNewControlObject(BTNPause_Resume = new Engine::ImageButton("btn/btn_resumegame_normal.png", "btn/btn_resumegame_hover.png", 681, 234, 238, 57));
+		AddNewControlObject(BTNPause_LoadCP = new Engine::ImageButton("btn/btn_loadcheckpoint_normal.png", "btn/btn_loadcheckpoint_hover.png", 681, 311, 238, 57));
+		AddNewControlObject(BTNPause_BackMenu = new Engine::ImageButton("btn/btn_mainmenu_normal.png", "btn/btn_mainmenu_hover.png", 681, 388, 238, 57));
+
+		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
+		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
+		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
+		std::cout << "Created Paused Menu!\n";
+	} else {
+		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
+		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
+		if (BTNPause_BackMenu) RemoveObject(BTNPause_BackMenu->GetObjectIterator());
+		if (BTNPause_Resume) RemoveObject(BTNPause_Resume->GetObjectIterator());
+		IMG_PauseMenuBG = nullptr; BTNPause_BackMenu = nullptr; BTNPause_LoadCP = nullptr; BTNPause_Resume = nullptr;
+		std::cout << "Destroyed Paused Menu!\n";
+	}
+	
+}
+
+void GameSceneHall::OnClickBTNResume(){
+	ToogleGamePaused(false);
+}
+void GameSceneHall::OnClickBTNBackMenu(){
+	Engine::GameEngine::GetInstance().ChangeScene("start-scene");
+}
+void GameSceneHall::OnClickBTNLoadCheckpoint(){
+
 }
 

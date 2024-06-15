@@ -5,7 +5,11 @@
 #include <string>
 
 #include "Engine/Point.hpp"
+#include "Engine/Group.hpp"
 #include "Engine/Sprite.hpp"
+#include "UI/Component/Label.hpp"
+#include "Engine/IScene.hpp"
+#include "Engine/GameEngine.hpp"
 
 class Bullet;
 class PlayScene;
@@ -14,13 +18,17 @@ enum Enum_Direction{
     DIRECTION_LEFT, // 0
     DIRECTION_RIGHT, // 1
     DIRECTION_UP, // 2
-    DIRECTION_DOWN // 3
+    DIRECTION_DOWN, // 3
+    DIRECTION_UPLEFT, // 4
+    DIRECTION_UPRIGHT,// 5
+    DIRECTION_DOWNLEFT,// 6
+    DIRECTION_DOWNRIGHT// 7
 };
 
 class PlayerCharacter : public Engine::Sprite {
 protected:
 	float speedMultiplier = 1.0f;
-	int gold;
+	int money = 0;
 
     float x = 0, y = 0;
     float size = 64;
@@ -28,17 +36,40 @@ protected:
     float currentHP = 100, maxHP = 100;
 
     Enum_Direction directionFacing = DIRECTION_DOWN;
-    IObject * charSpriteObj;
-
-    std::string imgPath[3]; // * 0 down, 1 up, 2 right, 3 left
+    IObject * charSpriteObj = nullptr;
 public:
-	PlayerCharacter(float x, float y, float speed, float hp, int money);
+
+
+	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize);
+    ~PlayerCharacter();
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
 	// virtual void VirtualUpdate(float deltatime) = 0;
+
+    // * Player Functionalities
     void UpdateCharacterDirection();
-    bool CollisionCheck();
+    bool CollisionCheck(float newX, float newY);
     void SetMovementState(int keycode, bool keyDown);
+    void OnPlayerDead();
+
+    // * helper function & getter setter
+    Engine::Point GetPlayerPositionAtMap();
+    float GetCurrentHP() {return currentHP;}
+    void SetCurrentHP(float newVal, bool shouldClamp = true);
+    float GetPlayerSpeed() {return speed;}
+    void SetPlayerSpeed(float newSpeed) {speed = newSpeed;}
+    float GetMaxHP() {return maxHP;}
+    void SetMaxHP(float newMaxHP) {maxHP = newMaxHP;}
+    int GetMoney() {return money;}
+    void SetMoney(int newAmount) {money = newAmount;}
+
+    // * Player HUD (UI) RESOURCES
+    IObject * HP_BarBG = nullptr;
+    IObject * HP_BarFILL = nullptr;
+    Engine::Label * TXT_HPVal = nullptr;
+    void ConstructPlayerHUD();
+    void DrawPlayerHUD() const;
+    void DestroyPlayerHUD();
 };
 #endif // ENEMY_HPP

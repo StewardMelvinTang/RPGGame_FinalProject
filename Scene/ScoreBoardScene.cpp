@@ -88,7 +88,7 @@ void ScoreBoardScene::Initialize() {
     btn = new Engine::ImageButton("btn/back_normal.png", "btn/back_hover.png", 456, 42, 70, 70);
     btn->SetOnClickCallback(bind(&ScoreBoardScene::BackOnClick, this));
     AddNewControlObject(btn);
-
+    
     BTN_Next = new Engine::ImageButton("btn/nextBtn_normal.png", "btn/nextBtn_hover.png", 1033, 677, 70, 70);
     BTN_Next->SetOnClickCallback(bind(&ScoreBoardScene::NextPage, this));
     AddNewControlObject(BTN_Next, true);

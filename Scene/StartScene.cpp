@@ -19,6 +19,8 @@
 #include "GameScene_Hall.hpp"
 #include "Scene/StartScene.h"
 
+#include "Scene/Loading/LoadingScene.hpp"
+
 // ! For save
 #include <fstream>
 using namespace std;
@@ -38,7 +40,7 @@ void StartScene::InitializeAudioEngine(){
     Engine::GameEngine::playerName = saveData.playerName;
     oldName = Engine::GameEngine::playerName;
 
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+    bgmInstance = AudioHelper::PlaySample("NewMenu_Theme.ogg", true, AudioHelper::BGMVolume);
     AudioHelper::SetMainMenuMusicPlaying(true);
 }
 
@@ -141,7 +143,6 @@ void StartScene::OnKeyDown(int keyCode) {
     }
 }
 void StartScene::OnMouseDown(int button, int mx, int my) {
-    cout << " On Mouse Down " << endl;
     if (recordingPlayerName) {
         recordingPlayerName = false;
     }
@@ -169,8 +170,11 @@ void StartScene::Terminate() {
 }
 void StartScene::PlayOnClick(int stage) {
     if (drawProfileMenu) return;
-    // Engine::GameEngine::GetInstance().ChangeScene("stage-select");
-    Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
+    // Engine::GameEngine::GetInstance().ChangeScene("stage-select"); gamescene_hall
+    LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+    loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
+    Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+
     GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
     if (bgmInstance){
         AudioHelper::StopSample(bgmInstance);

@@ -3,6 +3,10 @@
 
 #include "Group.hpp"
 
+enum Enum_TransitionMode{
+	FADEIN, FADEOUT, FORCEIN, FORCEOUT
+};
+
 namespace Engine {
 	/// <summary>
 	/// This class should be inherited whenever you want to define a new scene.
@@ -43,7 +47,6 @@ namespace Engine {
 		/// </summary>
 		void Draw() const override;
 		virtual void VirtualDraw() const;  // * Make a virtual draw to be used for other class
-
 	};
 }
 #endif // ISCENE_HPP

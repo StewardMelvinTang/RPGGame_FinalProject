@@ -206,6 +206,7 @@ void PlayScene::Draw() const {
 	IScene::Draw();
 	if (DebugMode) {
 		// Draw reverse BFS distance on all reachable blocks.
+		
 		for (int i = 0; i < MapHeight; i++) {
 			for (int j = 0; j < MapWidth; j++) {
 				if (mapDistance[i][j] != -1) {

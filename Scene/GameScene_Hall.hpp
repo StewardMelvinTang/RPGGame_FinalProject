@@ -7,7 +7,10 @@
 #include <vector>
 
 #include "Engine/IScene.hpp"
+#include "Engine/GameEngine.hpp"
 #include "Engine/Point.hpp"
+#include "UI/Dialog/DialogScreen.hpp"
+#include "UI/Component/ImageButton.hpp"
 
 #include "PlayerCharacter/PlayerCharacter.hpp"
 using namespace std;
@@ -56,6 +59,8 @@ public:
 
     string currentMapID;
 
+	bool isGameOver = false;
+
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
 	Group* BlockGroup;
@@ -73,6 +78,8 @@ public:
 	static Engine::Point GetClientSize();
 
 	PlayerCharacter * playerChar = nullptr;
+
+	Engine::DialogScreen * activeDialog;
 
     // * Default Function Initialization
 	explicit GameSceneHall() = default;
@@ -95,6 +102,14 @@ public:
 	void ConstructBlock(int, int);
 	int ClampMapPos(int, int);
 
+	void DestroyCurrentActiveDialog(IControl * currActiveDialog);
 
+    bool isGamePaused = false;
+	IObject * IMG_PauseMenuBG;
+	Engine::ImageButton * BTNPause_Resume, * BTNPause_LoadCP, * BTNPause_BackMenu;
+    void ToogleGamePaused(bool newState);
+	void OnClickBTNResume();
+	void OnClickBTNBackMenu();
+	void OnClickBTNLoadCheckpoint();
 };
 #endif // PLAYSCENE_HPP

@@ -36,6 +36,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Engine/IControl.cpp
         Engine/IControl.hpp
         UI/Component/Image.cpp
+        UI/Dialog/DialogScreen.hpp
+        UI/Dialog/DialogScreen.cpp
         UI/Component/Image.hpp
         UI/Component/ImageButton.cpp
         UI/Component/ImageButton.hpp
@@ -55,6 +57,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Engine/LOG.hpp
         Scene/LoseScene.cpp
         Scene/LoseScene.hpp
+        Scene/Loading/LoadingScene.hpp
+        Scene/Loading/LoadingScene.cpp
         Turret/MachineGunTurret.cpp
         Turret/MachineGunTurret.hpp
         main.cpp
@@ -109,6 +113,9 @@ add_executable(2024_I2P2_TowerDefense_with_answer
 
         PlayerCharacter/PlayerCharacter.hpp
         PlayerCharacter/PlayerCharacter.cpp
+        # DeathScene:
+        Scene/Death/DeathScene.cpp
+        Scene/Death/DeathScene.hpp
 )
 
 IF (WIN32)

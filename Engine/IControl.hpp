@@ -9,7 +9,7 @@ namespace Engine {
 	/// </summary>
 	class IControl {
 		friend class Group;
-	protected:
+	public:
 		// The iterator of controls linked-list when added to scene.
 		// Can make removing controls faster.
 		std::list<std::pair<bool, IControl*>>::iterator controlIterator{};

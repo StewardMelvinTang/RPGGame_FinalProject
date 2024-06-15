@@ -7,6 +7,8 @@
 #include "ImageButton.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/Resources.hpp"
+#include <iostream>
+using namespace std;
 
 namespace Engine {
 	ImageButton::ImageButton(std::string img, std::string imgIn, float x, float y, float w, float h, float anchorX, float anchorY) :
@@ -30,4 +32,8 @@ namespace Engine {
 		if (!mouseIn || !Enabled) bmp = imgOut;
 		else bmp = imgIn;
 	}
+
+// 	void ImageButton::VirtualDraw() {
+//         cout << "Virtual Draw of ImgBtn Called\n";
+//     }
 }

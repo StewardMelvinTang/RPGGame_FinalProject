@@ -395,5 +395,14 @@ namespace Engine {
 		
 		return currentDateTime;
 	}
+
+	Point GameEngine::GridToXYPosition(int gridY, int gridX, int blockSize) const {
+		// int screenW = Engine::GameEngine::GetInstance().GetScreenWidth();
+		// int screenH = Engine::GameEngine::GetInstance().GetScreenHeight();
+
+		return Point(gridY * blockSize, gridX * blockSize);	
+	}
+
 }
+
 
