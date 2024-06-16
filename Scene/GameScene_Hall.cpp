@@ -63,7 +63,7 @@ void GameSceneHall::Initialize() {
 	ConstructUI();
 
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
-	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize);
+	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
 
 	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
 }

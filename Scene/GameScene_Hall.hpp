@@ -31,6 +31,11 @@ struct PlayerStats
 
 class GameSceneHall final : public Engine::IScene {
 private:
+	ALLEGRO_SAMPLE_ID bgmId;
+	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
+protected:
+	int SpeedMult;
+public:
 	enum TileType {
 		TILE_DIRT, // 0
 		TILE_FLOOR, // 1
@@ -42,11 +47,6 @@ private:
 		TILE_HOUSE, // 7
 		TILE_BLOCK // 8
 	};
-	ALLEGRO_SAMPLE_ID bgmId;
-	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
-protected:
-	int SpeedMult;
-public:
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
 	static const int MapWidth, MapHeight;

@@ -32,6 +32,7 @@ protected:
 
     float x = 0, y = 0;
     float size = 64;
+    float collission_radius = 32; // think of this as a hitbox
     float speed = 2.0;
     float currentHP = 100, maxHP = 100;
 
@@ -40,16 +41,17 @@ protected:
 public:
 
 
-	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize);
+	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID);
     ~PlayerCharacter();
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
 	// virtual void VirtualUpdate(float deltatime) = 0;
+    std::string currentMapID;
 
     // * Player Functionalities
     void UpdateCharacterDirection();
-    bool CollisionCheck(float newX, float newY);
+    bool CollisionCheck(float x, float y, Enum_Direction dir);
     void SetMovementState(int keycode, bool keyDown);
     void OnPlayerDead();
 
