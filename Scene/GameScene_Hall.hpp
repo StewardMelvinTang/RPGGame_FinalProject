@@ -93,7 +93,6 @@ public:
 
 	void ReadMap();
 	void ConstructUI();
-
     // * Generative Tile Maps
 	void ConstructGenerativePathTile(int, int);
 	void ConstructGenerativeGrassTile(int, int);

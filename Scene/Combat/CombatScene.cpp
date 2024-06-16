@@ -24,7 +24,7 @@ void CombatScene::Initialize() {
     int Btn_h = 65;
 	AddNewObject(new Engine::Image("bg/blackscreen_bg.png", 0 ,0 , 1600, 832, 0.0, 0.0));
 
-	AddNewObject(new Engine::Label("You Died!", "pixel-font.ttf", 150, halfW, halfH - 175, 255, 255, 255, 255, 0.5, 0.5)); // 0.5 is the anchor for both x and y
+	// AddNewObject(new Engine::Label("You Died!", "pixel-font.ttf", 150, halfW, halfH - 175, 255, 255, 255, 255, 0.5, 0.5)); // 0.5 is the anchor for both x and y
     
 
     Engine::ImageButton* attack;
