@@ -15,27 +15,30 @@
 #include "Scene/Loading/LoadingScene.hpp"
 //Death Scene
 #include "Scene/Death/DeathScene.hpp"
-                                           
+//Combat Scene
+#include "Scene/Combat/CombatScene.hpp"          
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
 	Engine::GameEngine& game = Engine::GameEngine::GetInstance();
 
+	// game.AddNewScene("play", new PlayScene());
+	// game.AddNewScene("lose", new LoseScene());	
+	// game.AddNewScene("win", new WinScene());
 	game.AddNewScene("settings", new SettingsScene());
-	game.AddNewScene("play", new PlayScene());
 	game.AddNewScene("gamescene_hall", new GameSceneHall());
 
-	game.AddNewScene("lose", new LoseScene());
-	game.AddNewScene("win", new WinScene());
 	game.AddNewScene("stage-select", new StageSelectScene());
 	game.AddNewScene("start-scene", new StartScene());
+	game.AddNewScene("score-board", new ScoreBoardScene());
 	//Loading Scene
 	game.AddNewScene("loading-scene", new LoadingScene());
-	
-	game.AddNewScene("score-board", new ScoreBoardScene());
 	//Death Scene
 	game.AddNewScene("death-scene", new DeathScene());
-	
-	game.Start("death-scene", 60, 1600, 832); // 1600 / blockSize = 25
+	//Combat Scene
+	game.AddNewScene("combat-scene", new CombatScene());
+
+
+	game.Start("combat-scene", 60, 1600, 832); // 1600 / blockSize = 25
 	
 	//game.Start("settings", 60, 1600, 832);
 	return 0;

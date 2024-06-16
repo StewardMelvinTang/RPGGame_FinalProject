@@ -116,6 +116,9 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         # DeathScene:
         Scene/Death/DeathScene.cpp
         Scene/Death/DeathScene.hpp
+        # CombatScene:
+        Scene/Combat/CombatScene.cpp
+        Scene/Combat/CombatScene.hpp
 )
 
 IF (WIN32)

@@ -10,10 +10,10 @@
 
 
 using namespace std;
-#include "DeathScene.hpp"
+#include "CombatScene.hpp"
 
 
-void DeathScene::Initialize() {
+void CombatScene::Initialize() {
     
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -24,27 +24,36 @@ void DeathScene::Initialize() {
     int Btn_h = 65;
 	AddNewObject(new Engine::Image("bg/blackscreen_bg.png", 0 ,0 , 1600, 832, 0.0, 0.0));
 
-	AddNewObject(new Engine::Label("You Died!", "pixel-font.ttf", 150, halfW, halfH - 175, 255, 255, 255, 255, 0.5, 0.5)); // 0.5 is the anchor for both x and y
+	// AddNewObject(new Engine::Label("You Died!", "pixel-font.ttf", 150, halfW, halfH - 175, 255, 255, 255, 255, 0.5, 0.5)); // 0.5 is the anchor for both x and y
     
 
-    Engine::ImageButton* back;
-    back = new Engine::ImageButton("btn/btn_restart.png", "btn/btn_restart_hover.png", halfW - (Btn_w * 1.5/2), halfH - (Btn_h * 1.5/2) + 250, Btn_w * 1.5, Btn_h * 1.5);
-    back->SetOnClickCallback(bind(&DeathScene::BackOnClick, this)); 
-    AddNewControlObject(back);
+    Engine::ImageButton* attack;
+    attack = new Engine::ImageButton("btn/btn_attack.png", "btn/btn_attack_hover.png", halfW - (Btn_w * 1.5/2), halfH - (Btn_h * 1.5/2) + 50, Btn_w * 1.5, Btn_h * 1.5);
+    attack->SetOnClickCallback(bind(&CombatScene::BackOnClick, this)); 
+    AddNewControlObject(attack);
 
+    Engine::ImageButton* items;
+    items = new Engine::ImageButton("btn/btn_items.png", "btn/btn_items_hover.png", halfW - (Btn_w * 1.5/2), halfH - (Btn_h * 1.5/2) + 150, Btn_w * 1.5, Btn_h * 1.5);
+    items->SetOnClickCallback(bind(&CombatScene::BackOnClick, this)); 
+    AddNewControlObject(items);
+
+    Engine::ImageButton* escape;
+    escape = new Engine::ImageButton("btn/btn_escape.png", "btn/btn_escape_hover.png", halfW - (Btn_w * 1.5/2), halfH - (Btn_h * 1.5/2) + 250, Btn_w * 1.5, Btn_h * 1.5);
+    escape->SetOnClickCallback(bind(&CombatScene::BackOnClick, this)); 
+    AddNewControlObject(escape);
 
     // cout << "Initializeed\n";
 }
 
-void DeathScene::BackOnClick(){
+void CombatScene::BackOnClick(){
     Engine::GameEngine::GetInstance().ChangeScene(backMenuLevel);
 }
 
-void DeathScene::Terminate() {
+void CombatScene::Terminate() {
 
 }
 
-void DeathScene::Update(float deltaTime) {
+void CombatScene::Update(float deltaTime) {
     // if (duration > 0.0f) {
     //     currentProgress += deltaTime;
     //     float progressPercentage = currentProgress / totalDur;
@@ -61,7 +70,7 @@ void DeathScene::Update(float deltaTime) {
     // }
 }
 
-void DeathScene::InitLoadingScreen(std::string nextScene, float duration){
+void CombatScene::InitLoadingScreen(std::string nextScene, float duration){
     // this->duration = duration;
     // this->nextScene = nextScene;
     // this->totalDur = duration;
