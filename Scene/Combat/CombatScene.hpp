@@ -4,7 +4,7 @@
 #include <memory>
 #include "Engine/IScene.hpp"
 
-class DeathScene final : public Engine::IScene {
+class CombatScene final : public Engine::IScene {
 public:
     std::string nextScene = "";
     std::string prevScene = "";
@@ -13,7 +13,7 @@ public:
     float totalDur = 0.f;
     IObject * loadingProgressBar = nullptr;
 
-	explicit DeathScene() = default;
+	explicit CombatScene() = default;
 	void Initialize() override;
 	void Terminate() override;
     void Update(float deltaTime) override;
