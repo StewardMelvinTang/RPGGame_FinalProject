@@ -71,5 +71,9 @@ public:
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
+
+    // * PLAYER ENTERED COMBAT
+    bool combat;
+    void EnterCombat();
 };
 #endif // ENEMY_HPP

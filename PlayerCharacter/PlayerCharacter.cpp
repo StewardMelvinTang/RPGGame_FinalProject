@@ -14,7 +14,8 @@ using namespace std;
 #include "Engine/LOG.hpp"
 #include "Scene/Loading/LoadingScene.hpp"
 #include "PlayerCharacter.hpp"
-
+// CombatScene
+#include "Scene/Combat/CombatScene.hpp"
 // * Keyboard Shortcut Redefinition (for easier use)
 #define KEYBOARD_W 23
 #define KEYBOARD_S 19
@@ -28,7 +29,7 @@ PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int mo
     this->x = x; this->y = y; // Set Position in screen
     this->speed = speed; this->money = money;
     charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
-    
+    currentHP = maxHP;
 
     w = Engine::GameEngine::GetInstance().GetScreenSize().x / blockSize;
     h = Engine::GameEngine::GetInstance().GetScreenSize().y / blockSize;
@@ -234,7 +235,7 @@ void PlayerCharacter::OnPlayerDead(){
     // Change After Death Scene is created:
     Engine::GameEngine::GetInstance().ChangeScene("death-scene");
 }
-
+    
 void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
     if (shouldClamp == false){
         this->currentHP = newVal;
@@ -254,3 +255,11 @@ void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
         OnPlayerDead();
     }
 }
+
+// Uncomment when player can enter combat scene has been added
+// void PlayerCharacter::EnterCombat(){
+//     CombatScene* CombatScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
+//     if(CombatScene){
+//         CombatScene->player_hp = this->currentHP;
+//     }
+// }
