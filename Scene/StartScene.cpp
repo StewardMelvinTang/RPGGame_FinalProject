@@ -45,6 +45,7 @@ void StartScene::InitializeAudioEngine(){
 }
 
 void StartScene::Initialize() {
+    recordingPlayerName = false;
     InitializeAudioEngine();
     int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
     int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -87,6 +88,7 @@ void StartScene::Initialize() {
 
 
 void StartScene::InitializeProfileMenu(){
+    // recordingPlayerName = false;
     IMG_ProfileBG = new Engine::Image("bg/ProfileScreen_Game.png", 0, 0, 1600, 832, 0, 0);
     BTN_Back = new Engine::ImageButton("btn/back_normal.png", "btn/back_hover.png", 432, 223, 70, 70);
     BTN_Back->SetOnClickCallback(bind(&StartScene::Profile_BackBtnClick, this));
@@ -105,9 +107,11 @@ void StartScene::InitializeProfileMenu(){
 
 void StartScene::Profile_BackBtnClick(){
     drawProfileMenu = false;
+    recordingPlayerName = false;
 }
 void StartScene::Profile_DoneBtnClick(){
     drawProfileMenu = false;
+    recordingPlayerName = false;
     Engine::GameEngine::GetInstance().WriteSaveFile({Engine::GameEngine::playerName, AudioHelper::BGMVolume, AudioHelper::SFXVolume});
     RemoveObject(TXT_Name->GetObjectIterator());
     TXT_Name = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
@@ -117,12 +121,15 @@ void StartScene::Profile_DoneBtnClick(){
 void StartScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
 
+    cout << "Draw Profile Menu : " << drawProfileMenu << endl;
+    cout << "Recording Player Name : " << recordingPlayerName << endl;
+
     if (drawProfileMenu == true && recordingPlayerName == true){
         if (keyCode == 59) { // * Escape
             recordingPlayerName = false;
             return;
         }
-        if (keyCode == 63) { // * Backspace
+        if (keyCode == 63 && !Engine::GameEngine::playerName.empty()) { // * Backspace
             Engine::GameEngine::playerName.pop_back();
             NameText = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf", 35, 673, 373,  255, 255, 255, 255, 0, 0);
             return;
@@ -236,7 +243,8 @@ void StartScene::ProfileBtn(){
 
 void StartScene::RecordPlayerName(){
     if (drawProfileMenu) {
-        cout << "Recording Player Name \n";
-        recordingPlayerName = !recordingPlayerName;
+        // cout << "Recording Player Name " << recordingPlayerName << endl;
+        recordingPlayerName = true;
+        cout << "Recording Player Name " << recordingPlayerName << endl;
     }
 }
