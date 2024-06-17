@@ -108,7 +108,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 28 && playerChar){
-		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
+		playerChar->PlayerCharacter::SetCurrentHP(playerChar->PlayerCharacter::GetCurrentHP() - 20);
 	}
 
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu

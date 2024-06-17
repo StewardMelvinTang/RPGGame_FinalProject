@@ -106,7 +106,7 @@ void CombatScene::UpdateHP(){
     }
 }
 void CombatScene::Terminate() {
-
+    IScene::Terminate();
 }
 
 void CombatScene::Update(float deltaTime) {
