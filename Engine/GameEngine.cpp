@@ -403,6 +403,100 @@ namespace Engine {
 		return Point(gridY * blockSize, gridX * blockSize);	
 	}
 
+	std::vector<PlayerEntry> GameEngine::LoadProfileBasedSaving() {
+		std::vector<PlayerEntry> result;
+		std::ifstream file(profileListFilePath);
+		if (!file.is_open()) {
+			std::cerr << "Failed to open file " << profileListFilePath << std::endl;
+			return result;
+		}
+
+		std::string line;
+		while (std::getline(file, line)) {
+			std::istringstream iss(line);
+			PlayerEntry entry;
+			std::string token;
+
+			// Parsing each field based on the '|' delimiter
+			std::getline(iss, entry.name, '|');
+			std::getline(iss, token, '|');
+			entry.avatarID = std::stoi(token);
+			std::getline(iss, entry.difficulty, '|');  // Correctly parse difficulty as string
+			std::getline(iss, token, '|');
+			entry.money = std::stoi(token);
+			std::getline(iss, token, '|');
+			entry.x = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.y = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.speed = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.currentHP = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.maxHP = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.atkDMG = std::stof(token);
+			std::getline(iss, entry.lastScene); // Correctly parse the last field as string
+
+
+			if (iss.fail()) {
+				std::cerr << "Error parsing line: " << line << std::endl;
+				continue;
+			}
+
+			std::cout << "LOAD : Found " << entry.name << std::endl;
+			result.push_back(entry);
+		}
+
+		file.close();
+
+		return result;
+	}
+
+
+
+	void GameEngine::WriteProfileBasedSaving(std::vector<PlayerEntry> oldEntryData, PlayerEntry currPlayerEntry){
+		std::ofstream file(profileListFilePath, std::ios::out); // Open file in output mode
+		if (!file.is_open()) {
+			return;
+		}
+
+		bool contains = false;
+		for (auto& data : oldEntryData) {
+			cout << "Iterating through " << data.name << endl;
+			if (data.name == currPlayerEntry.name) {
+				contains = true;
+				data = currPlayerEntry; // Update existing entry with new data
+				break;
+			}
+		}
+
+		if (!contains) {
+			std::cout << "No One named " << currPlayerEntry.name << " Creating one... \n";
+			oldEntryData.push_back(currPlayerEntry); // Add new entry
+		}
+
+		// ! FORMAT : <NAME>|<AVATARID>|<DIFF>|<MONEY>|<POSX>|<POSY>|<SPEED>|<CURRHP>|<MAXHP>|<ATKDMG>|<LASTSCENENAME>
+		for (const auto& data : oldEntryData) {
+			std::cout << "WRITING : " << data.name << std::endl;
+			file << data.name << "|" 
+				<< data.avatarID << "|" 
+				<< data.difficulty << "|" 
+				<< data.money << "|" 
+				<< data.x << "|" 
+				<< data.y << "|" 
+				<< data.speed << "|" 
+				<< data.currentHP << "|" 
+				<< data.maxHP << "|" 
+				<< data.atkDMG << "|"
+				<< data.lastScene << std::endl;
+		}
+
+		std::cout << "Profile for " << currPlayerEntry.name << " Save Success\n"; 
+		file.close();
+	}
+
+
 }
 
 
