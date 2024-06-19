@@ -35,6 +35,7 @@ protected:
     float collission_radius = 32; // think of this as a hitbox
     float speed = 2.0;
     float currentHP = 100, maxHP = 100;
+    float attackDamage = 5;
 
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
@@ -73,5 +74,7 @@ public:
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
+
+    void CheckPointSave();
 };
 #endif // ENEMY_HPP

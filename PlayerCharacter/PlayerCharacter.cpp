@@ -282,3 +282,7 @@ void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
         OnPlayerDead();
     }
 }
+
+void PlayerCharacter::CheckPointSave(){
+    
+}
