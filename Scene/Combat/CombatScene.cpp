@@ -95,6 +95,7 @@ void CombatScene::OnKeyDown(int keycode){
         CombatScene::SetPlayerHP(this->currentHP - 20);
         CombatScene::UpdateHP();
     }
+    std::cout << "OnKeyDown!\n";
 }
 void CombatScene::UpdateHP(){
     if (HP_BarFILL) {
