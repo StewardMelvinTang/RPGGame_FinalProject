@@ -29,21 +29,6 @@ struct scoreBoardData
 	DateTime saveTime;
 };
 
-struct PlayerEntry // * For Profile Based Saving
-{
-    std::string name = "";
-    int money = 0;
-    std::string difficulty = "";
-	int avatarID = 0;
-
-	float x = -1, y = -1; // * -1 Means Hasnt be initialized. Will use the level's initial start position
-	float speed = 2.0;
-	float currentHP = 100, maxHP = 100;
-	float atkDMG = 5;
-
-	std::string lastScene = "gamescene_hall";
-};
-
 /// <summary>
 /// All general classes are under this namespace for clarity.
 /// </summary>
@@ -116,7 +101,6 @@ namespace Engine {
 
 		const std::string saveFilePath = "Resource/save.txt";
 		const std::string leaderBoardFilePath = "Resource/scoreboard.txt";
-		const std::string profileListFilePath = "Resource/profile_lists.txt";
 	public:
 		// Note: We'll ignore C++11's move constructor, move assignment operator in this project for simplicity.
 		/// <summary>
@@ -207,11 +191,6 @@ namespace Engine {
 		DateTime GetCurrentDateTime();
 
 		static std::string playerName;
-
-
-		// * Profile Based Saving
-		std::vector<PlayerEntry> LoadProfileBasedSaving();
-		void WriteProfileBasedSaving(std::vector<PlayerEntry> oldEntryData, PlayerEntry currPlayerEntry);
 	};
 }
 #endif // GAMEENGINE_HPP

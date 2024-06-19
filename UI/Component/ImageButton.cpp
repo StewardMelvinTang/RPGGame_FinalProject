@@ -19,7 +19,6 @@ namespace Engine {
 		else bmp = this->imgIn;
 	}
 	void ImageButton::SetOnClickCallback(std::function<void(void)> onClickCallback) {
-		if (!Enabled) return;
 		OnClickCallback = onClickCallback;
 	}
 	void ImageButton::OnMouseDown(int button, int mx, int my) {

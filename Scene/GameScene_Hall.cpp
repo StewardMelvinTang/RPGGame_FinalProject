@@ -116,10 +116,6 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		std::cout << "Paused Game!\n";
 		ToogleGamePaused(!isGamePaused);
 	}
-
-	if (keyCode == 29){
-		
-	}
 }
 
 void GameSceneHall::OnKeyUp(int keyCode) {

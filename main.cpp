@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	game.AddNewScene("combat-scene", new CombatScene());
 
 
-	game.Start("start-scene", 60, 1600, 832); // 1600 / blockSize = 25
+	game.Start("combat-scene", 60, 1600, 832); // 1600 / blockSize = 25
 	
 	//game.Start("settings", 60, 1600, 832);
 	return 0;
