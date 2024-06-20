@@ -86,7 +86,7 @@ public:
     
     //Profile Storage
     std::vector<PlayerEntry> entries;
-    int Id_Entries;
+    int Id_Entries = -1;
     std::string NAMEPLAYER = "PLAYER";
 };
 #endif //INC_2024_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H

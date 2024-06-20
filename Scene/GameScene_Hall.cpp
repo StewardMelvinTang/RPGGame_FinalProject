@@ -200,6 +200,9 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 			case TILE_CORNERBTMLEFT:
 				imgPathFile = "play/dirtCorner_BottomLeft.png";
 			break;
+			case TILE_MAR:
+				imgPathFile = "play/newgrass.png";
+			break;
 			default:
 				imgPathFile = "play/dirt.png";
 			break;
@@ -212,7 +215,7 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 
 void GameSceneHall::ConstructBlock(int locX, int locY) {
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
-	string blockImgPath = "play/Base_block.png";
+	string blockImgPath = "play/Base_blocks.png";
 	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
 
@@ -232,6 +235,7 @@ void GameSceneHall::ReadMap() {
 		case '5': mapData.push_back(TILE_CORNERTOPLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '6': mapData.push_back(TILE_CORNERBTMLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '8': mapData.push_back(TILE_BLOCK); break;
+		case '9': mapData.push_back(TILE_MAR); break;
 		case '\n':
 		case '\r':
 			if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -259,6 +263,7 @@ void GameSceneHall::ReadMap() {
 				case 5: mapState[i][j] = TILE_CORNERTOPLEFT; break;
 				case 6: mapState[i][j] = TILE_CORNERBTMLEFT; break;
 				case 8: mapState[i][j] = TILE_BLOCK; break;
+				case 9: mapState[i][j] = TILE_MAR; break;
 			}
 		}
 	}

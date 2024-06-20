@@ -185,7 +185,10 @@ void StartScene::PlayOnClick() {
     // if (drawCreatePlayerMenu || drawProfileListMenu) return;
     // drawProfileListMenu = true;
     // InitializeProfileListMenu();
-
+    if(Id_Entries == -1){
+        Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
+        return;
+    }
     std::cout << "Loading Player " << entries[Id_Entries].name << endl;
     LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
@@ -203,7 +206,6 @@ void StartScene::PlayOnClick() {
     }
     ProfileScene *scene = dynamic_cast<ProfileScene *>(Engine::GameEngine::GetInstance().GetScene("profile-scene"));
     if(scene != nullptr) scene->bgmInstance = this->bgmInstance;
-    // Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
 
 }
 void StartScene::SettingsOnClick(int stage) {

@@ -45,7 +45,8 @@ public:
 		TILE_CORNERTOPLEFT, // 5
 		TILE_CORNERBTMLEFT, // 6
 		TILE_HOUSE, // 7
-		TILE_BLOCK // 8
+		TILE_BLOCK, // 8
+		TILE_MAR // 9
 	};
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
