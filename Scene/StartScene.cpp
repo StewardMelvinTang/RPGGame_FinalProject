@@ -67,7 +67,7 @@ void StartScene::Initialize() {
     btn = new Engine::ImageButton("btn/btn_long.png", "btn/btn_long_hover.png", halfW - 200, halfH / 2 + 285 , 350, 88);
     btn->SetOnClickCallback(std::bind(&StartScene::PlayOnClick, this));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("PLAY", "pixel-font.ttf", 45, halfW - 25, halfH / 2 + 332, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("PLAY", "pixel-font.ttf", 45, halfW - 25, halfH / 2 + 323, 255, 255, 255, 255, 0.5, 0.5));
 
     btn = new Engine::ImageButton("btn/settings_normal.png", "btn/settings_hover.png", w - 260, 15, 70, 70);
     btn->SetOnClickCallback(std::bind(&StartScene::SettingsOnClick, this, 2));
@@ -261,8 +261,6 @@ void StartScene::VirtualDraw() const {
         
         if (drawCreatePlayerMenu){
             // * Draw Profile Menu Here
-            // cout << "Drawing Profile Menu" << endl;
-            // TXT_Profile->Draw();
             if (IMG_AddNewPlayerBG) IMG_AddNewPlayerBG->Draw();
             if (BTN_Back) BTN_Back->Draw();
             if (BTN_Done && !Engine::GameEngine::playerName.empty()) BTN_Done->Draw();
@@ -368,8 +366,6 @@ void StartScene::RecordPlayerName(){
     }
 }
 
-
-
 void StartScene::InitializeProfileListMenu(){
     IMG_ProfileBG = new Engine::Image("bg/profilelist_bg.png", 0, 0, 1600, 832);
 
@@ -404,6 +400,7 @@ void StartScene::InitializeProfileListMenu(){
 }
 
 void StartScene::PlayProfileBtn(vector<PlayerEntry> & entries, int id){
+    if (drawProfileListMenu == false) return;
     cout << "Loading Player " << entries[id].name << endl;
     LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
@@ -413,6 +410,11 @@ void StartScene::PlayProfileBtn(vector<PlayerEntry> & entries, int id){
     if (bgmInstance){
         AudioHelper::StopSample(bgmInstance);
         bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+    }
+
+    if (gameHallScene){
+        cout << "PPPPPP pass\n";
+        gameHallScene->playerEntryData = entries[id];
     }
 
 }

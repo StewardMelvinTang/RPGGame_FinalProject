@@ -63,9 +63,14 @@ void GameSceneHall::Initialize() {
 	ConstructUI();
 
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
+	if (playerEntryData.x != -1 && playerEntryData.y != -1) {
+		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(playerEntryData.x, playerEntryData.y, BlockSize);
+	}
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
 
 	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
+
+	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 }
 
 
@@ -118,7 +123,20 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 29){
-		
+		// * debug : save profile data
+		auto oldData = Engine::GameEngine::GetInstance().LoadProfileBasedSaving();
+		// * Find the name
+		PlayerEntry newData = playerEntryData;
+		newData.x = playerChar->GetPlayerPositionAtMap().x;
+		newData.y = playerChar->GetPlayerPositionAtMap().y;
+		// for (auto & data : oldData){
+		// 	if (data.name == playerEntryData.name){
+
+		// 	}
+		// }
+
+		Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, newData);
+		cout << "Data for player name saved . " << newData.name << ", new X : " << playerChar->GetPlayerPositionAtMap().x << " New Y : " << playerChar->GetPlayerPositionAtMap().y << endl;
 	}
 }
 
@@ -287,14 +305,12 @@ void GameSceneHall::ToogleGamePaused(bool newState){
 		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
 		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
 		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
-		std::cout << "Created Paused Menu!\n";
 	} else {
 		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
 		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
 		if (BTNPause_BackMenu) RemoveObject(BTNPause_BackMenu->GetObjectIterator());
 		if (BTNPause_Resume) RemoveObject(BTNPause_Resume->GetObjectIterator());
 		IMG_PauseMenuBG = nullptr; BTNPause_BackMenu = nullptr; BTNPause_LoadCP = nullptr; BTNPause_Resume = nullptr;
-		std::cout << "Destroyed Paused Menu!\n";
 	}
 	
 }

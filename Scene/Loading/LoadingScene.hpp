@@ -4,6 +4,8 @@
 #include <memory>
 #include "Engine/IScene.hpp"
 
+
+
 class LoadingScene final : public Engine::IScene {
 public:
     std::string nextScene = "";
@@ -11,6 +13,7 @@ public:
     float duration = 0.f;
     float totalDur = 0.f;
     IObject * loadingProgressBar = nullptr;
+
 
 	explicit LoadingScene() = default;
 	void Initialize() override;

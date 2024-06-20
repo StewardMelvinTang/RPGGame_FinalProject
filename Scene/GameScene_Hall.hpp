@@ -61,6 +61,8 @@ public:
 
 	bool isGameOver = false;
 
+	PlayerEntry playerEntryData;
+
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
 	Group* BlockGroup;

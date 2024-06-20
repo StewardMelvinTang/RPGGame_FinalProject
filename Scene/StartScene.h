@@ -25,7 +25,6 @@ struct PlayerEntryComponents
     Engine::ImageButton * PlayButton;
 };
 
-
 private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
 public:

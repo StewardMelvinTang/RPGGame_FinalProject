@@ -44,6 +44,7 @@ struct PlayerEntry // * For Profile Based Saving
 	std::string lastScene = "gamescene_hall";
 };
 
+
 /// <summary>
 /// All general classes are under this namespace for clarity.
 /// </summary>
@@ -207,7 +208,6 @@ namespace Engine {
 		DateTime GetCurrentDateTime();
 
 		static std::string playerName;
-
 
 		// * Profile Based Saving
 		std::vector<PlayerEntry> LoadProfileBasedSaving();
