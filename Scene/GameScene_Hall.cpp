@@ -54,8 +54,8 @@ void GameSceneHall::Initialize() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// * Group Initialization
-	AddNewObject(BlockGroup = new Group());
 	AddNewObject(TileMapGroup = new Group());
+	AddNewObject(BlockGroup = new Group());
 	AddNewControlObject(UIGroup = new Group());
 	AddNewControlObject(CharacterSpriteGroup = new Group());
 
@@ -213,13 +213,13 @@ void GameSceneHall::ReadMap() {
 		case '4': mapData.push_back(TILE_CORNERBTMRIGHT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '5': mapData.push_back(TILE_CORNERTOPLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '6': mapData.push_back(TILE_CORNERBTMLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
-		case '8': mapData.push_back(TILE_BLOCK); break;
+		// case '8': mapData.push_back(TILE_BLOCK); break;
 		case '\n':
 		case '\r':
 			if (static_cast<int>(mapData.size()) / MapWidth != 0)
 				throw std::ios_base::failure("Map data is corrupted. 1 ");
 			break;
-		default: throw std::ios_base::failure("Map data is corrupted. 2 ");
+		default: throw std::ios_base::failure("Map data is corrupted: unrecognized tile. 2 ");
 		}
 	}
 	fin.close();
@@ -240,24 +240,73 @@ void GameSceneHall::ReadMap() {
 				case 4: mapState[i][j] = TILE_CORNERBTMRIGHT; break;
 				case 5: mapState[i][j] = TILE_CORNERTOPLEFT; break;
 				case 6: mapState[i][j] = TILE_CORNERBTMLEFT; break;
-				case 8: mapState[i][j] = TILE_BLOCK; break;
+				// case 8: mapState[i][j] = TILE_BLOCK; break;
+			}
+		}
+	}
+	
+	// reset dep
+	mapData.clear();
+
+	// read the blocks
+	filename = std::string("Resource/map") + currentMapID + "_blocks.txt";
+	cout << filename << endl;
+	fin.open(filename, std::ifstream::in);
+	while(fin >> c) {
+		switch(c) {
+			case '0': mapData.push_back(0); break;
+			case '1': mapData.push_back(1); break;
+			case '\n':
+			case '\r':
+				if (static_cast<int>(mapData.size()) / MapWidth != 0)
+					throw std::ios_base::failure("Map block data is corrupted. 1 ");
+				break;
+			default: throw std::ios_base::failure("Map block data is corrupted: unknown block type");
+		}
+	}
+	fin.close();
+
+	// Validate block data.
+	if (static_cast<int>(mapData.size()) != MapWidth * MapHeight)
+		throw std::ios_base::failure("Map block data is corrupted: width and height does not match");
+
+	// Store blocks in 2d array.
+	mapBlocks = std::vector<std::vector<BlockType>>(MapHeight, std::vector<BlockType>(MapWidth));
+	for (int i = 0; i < MapHeight; i++) {
+		for (int j = 0; j < MapWidth; j++) {
+			const int num = mapData[i * MapWidth + j];
+			switch(num){
+				case 0: mapBlocks[i][j] = BLANK; break;
+				case 1: mapBlocks[i][j] = BASE_BLOCK; break;
 			}
 		}
 	}
 
-
+	// construct mapState
 	for (int i = 0; i < MapHeight; i++){
 		for (int j = 0; j < MapWidth; j++){
 			if (mapState[i][j] == TILE_FLOOR){
 				// TileMapGroup->AddNewObject(new Engine::Image("play/floor.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
 				ConstructGenerativeGrassTile(j , i);
 			} 
-			else if(mapState[i][j] == TILE_BLOCK) ConstructBlock(j, i);	
+			// else if(mapState[i][j] == TILE_BLOCK) ConstructBlock(j, i);	
 			else {
 				ConstructGenerativePathTile(j , i);
 			}
+
+			if(mapBlocks[i][j]) 
+				ConstructBlock(j, i);
 		}
 	}
+
+	// construct mapBlocks
+	// for (int i = 0; i < MapHeight; i++){
+	// 	for (int j = 0; j < MapWidth; j++){
+	// 		if (mapBlocks[i][j] == BASE_BLOCK) {
+	// 			ConstructBlock(j, i);
+	// 		}
+	// 	}
+	// }
 }
 
 void GameSceneHall::ConstructUI() {
