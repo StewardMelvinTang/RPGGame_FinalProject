@@ -9,9 +9,10 @@ public:
     std::string nextScene = "";
     std::string prevScene = "";
     std::string backMenuLevel = "start-scene";
-    float duration = 0.f;
-    float totalDur = 0.f;
-    IObject * loadingProgressBar = nullptr;
+    std::string backGameHall = "gamescene_hall";
+    
+    // float player_hp;
+    // float enemy_hp;
 
 	explicit CombatScene() = default;
 	void Initialize() override;
@@ -20,6 +21,35 @@ public:
     void InitLoadingScreen(std::string nextScene, float duration);
     // New Inits
     void BackOnClick();
+    // Attack, Items, Escape
+    void AttackOnClick();
+    void ItemsOnClick();
+    void EscapeOnClick();
+	// SetPlayerHp
+    void SetPlayerHP(float val);
+    void UpdateHP();
+    // keydown & up
+    void OnKeyDown(int keyCode) override;
+    // void OnKeyUp(int keyCode) override;
+private:
+    //bools
+    bool playerturn;
+    bool enemydead;
+    bool displayitems;
+    bool playerdead;
+    //Player health values
+    IObject * HP_BarBG = nullptr;
+    IObject * HP_BarFILL = nullptr;
+    Engine::Label * TXT_HPVal = nullptr;
+    float currentHP = 100, maxHP = 100; // remove value when combat can be entered
+    
+
+    //Player attack values
+    IObject * ATK_BarBG = nullptr;
+    IObject * ATK_BarFILL = nullptr;
+    Engine::Label * TXT_ATKVal = nullptr;
+    float playerATK = 20, maxATK = 100;
+    int ATK_FILL = 282 * (playerATK / maxATK);
 };
 
 #endif // LOSESCENE_HPP
