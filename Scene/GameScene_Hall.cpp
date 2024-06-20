@@ -68,14 +68,14 @@ void GameSceneHall::Initialize() {
 	}
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
 
-	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
+	// bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
 
 	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 }
 
 
 void GameSceneHall::Terminate() {
-	AudioHelper::StopBGM(bgmId);
+	// AudioHelper::StopBGM(bgmId);
 	// AudioHelper::StopSample(deathBGMInstance);
 	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
 	cout << "Terminated\n";

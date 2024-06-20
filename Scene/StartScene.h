@@ -38,7 +38,7 @@ public:
     IObject * NameText, * DoneText, *DiffText;
     IObject * IMG_Avatar;
     Engine::ImageButton * BTN_Back, * BTN_Done, * NameTextBox, * AvatarLeft, *AvatarRight, *DiffLeft, *DiffRight;
-
+    
     // * Profile List Components
     Engine::ImageButton * BTN_BackPrfl, * BTN_CreateNewProfile;
     IObject * IMG_ProfileBG, * TXT_AddNew;
