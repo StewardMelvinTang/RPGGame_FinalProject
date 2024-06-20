@@ -69,6 +69,7 @@ private:
     void RecordPlayerName();
     void ChangeAvatar(int mode);
     void ChangeDifficulty(int mode);
+    void OnKeyDown(int keyCode) override;
 };
 
 #endif // LOSESCENE_HPP

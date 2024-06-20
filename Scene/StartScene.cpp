@@ -67,7 +67,7 @@ void StartScene::Initialize() {
     btn = new Engine::ImageButton("btn/btn_long.png", "btn/btn_long_hover.png", halfW - 200, halfH / 2 + 285 , 350, 88);
     btn->SetOnClickCallback(std::bind(&StartScene::PlayOnClick, this));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("PLAY", "pixel-font.ttf", 45, halfW - 25, halfH / 2 + 323, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("PLAY", "pixel-font.ttf", 45, halfW - 25, halfH / 2 + 333, 255, 255, 255, 255, 0.5, 0.5));
 
     btn = new Engine::ImageButton("btn/settings_normal.png", "btn/settings_hover.png", w - 260, 15, 70, 70);
     btn->SetOnClickCallback(std::bind(&StartScene::SettingsOnClick, this, 2));
@@ -87,11 +87,15 @@ void StartScene::Initialize() {
     AddNewControlObject(btn);
 
     btn = new Engine::ImageButton("btn/profile_bg.png", "btn/profile_bg_hover.png", 10, 15, 298, 70);
-    // btn->SetOnClickCallback(bind(&StartScene::AddNewPlayerBtn, this));
+    btn->SetOnClickCallback(bind(&StartScene::AddNewPlayerBtn, this));
     AddNewControlObject(btn);
     
-    TXT_Name = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
+    TXT_Name = new Engine::Label(NAMEPLAYER, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
     AddNewObject(TXT_Name);
+}
+
+void StartScene::AddNewPlayerBtn(){
+    Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
 }
 
 void StartScene::OnKeyDown(int keyCode) {
@@ -181,9 +185,26 @@ void StartScene::PlayOnClick() {
     // if (drawCreatePlayerMenu || drawProfileListMenu) return;
     // drawProfileListMenu = true;
     // InitializeProfileListMenu();
+
+    std::cout << "Loading Player " << entries[Id_Entries].name << endl;
+    LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+    loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
+    Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+
+    GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
+    
+    if (gameHallScene){
+        cout << "PPPPPP pass\n";
+        gameHallScene->playerEntryData = entries[Id_Entries];
+    }
+    if (bgmInstance){
+        AudioHelper::StopSample(bgmInstance);
+        bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+    }
     ProfileScene *scene = dynamic_cast<ProfileScene *>(Engine::GameEngine::GetInstance().GetScene("profile-scene"));
     if(scene != nullptr) scene->bgmInstance = this->bgmInstance;
-    Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
+    // Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
+
 }
 void StartScene::SettingsOnClick(int stage) {
     if (drawCreatePlayerMenu || drawProfileListMenu) return;

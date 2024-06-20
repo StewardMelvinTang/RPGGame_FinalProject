@@ -84,5 +84,9 @@ public:
 
     void PlayProfileBtn(std::vector<PlayerEntry> & entries, int id);
     
+    //Profile Storage
+    std::vector<PlayerEntry> entries;
+    int Id_Entries;
+    std::string NAMEPLAYER = "PLAYER";
 };
 #endif //INC_2024_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H

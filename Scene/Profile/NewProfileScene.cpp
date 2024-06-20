@@ -41,20 +41,20 @@ void NewProfileScene::CreateNewProfile(){
     AddNewControlObject(BTN_Done);
 
     // * Draw Text Box
-    NameTextBox = new Engine::ImageButton("btn/textbox.png", "btn/textbox.png", 619, 422, 362, 49);
+    NameTextBox = new Engine::ImageButton("btn/textbox.png", "btn/textbox_hover.png", 619, 422, 362, 49);
     NameTextBox->SetOnClickCallback(bind(&NewProfileScene::RecordPlayerName, this));
     AddNewControlObject(NameTextBox);
     NameText = new Engine::Label((!Engine::GameEngine::playerName.empty() ? Engine::GameEngine::playerName : "PLAYER"), "pixel-font.ttf", 24, 630, 437,  255, 255, 255, 255, 0, 0);
-    DoneText = new Engine::Label("Done", "pixel-font.ttf", 32, 760, 650,  255, 255, 255, 255, 0, 0);
+    DoneText = new Engine::Label("Done", "pixel-font.ttf", 32, 766, 650,  255, 255, 255, 255, 0, 0);
     AddNewObject(NameText);
     AddNewObject(DoneText);
 
     // * Draw Avatar Selection
     IMG_Avatar = new Engine::Image("avatar/avatar_1.png", 720, 218, 160, 160);
     AddNewObject(IMG_Avatar);
-    AvatarRight = new Engine::ImageButton("btn/arrowBeige_right.png", "btn/arrowBeige_right.png", 895, 281, 36, 34);
+    AvatarRight = new Engine::ImageButton("btn/nextBtn_normal.png", "btn/nextBtn_hover.png", 895, 281, 36, 34);
     AddNewControlObject(AvatarRight);
-    AvatarLeft = new Engine::ImageButton("btn/arrowBeige_left.png", "btn/arrowBeige_left.png", 672, 281, 36, 34);
+    AvatarLeft = new Engine::ImageButton("btn/prevBtn_normal.png", "btn/prevBtn_hover.png", 672, 281, 36, 34);
     AddNewControlObject(AvatarLeft);
     AvatarRight->SetOnClickCallback(std::bind(&NewProfileScene::ChangeAvatar, this, 1));
     AvatarLeft->SetOnClickCallback(std::bind(&NewProfileScene::ChangeAvatar, this, -1));
@@ -62,10 +62,10 @@ void NewProfileScene::CreateNewProfile(){
     // * Draw Difficulty Selection
     DiffText = new Engine::Label("Normal", "pixel-font.ttf", 30, 800, 530,  255, 255, 255, 255, 0.5, 0.5);
     AddNewObject(DiffText);
-    DiffRight = new Engine::ImageButton("btn/arrowBeige_right.png", "btn/arrowBeige_right.png", 895, 510, 36, 34);
+    DiffRight = new Engine::ImageButton("btn/nextBtn_normal.png", "btn/nextBtn_hover.png", 895, 510, 36, 34);
     AddNewControlObject(DiffRight);
     DiffRight->SetOnClickCallback(std::bind(&NewProfileScene::ChangeDifficulty, this, 1));
-    DiffLeft = new Engine::ImageButton("btn/arrowBeige_left.png", "btn/arrowBeige_left.png", 672, 510, 36, 34);
+    DiffLeft = new Engine::ImageButton("btn/prevBtn_normal.png", "btn/prevBtn_hover.png", 672, 510, 36, 34);
     AddNewControlObject(DiffLeft);
     DiffLeft->SetOnClickCallback(std::bind(&NewProfileScene::ChangeDifficulty, this, -1));
     

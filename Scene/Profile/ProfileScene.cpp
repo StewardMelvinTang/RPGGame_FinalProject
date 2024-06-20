@@ -13,7 +13,7 @@
 #include "Scene/Profile/NewProfileScene.hpp"
 using namespace std;
 #include "ProfileScene.hpp"
-
+#include "Scene/StartScene.h"
 
 
 void ProfileScene::Initialize() {
@@ -53,7 +53,7 @@ void ProfileScene::InitializeProfileList(){
         // * Construct a new EntryComponent Here
         PlayerEntryComponents newComponent;
         newComponent.IMG_Avatar = new Engine::Image(avatarPath[profile.avatarID], 637, 218 + offsetY, 64, 64);
-        newComponent.PlayButton = new Engine::ImageButton("btn/profileentry_normal.png", "btn/profileentry_normal.png", 625, 208 + offsetY, 350, 83);
+        newComponent.PlayButton = new Engine::ImageButton("btn/profileentry_normal.png", "btn/profileentry_hover.png", 625, 208 + offsetY, 350, 83);
         newComponent.PlayerDifficulty = new Engine::Label(profile.difficulty, "pixel-font.ttf", 19, 707, 254 + offsetY, 255, 255, 255, 255);
         newComponent.PlayerName = new Engine::Label(profile.name, "pixel-font.ttf", profile.name.length() > 10 ? 25 : 35, 707, profile.name.length() > 10 ? 225 + offsetY : 219 + offsetY, 255, 255, 255, 255);
         newComponent.PlayerMoney = new Engine::Label(to_string(profile.money), "pixel-font.ttf", 19, 942, 241 + offsetY, 255, 255, 255, 255, 1.0);
@@ -73,21 +73,26 @@ void ProfileScene::InitializeProfileList(){
     profileListMenuInitialized = true;
 }
 void ProfileScene::PlayProfileBtn(vector<PlayerEntry> & entries, int id){
-    cout << "Loading Player " << entries[id].name << endl;
-    LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
-    loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
-    Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+    // cout << "Loading Player " << entries[id].name << endl;
+    // LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+    // loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
+    // Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
 
-    GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
+    // GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
     
-    if (gameHallScene){
-        cout << "PPPPPP pass\n";
-        gameHallScene->playerEntryData = entries[id];
-    }
-    if (bgmInstance){
-        AudioHelper::StopSample(bgmInstance);
-        bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
-    }
+    // if (gameHallScene){
+    //     cout << "PPPPPP pass\n";
+    //     gameHallScene->playerEntryData = entries[id];
+    // }
+    // if (bgmInstance){
+    //     AudioHelper::StopSample(bgmInstance);
+    //     bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+    // }
+    StartScene * Start = dynamic_cast<StartScene *>(Engine::GameEngine::GetInstance().GetScene("start-scene"));
+    Start->entries = entries;
+    Start->Id_Entries = id;
+    Start->NAMEPLAYER = entries[id].name;
+    Engine::GameEngine::GetInstance().ChangeScene("start-scene");
 }
 void ProfileScene::Terminate() {
     // AudioHelper::StopBGM(bgmId);
@@ -95,5 +100,11 @@ void ProfileScene::Terminate() {
 	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
 	cout << "Terminated_ProfileScene!\n";
 	IScene::Terminate();
+}
+void ProfileScene::OnKeyDown(int keyCode){
+    IScene::OnKeyDown(keyCode);
+    if(keyCode == ALLEGRO_KEY_ESCAPE){
+        Engine::GameEngine::GetInstance().ChangeScene("start-scene");
+    }
 }
 
