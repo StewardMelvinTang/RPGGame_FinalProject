@@ -130,7 +130,7 @@ void NewProfileScene::ChangeDifficulty(int mode){ //  1 for inc, -1 for dec
         currDifficulty++;
         // std::cout << "curr: " << currDifficulty << "\n";
     } else if (mode == -1){
-        if (currDifficulty - 1 < 0) currDifficulty = 2;
+        if (currDifficulty - 1 < 0) currDifficulty = 3;
         currDifficulty--;
         // std::cout << "curr: " << currDifficulty << "\n";
     }

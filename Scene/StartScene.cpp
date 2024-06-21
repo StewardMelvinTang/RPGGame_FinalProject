@@ -86,12 +86,12 @@ void StartScene::Initialize() {
     btn->SetOnClickCallback(bind(&StartScene::ScoreBoardBtn, this));
     AddNewControlObject(btn);
 
-    btn = new Engine::ImageButton("btn/profile_bg.png", "btn/profile_bg_hover.png", 10, 15, 298, 70);
-    btn->SetOnClickCallback(bind(&StartScene::AddNewPlayerBtn, this));
-    AddNewControlObject(btn);
+    // btn = new Engine::ImageButton("btn/profile_bg.png", "btn/profile_bg_hover.png", 10, 15, 298, 70);
+    // btn->SetOnClickCallback(bind(&StartScene::AddNewPlayerBtn, this));
+    // AddNewControlObject(btn);
     
-    TXT_Name = new Engine::Label(NAMEPLAYER, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
-    AddNewObject(TXT_Name);
+    // TXT_Name = new Engine::Label(NAMEPLAYER, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
+    // AddNewObject(TXT_Name);
 }
 
 void StartScene::AddNewPlayerBtn(){
@@ -108,7 +108,7 @@ void StartScene::OnKeyDown(int keyCode) {
         PlayerEntry entry;
         entry.name = "WICAKSONO"; entry.money = 15000; entry.difficulty = "Normal";
         Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, entry);
-    } 
+    }
 }
 void StartScene::OnMouseDown(int button, int mx, int my) {
     if (recordingPlayerName) {
@@ -120,73 +120,18 @@ void StartScene::OnMouseDown(int button, int mx, int my) {
 
 void StartScene::VirtualDraw() const {
     IScene::VirtualDraw();
-
-    if (drawProfileListMenu){
-        if (IMG_ProfileBG) IMG_ProfileBG->Draw();
-        if (BTN_BackPrfl) BTN_BackPrfl->Draw();
-        if (BTN_CreateNewProfile) BTN_CreateNewProfile->Draw();
-        if (TXT_AddNew) TXT_AddNew->Draw();
-
-        // * Draw Entry Comps
-        for (auto & comp : playerEntryComps){
-            if (comp.PlayButton) comp.PlayButton->Draw();
-            if (comp.IMG_Avatar) comp.IMG_Avatar->Draw();
-            if (comp.PlayerDifficulty) comp.PlayerDifficulty->Draw();
-            if (comp.PlayerMoney) comp.PlayerMoney->Draw();
-            if (comp.PlayerName) comp.PlayerName->Draw();
-        }
-
-        
-        if (drawCreatePlayerMenu){
-            // * Draw Profile Menu Here
-            if (IMG_AddNewPlayerBG) IMG_AddNewPlayerBG->Draw();
-            if (BTN_Back) BTN_Back->Draw();
-            if (BTN_Done && !Engine::GameEngine::playerName.empty()) BTN_Done->Draw();
-            if (NameTextBox) NameTextBox->Draw();
-            if (NameText && !Engine::GameEngine::playerName.empty()) NameText->Draw();
-            if (DoneText) DoneText->Draw();
-            if (IMG_Avatar) IMG_Avatar->Draw();
-            if (AvatarLeft) AvatarLeft->Draw();
-            if (AvatarRight) AvatarRight->Draw();
-            if (DiffText) DiffText->Draw();
-            if (DiffLeft) DiffLeft->Draw();
-            if (DiffRight) DiffRight->Draw();
-        } 
-    }
+    
 }
 
 void StartScene::Terminate() {
     IScene::Terminate();
 
-    if (hasInitialized){
-        if (IMG_AddNewPlayerBG )delete IMG_AddNewPlayerBG;
-        if (NameText )delete NameText;
-        if (DoneText )delete DoneText;
-        if (IMG_Avatar )delete IMG_Avatar;
-        if (DiffText )delete DiffText;
-    }
 }
 void StartScene::PlayOnClick() {
-    // if (drawCreatePlayerMenu) return;
-    // // Engine::GameEngine::GetInstance().ChangeScene("stage-select"); gamescene_hall
-    // LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
-    // loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
-    // Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
-
-    // GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
-    // if (bgmInstance){
-    //     AudioHelper::StopSample(bgmInstance);
-    //     bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
-    // }
-    // StageSelectScene *scene = dynamic_cast<StageSelectScene *>(Engine::GameEngine::GetInstance().GetScene("stage-select"));
-    // if (scene != nullptr) scene->bgmInstance = this->bgmInstance;
-
-
-    // if (drawCreatePlayerMenu || drawProfileListMenu) return;
-    // drawProfileListMenu = true;
-    // InitializeProfileListMenu();
     if(Id_Entries == -1){
         Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
+        ProfileScene *scene = dynamic_cast<ProfileScene *>(Engine::GameEngine::GetInstance().GetScene("profile-scene"));
+        if(scene != nullptr) scene->bgmInstance = this->bgmInstance;
         return;
     }
     std::cout << "Loading Player " << entries[Id_Entries].name << endl;
@@ -194,12 +139,6 @@ void StartScene::PlayOnClick() {
     loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
     Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
 
-    GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
-    
-    if (gameHallScene){
-        cout << "PPPPPP pass\n";
-        gameHallScene->playerEntryData = entries[Id_Entries];
-    }
     if (bgmInstance){
         AudioHelper::StopSample(bgmInstance);
         bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
@@ -250,8 +189,6 @@ void StartScene::ScoreBoardBtn(){
     ScoreBoardScene *scene = dynamic_cast<ScoreBoardScene *>(Engine::GameEngine::GetInstance().GetScene("score-board"));
     if (scene != nullptr) scene->backMenuLevel = "start-scene";
 }
-
-
 
 
 void StartScene::RecordPlayerName(){

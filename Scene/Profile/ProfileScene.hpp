@@ -28,38 +28,28 @@ public:
     void InitLoadingScreen(std::string nextScene, float duration);
     // New Inits
     void BackOnClick();
+    void VirtualDraw() const override;
     
 private:
-    // bools
-    bool drawCreatePlayerMenu = false;
-    bool recordingPlayerName = false;
-
-    bool drawProfileListMenu = false;
-    bool hasInitialized = false;
-    bool profileListMenuInitialized = false;
-
-    ALLEGRO_SAMPLE_ID bgmId;
-    
     IObject * TXT_Name;
-    // * Create New Player
-    IObject * TXT_Profile;
-    IObject * IMG_AddNewPlayerBG;
-    IObject * NameText, * DoneText, *DiffText;
-    IObject * IMG_Avatar;
-    Engine::ImageButton * BTN_Back, * BTN_Done, * NameTextBox, * AvatarLeft, *AvatarRight, *DiffLeft, *DiffRight;
-    
     // * Profile List Components
-    Engine::ImageButton * BTN_BackPrfl, * BTN_CreateNewProfile;
+    Engine::ImageButton * BTN_BackPrfl, * BTN_CreateNewProfile, * BTN_NextPage, *BTN_PrevPage;
     IObject * IMG_ProfileBG, * TXT_AddNew;
     std::vector<PlayerEntryComponents> playerEntryComps;
     void InitializeProfileListMenu();
     void DestroyProfileListMenu();
 
+    int currPage = 1;
+    int maxPage = 1;
+    int totalEntry = 0;
+
     int currAvatarID = 0;
     std::string avatarPath[6] = {"avatar/avatar_1.png", "avatar/avatar_2.png", "avatar/avatar_3.png", "avatar/avatar_4.png", "avatar/avatar_5.png", "avatar/avatar_6.png"};
     int currDifficulty = 1; // 0 = easy, 1 = normal, 2 = hard
+
+    vector<PlayerEntry> profiles;
     //Buttons Inits
-    void InitializeProfileList();
+    void InitializeProfileList(int page);
     void InitializeProfileListButtons();
     void CreateNewProfile();
     void PlayProfileBtn(std::vector<PlayerEntry> & entries, int id);
@@ -70,6 +60,9 @@ private:
     void ChangeAvatar(int mode);
     void ChangeDifficulty(int mode);
     void OnKeyDown(int keyCode) override;
+
+    void ChangePageProfileList(int mode);
+    void EmptyFunction() {}
 };
 
 #endif // LOSESCENE_HPP
