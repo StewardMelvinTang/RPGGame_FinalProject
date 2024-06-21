@@ -43,12 +43,24 @@ PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int mo
 
 void PlayerCharacter::ConstructPlayerHUD(){
     // * Size 282 x 40, 282 * (maxHP / currHP) to track progressbar percent
+
+    LevelUpBG = new Engine::Image("bg/levelup_screen.png", 0, -300, 1600, 832);
     HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 770, 282, 40 );
     HP_BarFILL = new Engine::Image("bg/progressbar_fill.png", 16, 770, 282, 40);
     TXT_HPVal = new Engine::Label("HP: " + to_string(static_cast<int>(round(currentHP))), "pixel-font.ttf", 30, 20, 790, 255, 255, 255, 255, 0.0, 0.5);
+
+    EXP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 720, 282, 40 );
+    EXP_BarFILL = new Engine::Image("bg/progressbar_fill_white.png", 16, 720, 282, 40);
+
+    std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
+    TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
 }
 
 void PlayerCharacter::DrawPlayerHUD() const{
+    if (LevelUpBG && LevelUpBG->Position.y > -300){
+        LevelUpBG->Draw();
+        LevelUpBG->Position.y -= 1.5f;
+    }
     if (HP_BarBG) HP_BarBG->Draw();
 
     if (HP_BarFILL) {
@@ -59,6 +71,19 @@ void PlayerCharacter::DrawPlayerHUD() const{
     if (TXT_HPVal) {
         TXT_HPVal->Draw();
     }
+
+    if (EXP_BarBG){
+        EXP_BarBG->Draw();
+    }
+    if (EXP_BarFILL){
+        EXP_BarFILL->Draw();
+        EXP_BarFILL->Size.x = 282 * static_cast<float>(currentEXP) / maxEXP;
+        cout << currentEXP / maxEXP << endl;
+    }
+    if (TXT_EXPVal){
+        TXT_EXPVal->Draw();
+    }
+    
 }
 
 void PlayerCharacter::DestroyPlayerHUD(){
@@ -283,6 +308,51 @@ void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
     }
 }
 
+// * Should be called from scenes.
 void PlayerCharacter::CheckPointSave(){
-    
+    // * we have to get the old playerdata from gameengine and set it back
+    PlayerEntry entry = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
+    entry.atkDMG = this->attackDamage;
+    entry.currentHP = this->currentHP;
+    entry.maxHP = this->maxHP;
+    entry.lastScene = currentScene;
+    entry.money = this->money;
+    entry.speed = this->speed;
+    entry.currentEXP = this->currentEXP;
+    entry.maxEXP = this->maxEXP;
+    entry.playerLevel = this->playerLevel;
+    entry.x = this->x;
+    entry.y = this->y;
+
+    // * update the current active player
+    Engine::GameEngine::GetInstance().SetCurrentActivePlayer(Engine::GameEngine::GetInstance().currentActivePlayerName, entry);
+     
+    // * Write to save file
+    auto oldEntries = Engine::GameEngine::GetInstance().LoadProfileBasedSaving();
+    Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldEntries, entry);
+
+    cout << "Checkpoint Reached, Player Data Saved!!!!\n";
+}
+
+void PlayerCharacter::AddEXP(int amount){
+    if (amount + currentEXP >= maxEXP){
+        // * Level Up
+        int selisih =  (amount + currentEXP) - maxEXP;
+        currentEXP = selisih;
+        maxEXP *= 1.25;
+        playerLevel ++;
+
+        std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
+        TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
+
+        if (LevelUpBG) LevelUpBG->Position.y = 0;
+        attackDamage *= 1.1f;
+        maxHP += 10;
+        
+        return;
+    }
+
+    currentEXP += amount;
+    std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
+    TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
 }

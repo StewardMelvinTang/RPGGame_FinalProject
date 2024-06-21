@@ -36,10 +36,14 @@ protected:
     float speed = 2.0;
     float currentHP = 100, maxHP = 100;
     float attackDamage = 5;
+    int currentEXP = 0, maxEXP = 50;
+	int playerLevel = 1;
 
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
-    
+
+    std::string currentScene = "gamescene_hall";
+
 public:
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID);
     ~PlayerCharacter();
@@ -65,15 +69,20 @@ public:
     void SetMaxHP(float newMaxHP) {maxHP = newMaxHP;}
     int GetMoney() {return money;}
     void SetMoney(int newAmount) {money = newAmount;}
+    void AddEXP(int amount);
+    int GetCurrentEXP() { return currentEXP;}
+    int GetCurrentLevel() { return playerLevel;}
 
     // * Player HUD (UI) RESOURCES
-    IObject * HP_BarBG = nullptr;
-    IObject * HP_BarFILL = nullptr;
-    Engine::Label * TXT_HPVal = nullptr;
+    IObject * LevelUpBG = nullptr;
+    IObject * HP_BarBG = nullptr, * EXP_BarBG = nullptr;
+    IObject * HP_BarFILL = nullptr, * EXP_BarFILL = nullptr;
+    Engine::Label * TXT_HPVal = nullptr, * TXT_EXPVal = nullptr;
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
 
     void CheckPointSave();
+    void LoadPlayerEntryData(std::string ); // * To Load from profile lists
 };
 #endif // ENEMY_HPP

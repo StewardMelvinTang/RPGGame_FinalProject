@@ -44,7 +44,7 @@ void DeadScene::Initialize() {
 	vector<scoreBoardData> oldSb = Engine::GameEngine::GetInstance().LoadScoreBoard();
 	scoreBoardData entry; bool shouldSave = false, foundName = false;
 	for (scoreBoardData dt : oldSb){
-		if (dt.playerName == Engine::GameEngine::playerName){
+		if (dt.playerName == Engine::GameEngine::currentActivePlayerName){
 			// * found
 			foundName = true;
 			if (dt.highestScore >= score) return; // * dont have to update scoreBoard
@@ -58,7 +58,7 @@ void DeadScene::Initialize() {
 	if (foundName == false){
 		cout << "Cannot find name... creating one\n";
 		entry.highestScore = score;
-		entry.playerName = Engine::GameEngine::playerName;
+		entry.playerName = Engine::GameEngine::currentActivePlayerName;
 		entry.saveTime = Engine::GameEngine::GetInstance().GetCurrentDateTime();
 		shouldSave = true;
 	}

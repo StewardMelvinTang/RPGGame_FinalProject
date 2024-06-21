@@ -118,7 +118,6 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
-		std::cout << "Paused Game!\n";
 		ToogleGamePaused(!isGamePaused);
 	}
 
@@ -137,6 +136,11 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 
 		Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, newData);
 		cout << "Data for player name saved . " << newData.name << ", new X : " << playerChar->GetPlayerPositionAtMap().x << " New Y : " << playerChar->GetPlayerPositionAtMap().y << endl;
+	}
+
+	if (keyCode == 30){
+		// * debug : add EXP
+		playerChar->AddEXP(49);
 	}
 }
 

@@ -58,7 +58,7 @@ void ScoreBoardScene::RefreshEntries(){
     int startIndex = (currPage - 1) * maxEntryPerPage;
     for (int i = startIndex; i < startIndex + maxEntryPerPage && i < entriesData.size(); i++){
         if (entriesData[i].playerName == "") break;
-        string playerNameStr = (toUpperCase(entriesData[i].playerName) == toUpperCase(Engine::GameEngine::playerName) ? toUpperCase(entriesData[i].playerName) + " (You)" : toUpperCase(entriesData[i].playerName));
+        string playerNameStr = (toUpperCase(entriesData[i].playerName) == toUpperCase(Engine::GameEngine::currentActivePlayerName) ? toUpperCase(entriesData[i].playerName) + " (You)" : toUpperCase(entriesData[i].playerName));
         string dayMonth = std::to_string(entriesData[i].saveTime.day) + "/" + std::to_string(entriesData[i].saveTime.month);
         string timeStr =  ProcessTimeAddZero(entriesData[i].saveTime.hour) + ":" + ProcessTimeAddZero(entriesData[i].saveTime.minute) + ":" + ProcessTimeAddZero(entriesData[i].saveTime.second );
 
@@ -137,11 +137,11 @@ void ScoreBoardScene::PrevPage(){
 
 void ScoreBoardScene::OnKeyDown(int keyCode) {
     if (keyCode == ALLEGRO_KEY_C){
-        cout << "Adding Entry " << Engine::GameEngine::playerName << endl;
+        cout << "Adding Entry " << Engine::GameEngine::currentActivePlayerName << endl;
 
         bool contains = false;
         for (auto entry : entriesData){
-            if (entry.playerName == Engine::GameEngine::playerName){
+            if (entry.playerName == Engine::GameEngine::currentActivePlayerName){
                 contains = true;
             }
         }
@@ -149,14 +149,14 @@ void ScoreBoardScene::OnKeyDown(int keyCode) {
         if (contains == false){
             scoreBoardData newEntry;
             newEntry.highestScore = 15000;
-            newEntry.playerName = Engine::GameEngine::playerName;
+            newEntry.playerName = Engine::GameEngine::currentActivePlayerName;
             newEntry.saveTime = Engine::GameEngine::GetInstance().GetCurrentDateTime();
             entriesData.push_back(newEntry);
             cout << "Creating new Entry of name " << newEntry.playerName << endl;
         }
         for (auto entry : entriesData){
             // cout << "DBG : " << entry.playerName << endl;
-            if (entry.playerName == Engine::GameEngine::playerName){
+            if (entry.playerName == Engine::GameEngine::currentActivePlayerName){
                 // * found player. changing score
                 entry.highestScore = 16000;
                 entry.saveTime = Engine::GameEngine::GetInstance().GetCurrentDateTime();

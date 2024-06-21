@@ -40,6 +40,8 @@ struct PlayerEntry // * For Profile Based Saving
 	float speed = 2.0;
 	float currentHP = 100, maxHP = 100;
 	float atkDMG = 5;
+	int currentEXP = 0, maxEXP = 50;
+	int playerLevel = 1;
 
 	std::string lastScene = "gamescene_hall";
 };
@@ -207,11 +209,14 @@ namespace Engine {
 		void WriteScoreBoard(std::vector<scoreBoardData> oldSbData,scoreBoardData entry);
 		DateTime GetCurrentDateTime();
 
-		static std::string playerName;
+		static std::string currentActivePlayerName;
+		PlayerEntry currentActivePlayerEntry;
 
 		// * Profile Based Saving
 		std::vector<PlayerEntry> LoadProfileBasedSaving();
 		void WriteProfileBasedSaving(std::vector<PlayerEntry> oldEntryData, PlayerEntry currPlayerEntry);
+		void SetCurrentActivePlayer(std::string name, PlayerEntry playerEntry);
+		PlayerEntry GetCurrentActivePlayer();
 	};
 }
 #endif // GAMEENGINE_HPP

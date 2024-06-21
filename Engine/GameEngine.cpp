@@ -22,7 +22,7 @@
 #include <ostream>
 using namespace std;
 
-std::string Engine::GameEngine::playerName = "PLAYER";
+std::string Engine::GameEngine::currentActivePlayerName = "PLAYER";
 namespace Engine {
 	void GameEngine::initAllegro5() {
 		if (!al_init()) throw Allegro5Exception("failed to initialize allegro");
@@ -494,6 +494,15 @@ namespace Engine {
 
 		std::cout << "Profile for " << currPlayerEntry.name << " Save Success\n"; 
 		file.close();
+	}
+
+	void GameEngine::SetCurrentActivePlayer(std::string name, PlayerEntry playerEntry){
+		currentActivePlayerName = name;
+		currentActivePlayerEntry = playerEntry;
+	}
+
+	PlayerEntry GameEngine::GetCurrentActivePlayer(){
+		return currentActivePlayerEntry;
 	}
 
 
