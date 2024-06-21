@@ -33,7 +33,7 @@ struct PlayerEntry // * For Profile Based Saving
 {
     std::string name = "PLAYER";
     int money = 0;
-    std::string difficulty = "";
+    std::string difficulty = "Normal";
 	int avatarID = 0;
 
 	float x = -1, y = -1; // * -1 Means Hasnt be initialized. Will use the level's initial start position
