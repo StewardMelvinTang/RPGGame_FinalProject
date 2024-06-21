@@ -42,6 +42,8 @@ const std::vector<Engine::Point> GameSceneHall::directions = { Engine::Point(-1,
 const int GameSceneHall::MapWidth = 25, GameSceneHall::MapHeight = 13;
 const int GameSceneHall::BlockSize = 64;
 
+bool mapAllInitialized = false;
+
 Engine::Point GameSceneHall::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
@@ -56,6 +58,7 @@ void GameSceneHall::Initialize() {
 
 	// * Group Initialization
 	AddNewObject(TileMapGroup = new Group());
+	AddNewObject(ItemGroup = new Group());
 	AddNewObject(BlockGroup = new Group());
 	AddNewControlObject(UIGroup = new Group());
 	AddNewControlObject(CharacterSpriteGroup = new Group());
@@ -70,9 +73,17 @@ void GameSceneHall::Initialize() {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 		// cout << "Player Will Spawn at " << playerEntryData.y << " X : " << playerEntryData.x << endl;
 	}
-	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
+	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID, playerEntryData);
+	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 
-	// cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
+	for (int i = 0; i < MapHeight; i++){
+		for (int j = 0; j < MapWidth; j++){
+			cout << mapItems[i][j];
+		}
+		cout << endl;
+	}
+
+	mapAllInitialized = true;
 }
 
 
@@ -85,7 +96,14 @@ void GameSceneHall::Terminate() {
 
 }
 void GameSceneHall::Update(float deltaTime) {
-    if (playerChar != nullptr) playerChar->Update(deltaTime);
+    if (playerChar != nullptr) {
+		playerChar->Update(deltaTime);
+		if (!mapAllInitialized) return;
+		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
+		if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
+			playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
+		}
+	}
 }
 void GameSceneHall::Draw() const {
 	IScene::Draw();
@@ -206,10 +224,31 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 	
 }
 
-void GameSceneHall::ConstructBlock(int locX, int locY) {
+void GameSceneHall::ConstructBlock(int locX, int locY, BlockType block) {
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	string blockImgPath = "play/Base_blocks.png";
+	switch (block){
+		case BLANK: blockImgPath = ""; break;
+		case BASE_BLOCK: blockImgPath = "play/Base_blocks.png"; break;
+		case BLOCK_CHEST: blockImgPath = "play/chest_closed.png"; break;
+	}
+	if (blockImgPath.empty()) return;
 	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+	
+}
+
+void GameSceneHall::ConstructItem(int locX, int locY, ItemType item){
+	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
+	string itemImgPath = "play/Base_blocks.png";
+	switch (item){
+		case ITEM_BLANK: itemImgPath = ""; break;
+		case ITEM_POTION: itemImgPath = "play/potion.png"; break;
+		case ITEM_MISSILE: itemImgPath = "play/missile.png"; break;
+	}
+
+	cout << itemImgPath << endl;
+	if (itemImgPath.empty()) return;
+	ItemGroup->AddNewObject(new Engine::Image(itemImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
 
 void GameSceneHall::ReadMap() {
@@ -271,6 +310,9 @@ void GameSceneHall::ReadMap() {
 		switch(c) {
 			case '0': mapData.push_back(0); break;
 			case '1': mapData.push_back(1); break;
+			case '2': mapData.push_back(2); break;
+			case '3': mapData.push_back(3); break;
+			case '4': mapData.push_back(4); break;
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -287,17 +329,22 @@ void GameSceneHall::ReadMap() {
 
 	// Store blocks in 2d array.
 	mapBlocks = std::vector<std::vector<BlockType>>(MapHeight, std::vector<BlockType>(MapWidth));
+	mapItems = std::vector<std::vector<ItemType>>(MapHeight, std::vector<ItemType>(MapWidth));
+
 	for (int i = 0; i < MapHeight; i++) {
 		for (int j = 0; j < MapWidth; j++) {
 			const int num = mapData[i * MapWidth + j];
 			switch(num){
 				case 0: mapBlocks[i][j] = BLANK; break;
 				case 1: mapBlocks[i][j] = BASE_BLOCK; break;
+				case 2: mapBlocks[i][j] = BLOCK_CHEST; break;
+				case 3: mapItems[i][j] = ITEM_POTION; break;
+				case 4: mapItems[i][j] = ITEM_MISSILE; break;
 			}
 		}
 	}
 
-	// construct mapState
+	// * construct Map Blocks
 	for (int i = 0; i < MapHeight; i++){
 		for (int j = 0; j < MapWidth; j++){
 			if (mapState[i][j] == TILE_FLOOR){
@@ -310,9 +357,15 @@ void GameSceneHall::ReadMap() {
 			}
 
 			if(mapBlocks[i][j]) 
-				ConstructBlock(j, i);
+				ConstructBlock(j, i, mapBlocks[i][j]);
+			
+			if (mapItems[i][j]){
+				ConstructItem(j, i, mapItems[i][j]);
+				cout << "Constructing Item\n";
+			}
 		}
 	}
+
 
 	// construct mapBlocks
 	// for (int i = 0; i < MapHeight; i++){

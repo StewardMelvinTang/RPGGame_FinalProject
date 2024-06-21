@@ -24,21 +24,30 @@ using namespace std;
 #define KEYBOARD_D 4
 
 bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding)
-int w,h;
 
-PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, string mapID): 
+PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, string mapID, PlayerEntry entry): 
     Engine::Sprite("char/char_idle_down.png", x, y),
     currentMapID(mapID)    
 {
+    InitializeProfile(entry);
     this->x = x; this->y = y; // Set Position in screen
     this->speed = speed; this->money = money;
     charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
     
-
-    w = Engine::GameEngine::GetInstance().GetScreenSize().x / blockSize;
-    h = Engine::GameEngine::GetInstance().GetScreenSize().y / blockSize;
-
     ConstructPlayerHUD();
+}
+void PlayerCharacter::InitializeProfile(PlayerEntry entry){
+    maxHP = entry.maxHP;
+    currentHP = entry.currentHP;
+    speed = entry.speed;
+    attackDamage = entry.atkDMG;
+    currentEXP = entry.currentEXP;
+    maxEXP = entry.maxEXP;
+    playerLevel = entry.playerLevel;
+    healthPotion = entry.healthPotion;
+    missile = entry.missile;
+
+    cout << "PLAYER LEVEL : " << entry.playerLevel << endl;
 }
 
 void PlayerCharacter::ConstructPlayerHUD(){
@@ -91,7 +100,10 @@ void PlayerCharacter::DestroyPlayerHUD(){
 
 void PlayerCharacter::Update(float deltaTime) {
     UpdateCharacterDirection();
-    // cout << "Char Pos Y : " << GetPlayerPositionAtMap().y << " X : " << GetPlayerPositionAtMap().x << endl;
+}
+
+void PlayerCharacter::OverlapWithItem(ItemType itemType, int posY, int posX){
+    cout << "OVERLAPPED WITH ITEM " << itemType << endl;
 }
 
 PlayerCharacter::~PlayerCharacter(){
@@ -191,7 +203,7 @@ void PlayerCharacter::UpdateCharacterDirection() {
         std::string charSpritePath;
         switch (this->directionFacing) {
             case DIRECTION_DOWN:
-                charSpritePath = "char/char_idle_down.png";s
+                charSpritePath = "char/char_idle_down.png";
                 break;
             case DIRECTION_UP:
                 charSpritePath = "char/char_idle_up.png";
@@ -275,7 +287,7 @@ void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
 }
 
 Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
-    return Engine::Point(round(x / w), round(y / h));
+    return Engine::Point(round(x / 64), round(y / 64));
 }
 
 void PlayerCharacter::OnPlayerDead(){
@@ -322,6 +334,8 @@ void PlayerCharacter::CheckPointSave(){
     entry.playerLevel = this->playerLevel;
     entry.x = this->x;
     entry.y = this->y;
+
+    
 
     // * update the current active player
     Engine::GameEngine::GetInstance().SetCurrentActivePlayer(Engine::GameEngine::GetInstance().currentActivePlayerName, entry);

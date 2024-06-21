@@ -48,10 +48,7 @@ public:
 		TILE_BLOCK, // 8
 		TILE_MAR // 9
 	};
-	enum BlockType {
-		BLANK,
-		BASE_BLOCK,
-	};
+
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
 	static const int MapWidth, MapHeight;
@@ -71,6 +68,7 @@ public:
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
 	Group* BlockGroup;
+	Group* ItemGroup;
 	Group* GroundEffectGroup;
 	Group* EffectGroup;
 	Group* UIGroup;
@@ -80,6 +78,7 @@ public:
 	Engine::Image* imgTarget;
 	std::vector<std::vector<TileType>> mapState;
 	std::vector<std::vector<BlockType>> mapBlocks;
+	std::vector<std::vector<ItemType>> mapItems;
 	std::vector<std::vector<int>> mapDistance;
 	std::list<int> keyStrokes;
 
@@ -106,7 +105,8 @@ public:
     // * Generative Tile Maps
 	void ConstructGenerativePathTile(int, int);
 	void ConstructGenerativeGrassTile(int, int);
-	void ConstructBlock(int, int);
+	void ConstructBlock(int, int, BlockType);
+	void ConstructItem(int, int, ItemType);
 	int ClampMapPos(int, int);
 
 	void DestroyCurrentActiveDialog(IControl * currActiveDialog);

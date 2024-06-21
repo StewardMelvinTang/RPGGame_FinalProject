@@ -23,8 +23,8 @@ void NewProfileScene::Initialize() {
 	int halfW = w / 2;
 	int halfH = h / 2;
     AddNewObject(new Engine::Image("bg/ProfileScene_bg.png", 0 ,0 , 1600, 832, 0.0, 0.0));
-    
-    Engine::GameEngine::currentActivePlayerName.clear();
+    currDifficulty = 1;
+    Engine::GameEngine::currentActivePlayerName = "PLAYER";
     CreateNewProfile();
 }
 
@@ -80,8 +80,13 @@ void NewProfileScene::Profile_BackBtnClick(){
 void NewProfileScene::Profile_DoneBtnClick(){
 
     recordingPlayerName = false;
+
+    if (Engine::GameEngine::currentActivePlayerName.empty()) {
+        Engine::GameEngine::currentActivePlayerName = "PLAYER";
+        Engine::GameEngine::GetInstance().currentActivePlayerEntry.name = "PLAYER";
+    }
    
-    Engine::GameEngine::GetInstance().WriteSaveFile({Engine::GameEngine::currentActivePlayerName, AudioHelper::BGMVolume, AudioHelper::SFXVolume});
+    // Engine::GameEngine::GetInstance().WriteSaveFile({Engine::GameEngine::currentActivePlayerName, AudioHelper::BGMVolume, AudioHelper::SFXVolume});
     LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
 
@@ -91,6 +96,7 @@ void NewProfileScene::Profile_DoneBtnClick(){
     entry.difficulty = (currDifficulty == 0 ? "Easy" : currDifficulty == 1 ? "Normal" : currDifficulty == 2 ? "Hard" : "Normal");
     entry.avatarID = currAvatarID;
     Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, entry);
+    Engine::GameEngine::GetInstance().SetCurrentActivePlayer(entry.name,  entry);
     if (bgmInstance){
         AudioHelper::StopSample(bgmInstance);
         bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();

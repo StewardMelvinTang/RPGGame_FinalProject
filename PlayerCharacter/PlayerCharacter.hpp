@@ -25,6 +25,18 @@ enum Enum_Direction{
     DIRECTION_DOWNRIGHT// 7
 };
 
+enum BlockType {
+    BLANK,
+    BASE_BLOCK,
+    BLOCK_CHEST,
+};
+
+enum ItemType{
+    ITEM_BLANK,
+    ITEM_POTION,
+    ITEM_MISSILE
+};
+
 class PlayerCharacter : public Engine::Sprite {
 protected:
 	float speedMultiplier = 1.0f;
@@ -44,11 +56,16 @@ protected:
 
     std::string currentScene = "gamescene_hall";
 
+    int healthPotion = 0;
+    int missile = 0;
+
 public:
-	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID);
+	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID, PlayerEntry entry);
     ~PlayerCharacter();
 	void Update(float deltaTime) override;
 	void Draw() const override;
+
+    void InitializeProfile(PlayerEntry entry);
 
 	// virtual void VirtualUpdate(float deltatime) = 0;
     std::string currentMapID;
@@ -61,6 +78,7 @@ public:
 
     // * helper function & getter setter
     Engine::Point GetPlayerPositionAtMap();
+    void OverlapWithItem(ItemType, int, int);
     float GetCurrentHP() {return currentHP;}
     void SetCurrentHP(float newVal, bool shouldClamp = true);
     float GetPlayerSpeed() {return speed;}

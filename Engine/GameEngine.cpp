@@ -436,8 +436,17 @@ namespace Engine {
 			entry.maxHP = std::stof(token);
 			std::getline(iss, token, '|');
 			entry.atkDMG = std::stof(token);
+			std::getline(iss, token, '|');
+			entry.healthPotion = std::stoi(token);
+			std::getline(iss, token, '|');
+			entry.missile = std::stoi(token);
+			std::getline(iss, token, '|');
+			entry.currentEXP = std::stoi(token);
+			std::getline(iss, token, '|');
+			entry.maxEXP = std::stoi(token);
+			std::getline(iss, token, '|');
+			entry.playerLevel = std::stoi(token);
 			std::getline(iss, entry.lastScene); // Correctly parse the last field as string
-
 
 			if (iss.fail()) {
 				std::cerr << "Error parsing line: " << line << std::endl;
@@ -455,7 +464,8 @@ namespace Engine {
 
 
 
-	void GameEngine::WriteProfileBasedSaving(std::vector<PlayerEntry> oldEntryData, PlayerEntry currPlayerEntry){
+
+	void GameEngine::WriteProfileBasedSaving(std::vector<PlayerEntry> oldEntryData, PlayerEntry currPlayerEntry) {
 		std::ofstream file(profileListFilePath, std::ios::out); // Open file in output mode
 		if (!file.is_open()) {
 			return;
@@ -463,7 +473,7 @@ namespace Engine {
 
 		bool contains = false;
 		for (auto& data : oldEntryData) {
-			cout << "Iterating through " << data.name << endl;
+			std::cout << "Iterating through " << data.name << std::endl;
 			if (data.name == currPlayerEntry.name) {
 				contains = true;
 				data = currPlayerEntry; // Update existing entry with new data
@@ -476,7 +486,7 @@ namespace Engine {
 			oldEntryData.push_back(currPlayerEntry); // Add new entry
 		}
 
-		// ! FORMAT : <NAME>|<AVATARID>|<DIFF>|<MONEY>|<POSX>|<POSY>|<SPEED>|<CURRHP>|<MAXHP>|<ATKDMG>|<LASTSCENENAME>
+		// FORMAT : <NAME>|<AVATARID>|<DIFF>|<MONEY>|<POSX>|<POSY>|<SPEED>|<CURRHP>|<MAXHP>|<ATKDMG>|<HEALTHPOTION>|<MISSILE>|<CURREXP>|<MAXEXP>|<CURRLVL>|<LASTSCENENAME>
 		for (const auto& data : oldEntryData) {
 			std::cout << "WRITING : " << data.name << std::endl;
 			file << data.name << "|" 
@@ -489,12 +499,18 @@ namespace Engine {
 				<< data.currentHP << "|" 
 				<< data.maxHP << "|" 
 				<< data.atkDMG << "|"
+				<< data.healthPotion << "|"
+				<< data.missile << "|"
+				<< data.currentEXP << "|"
+				<< data.maxEXP << "|"
+				<< data.playerLevel << "|"
 				<< data.lastScene << std::endl;
 		}
 
 		std::cout << "Profile for " << currPlayerEntry.name << " Save Success\n"; 
 		file.close();
 	}
+
 
 	void GameEngine::SetCurrentActivePlayer(std::string name, PlayerEntry playerEntry){
 		currentActivePlayerName = name;

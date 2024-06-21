@@ -31,7 +31,7 @@ struct scoreBoardData
 
 struct PlayerEntry // * For Profile Based Saving
 {
-    std::string name = "";
+    std::string name = "PLAYER";
     int money = 0;
     std::string difficulty = "";
 	int avatarID = 0;
@@ -44,6 +44,8 @@ struct PlayerEntry // * For Profile Based Saving
 	int playerLevel = 1;
 
 	std::string lastScene = "gamescene_hall";
+	int healthPotion = 0;
+	int missile = 0;
 };
 
 
