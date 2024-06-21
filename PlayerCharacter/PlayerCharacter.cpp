@@ -78,7 +78,6 @@ void PlayerCharacter::DrawPlayerHUD() const{
     if (EXP_BarFILL){
         EXP_BarFILL->Draw();
         EXP_BarFILL->Size.x = 282 * static_cast<float>(currentEXP) / maxEXP;
-        cout << currentEXP / maxEXP << endl;
     }
     if (TXT_EXPVal){
         TXT_EXPVal->Draw();
@@ -192,7 +191,7 @@ void PlayerCharacter::UpdateCharacterDirection() {
         std::string charSpritePath;
         switch (this->directionFacing) {
             case DIRECTION_DOWN:
-                charSpritePath = "char/char_idle_down.png";
+                charSpritePath = "char/char_idle_down.png";s
                 break;
             case DIRECTION_UP:
                 charSpritePath = "char/char_idle_up.png";
@@ -231,7 +230,7 @@ bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir)
     // if(this->currentMapID == "hall") {
     //     GameSceneHall* currScene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("hall"));
     // }
-    // Engine::GameEngine::GetActiveScene().
+    // Engine::GameEngine::GetActiveScene().       
 
 
     if (newX < 0 || newX > w || newY < 0 || newY > h) {

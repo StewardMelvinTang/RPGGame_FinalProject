@@ -39,8 +39,8 @@ void StartScene::InitializeAudioEngine(){
     SaveFileData saveData = Engine::GameEngine::GetInstance().LoadSaveFile();
     AudioHelper::BGMVolume = saveData.bgmVolume;
     AudioHelper::SFXVolume = saveData.sfxVolume;
-    Engine::GameEngine::playerName = saveData.playerName;
-    oldName = Engine::GameEngine::playerName;
+    // Engine::GameEngine::currentActivePlayerName = saveData.playerName;
+    // oldName = Engine::GameEngine::playerName;
 
     bgmInstance = AudioHelper::PlaySample("NewMenu_Theme.ogg", true, AudioHelper::BGMVolume);
     AudioHelper::SetMainMenuMusicPlaying(true);

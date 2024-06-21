@@ -122,7 +122,7 @@ void ProfileScene::PlayProfileBtn(vector<PlayerEntry> & entries, int id){
     // LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     // loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
 
-    
+    Engine::GameEngine::GetInstance().SetCurrentActivePlayer(entries[id].name, entries[id]);
 
     Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
 

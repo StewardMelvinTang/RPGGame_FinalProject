@@ -24,7 +24,7 @@ void NewProfileScene::Initialize() {
 	int halfH = h / 2;
     AddNewObject(new Engine::Image("bg/ProfileScene_bg.png", 0 ,0 , 1600, 832, 0.0, 0.0));
     
-    Engine::GameEngine::playerName.clear();
+    Engine::GameEngine::currentActivePlayerName.clear();
     CreateNewProfile();
 }
 
@@ -44,7 +44,7 @@ void NewProfileScene::CreateNewProfile(){
     NameTextBox = new Engine::ImageButton("btn/textbox.png", "btn/textbox_hover.png", 619, 422, 362, 49);
     NameTextBox->SetOnClickCallback(bind(&NewProfileScene::RecordPlayerName, this));
     AddNewControlObject(NameTextBox);
-    NameText = new Engine::Label((!Engine::GameEngine::playerName.empty() ? Engine::GameEngine::playerName : "PLAYER"), "pixel-font.ttf", 24, 630, 437,  255, 255, 255, 255, 0, 0);
+    NameText = new Engine::Label((!Engine::GameEngine::currentActivePlayerName.empty() ? Engine::GameEngine::currentActivePlayerName : "PLAYER"), "pixel-font.ttf", 24, 630, 437,  255, 255, 255, 255, 0, 0);
     DoneText = new Engine::Label("Done", "pixel-font.ttf", 32, 766, 650,  255, 255, 255, 255, 0, 0);
     AddNewObject(NameText);
     AddNewObject(DoneText);
@@ -81,13 +81,13 @@ void NewProfileScene::Profile_DoneBtnClick(){
 
     recordingPlayerName = false;
    
-    Engine::GameEngine::GetInstance().WriteSaveFile({Engine::GameEngine::playerName, AudioHelper::BGMVolume, AudioHelper::SFXVolume});
+    Engine::GameEngine::GetInstance().WriteSaveFile({Engine::GameEngine::currentActivePlayerName, AudioHelper::BGMVolume, AudioHelper::SFXVolume});
     LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
     loadingScene->InitLoadingScreen("gamescene_hall", 2.5f);
 
     auto oldData = Engine::GameEngine::GetInstance().LoadProfileBasedSaving(); 
     PlayerEntry entry;
-    entry.name = Engine::GameEngine::playerName;
+    entry.name = Engine::GameEngine::currentActivePlayerName;
     entry.difficulty = (currDifficulty == 0 ? "Easy" : currDifficulty == 1 ? "Normal" : currDifficulty == 2 ? "Hard" : "Normal");
     entry.avatarID = currAvatarID;
     Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, entry);
@@ -102,8 +102,8 @@ void NewProfileScene::RecordPlayerName(){
         // cout << "Recording Player Name " << recordingPlayerName << endl;
         recordingPlayerName = true;
         RemoveObject(NameText->GetObjectIterator());
-        Engine::GameEngine::playerName.clear();
-        NameText = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
+        Engine::GameEngine::currentActivePlayerName.clear();
+        NameText = new Engine::Label(Engine::GameEngine::currentActivePlayerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
         AddNewObject(NameText);
         cout << "Recording Player Name " << recordingPlayerName << endl;
 }
@@ -150,21 +150,21 @@ void NewProfileScene::OnKeyDown(int keyCode){
             recordingPlayerName = false;
             return;
         }
-        if (keyCode == 63 && !Engine::GameEngine::playerName.empty()) { // * Backspace
-            Engine::GameEngine::playerName.pop_back();
+        if (keyCode == 63 && !Engine::GameEngine::currentActivePlayerName.empty()) { // * Backspace
+            Engine::GameEngine::currentActivePlayerName.pop_back();
             RemoveObject(NameText->GetObjectIterator());
-            NameText = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
+            NameText = new Engine::Label(Engine::GameEngine::currentActivePlayerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
             AddNewObject(NameText);
-            std::cout <<"name now: "<< Engine::GameEngine::playerName << "\n";
+            std::cout <<"name now: "<< Engine::GameEngine::currentActivePlayerName << "\n";
             return;
         }
-        if (keyCode < 0 || keyCode > 36 || Engine::GameEngine::playerName.length() >= 12) return;
+        if (keyCode < 0 || keyCode > 36 || Engine::GameEngine::currentActivePlayerName.length() >= 12) return;
         else if(keyCode >= 0 && keyCode <= 36){
             std::cout <<"keycode supposed to appear!\n";
-            std::cout <<"name now: "<< Engine::GameEngine::playerName << "\n";
-            Engine::GameEngine::playerName += '@' + keyCode;
+            std::cout <<"name now: "<< Engine::GameEngine::currentActivePlayerName << "\n";
+            Engine::GameEngine::currentActivePlayerName += '@' + keyCode;
             RemoveObject(NameText->GetObjectIterator());
-            NameText = new Engine::Label(Engine::GameEngine::playerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
+            NameText = new Engine::Label(Engine::GameEngine::currentActivePlayerName, "pixel-font.ttf",  24, 630, 437,  255, 255, 255, 255, 0, 0);
             AddNewObject(NameText);
         }
     }

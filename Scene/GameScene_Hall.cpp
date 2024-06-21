@@ -51,6 +51,7 @@ void GameSceneHall::Initialize() {
 	keyStrokes.clear();
 	ticks = 0;
 	SpeedMult = 1;
+	isGamePaused = false;
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// * Group Initialization
@@ -62,15 +63,16 @@ void GameSceneHall::Initialize() {
 	ReadMap();
 	ConstructUI();
 
+	// * Load Player Data from Profile Based Saving System
+	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
 	if (playerEntryData.x != -1 && playerEntryData.y != -1) {
-		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(playerEntryData.x, playerEntryData.y, BlockSize);
+		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
+		// cout << "Player Will Spawn at " << playerEntryData.y << " X : " << playerEntryData.x << endl;
 	}
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
 
-	// bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
-
-	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
+	// cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 }
 
 
@@ -122,20 +124,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 29){
-		// * debug : save profile data
-		auto oldData = Engine::GameEngine::GetInstance().LoadProfileBasedSaving();
-		// * Find the name
-		PlayerEntry newData = playerEntryData;
-		newData.x = playerChar->GetPlayerPositionAtMap().x;
-		newData.y = playerChar->GetPlayerPositionAtMap().y;
-		// for (auto & data : oldData){
-		// 	if (data.name == playerEntryData.name){
-
-		// 	}
-		// }
-
-		Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, newData);
-		cout << "Data for player name saved . " << newData.name << ", new X : " << playerChar->GetPlayerPositionAtMap().x << " New Y : " << playerChar->GetPlayerPositionAtMap().y << endl;
+		playerChar->CheckPointSave();
 	}
 
 	if (keyCode == 30){
