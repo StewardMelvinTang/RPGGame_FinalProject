@@ -16,7 +16,10 @@
 //Death Scene
 #include "Scene/Death/DeathScene.hpp"
 //Combat Scene
-#include "Scene/Combat/CombatScene.hpp"          
+#include "Scene/Combat/CombatScene.hpp"  
+//Profile Scene
+#include "Scene/Profile/ProfileScene.hpp"  
+#include "Scene/Profile/NewProfileScene.hpp"  
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
 	Engine::GameEngine& game = Engine::GameEngine::GetInstance();
@@ -28,6 +31,8 @@ int main(int argc, char **argv) {
 	game.AddNewScene("gamescene_hall", new GameSceneHall());
 
 	game.AddNewScene("stage-select", new StageSelectScene());
+
+
 	game.AddNewScene("start-scene", new StartScene());
 	game.AddNewScene("score-board", new ScoreBoardScene());
 	//Loading Scene
@@ -36,7 +41,9 @@ int main(int argc, char **argv) {
 	game.AddNewScene("death-scene", new DeathScene());
 	//Combat Scene
 	game.AddNewScene("combat-scene", new CombatScene());
-
+	//Profile Scene
+	game.AddNewScene("profile-scene", new ProfileScene());
+	game.AddNewScene("newprofile-scene", new NewProfileScene());
 
 	game.Start("start-scene", 60, 1600, 832); // 1600 / blockSize = 25
 	

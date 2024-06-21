@@ -45,7 +45,8 @@ public:
 		TILE_CORNERTOPLEFT, // 5
 		TILE_CORNERBTMLEFT, // 6
 		TILE_HOUSE, // 7
-		TILE_BLOCK // 8
+		TILE_BLOCK, // 8
+		TILE_MAR // 9
 	};
 	enum BlockType {
 		BLANK,
@@ -64,6 +65,8 @@ public:
     string currentMapID;
 
 	bool isGameOver = false;
+
+	PlayerEntry playerEntryData;
 
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;

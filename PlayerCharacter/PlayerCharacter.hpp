@@ -39,9 +39,8 @@ protected:
 
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
+    
 public:
-
-
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID);
     ~PlayerCharacter();
 	void Update(float deltaTime) override;

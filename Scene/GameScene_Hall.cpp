@@ -63,14 +63,19 @@ void GameSceneHall::Initialize() {
 	ConstructUI();
 
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
+	if (playerEntryData.x != -1 && playerEntryData.y != -1) {
+		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(playerEntryData.x, playerEntryData.y, BlockSize);
+	}
 	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID);
 
-	bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
+	// bgmId = AudioHelper::PlayBGM("GameSceneHall_Theme.ogg");
+
+	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 }
 
 
 void GameSceneHall::Terminate() {
-	AudioHelper::StopBGM(bgmId);
+	// AudioHelper::StopBGM(bgmId);
 	// AudioHelper::StopSample(deathBGMInstance);
 	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
 	cout << "Terminated\n";
@@ -118,7 +123,20 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 29){
-		
+		// * debug : save profile data
+		auto oldData = Engine::GameEngine::GetInstance().LoadProfileBasedSaving();
+		// * Find the name
+		PlayerEntry newData = playerEntryData;
+		newData.x = playerChar->GetPlayerPositionAtMap().x;
+		newData.y = playerChar->GetPlayerPositionAtMap().y;
+		// for (auto & data : oldData){
+		// 	if (data.name == playerEntryData.name){
+
+		// 	}
+		// }
+
+		Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldData, newData);
+		cout << "Data for player name saved . " << newData.name << ", new X : " << playerChar->GetPlayerPositionAtMap().x << " New Y : " << playerChar->GetPlayerPositionAtMap().y << endl;
 	}
 }
 
@@ -182,6 +200,9 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 			case TILE_CORNERBTMLEFT:
 				imgPathFile = "play/dirtCorner_BottomLeft.png";
 			break;
+			case TILE_MAR:
+				imgPathFile = "play/newgrass.png";
+			break;
 			default:
 				imgPathFile = "play/dirt.png";
 			break;
@@ -194,7 +215,7 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 
 void GameSceneHall::ConstructBlock(int locX, int locY) {
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
-	string blockImgPath = "play/Base_block.png";
+	string blockImgPath = "play/Base_blocks.png";
 	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
 
@@ -213,7 +234,7 @@ void GameSceneHall::ReadMap() {
 		case '4': mapData.push_back(TILE_CORNERBTMRIGHT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '5': mapData.push_back(TILE_CORNERTOPLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '6': mapData.push_back(TILE_CORNERBTMLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
-		// case '8': mapData.push_back(TILE_BLOCK); break;
+		case '9': mapData.push_back(TILE_MAR); break;
 		case '\n':
 		case '\r':
 			if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -240,7 +261,8 @@ void GameSceneHall::ReadMap() {
 				case 4: mapState[i][j] = TILE_CORNERBTMRIGHT; break;
 				case 5: mapState[i][j] = TILE_CORNERTOPLEFT; break;
 				case 6: mapState[i][j] = TILE_CORNERBTMLEFT; break;
-				// case 8: mapState[i][j] = TILE_BLOCK; break;
+				case 8: mapState[i][j] = TILE_BLOCK; break;
+				case 9: mapState[i][j] = TILE_MAR; break;
 			}
 		}
 	}
@@ -336,14 +358,12 @@ void GameSceneHall::ToogleGamePaused(bool newState){
 		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
 		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
 		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
-		std::cout << "Created Paused Menu!\n";
 	} else {
 		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
 		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
 		if (BTNPause_BackMenu) RemoveObject(BTNPause_BackMenu->GetObjectIterator());
 		if (BTNPause_Resume) RemoveObject(BTNPause_Resume->GetObjectIterator());
 		IMG_PauseMenuBG = nullptr; BTNPause_BackMenu = nullptr; BTNPause_LoadCP = nullptr; BTNPause_Resume = nullptr;
-		std::cout << "Destroyed Paused Menu!\n";
 	}
 	
 }

@@ -119,6 +119,11 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         # CombatScene:
         Scene/Combat/CombatScene.cpp
         Scene/Combat/CombatScene.hpp
+        # ProfileScene:
+        Scene/Profile/ProfileScene.cpp
+        Scene/Profile/ProfileScene.hpp
+        Scene/Profile/NewProfileScene.cpp
+        Scene/Profile/NewProfileScene.hpp
 )
 
 IF (WIN32)

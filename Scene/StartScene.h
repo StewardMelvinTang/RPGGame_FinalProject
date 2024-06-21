@@ -25,7 +25,6 @@ struct PlayerEntryComponents
     Engine::ImageButton * PlayButton;
 };
 
-
 private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
 public:
@@ -39,7 +38,7 @@ public:
     IObject * NameText, * DoneText, *DiffText;
     IObject * IMG_Avatar;
     Engine::ImageButton * BTN_Back, * BTN_Done, * NameTextBox, * AvatarLeft, *AvatarRight, *DiffLeft, *DiffRight;
-
+    
     // * Profile List Components
     Engine::ImageButton * BTN_BackPrfl, * BTN_CreateNewProfile;
     IObject * IMG_ProfileBG, * TXT_AddNew;
@@ -85,5 +84,9 @@ public:
 
     void PlayProfileBtn(std::vector<PlayerEntry> & entries, int id);
     
+    //Profile Storage
+    std::vector<PlayerEntry> entries;
+    int Id_Entries = -1;
+    std::string NAMEPLAYER = "PLAYER";
 };
 #endif //INC_2024_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H
