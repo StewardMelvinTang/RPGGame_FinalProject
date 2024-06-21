@@ -48,6 +48,10 @@ public:
 		TILE_BLOCK, // 8
 		TILE_MAR // 9
 	};
+	enum BlockType {
+		BLANK,
+		BASE_BLOCK,
+	};
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
 	static const int MapWidth, MapHeight;
@@ -75,6 +79,7 @@ public:
 	Engine::Label* UILives;
 	Engine::Image* imgTarget;
 	std::vector<std::vector<TileType>> mapState;
+	std::vector<std::vector<BlockType>> mapBlocks;
 	std::vector<std::vector<int>> mapDistance;
 	std::list<int> keyStrokes;
 
