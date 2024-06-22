@@ -109,7 +109,7 @@ public:
 	void ConstructItem(int, int, ItemType);
 	int ClampMapPos(int, int);
 
-	void DestroyCurrentActiveDialog(IControl * currActiveDialog);
+	void OnDialogDone(IControl * currActiveDialog);
 
     bool isGamePaused = false;
 	IObject * IMG_PauseMenuBG;

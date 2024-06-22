@@ -7,7 +7,9 @@
 
 #include "Engine/IControl.hpp"
 #include "Engine/IObject.hpp"
+#include "UI/Component/MultiLineLabel.hpp"
 #include "Engine/GameEngine.hpp"
+
 namespace Engine {
 
 	class DialogScreen: public Image, public IControl {
@@ -16,9 +18,10 @@ namespace Engine {
 		std::function<void()> OnClickCallback;
 	public:
 		// Whether the button can be pressed.
+		int dialogID = -1;
 		bool Enabled = true;
         void VirtualDraw() const override;
-		explicit DialogScreen(std::string dialogText, std::string charName, float duration, IObject * playerSprite = nullptr);
+		explicit DialogScreen(std::string dialogText, std::string charName, float duration, IObject * playerSprite = nullptr, int dialogID = -1);
 		void SetOnClickCallback(std::function<void(void)> onClickCallback);
 		void OnMouseDown(int button, int mx, int my) override;
 		void OnMouseMove(int mx, int my) override;
@@ -29,7 +32,7 @@ namespace Engine {
 		IObject * playerCharSprite = nullptr;
         
         mutable IObject * TXT_CharName = nullptr;
-        mutable IObject * TXT_Dialog = nullptr;
+        mutable Engine::MultiLineLabel * TXT_Dialog = nullptr;
         mutable std::string displayedText = "";
         
         mutable double lastTime = 0.0;

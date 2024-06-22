@@ -26,6 +26,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include "Scene/Combat/CombatScene.hpp"
+#include "Scene/Loading/LoadingScene.hpp"
 // #include "GameScene_Hall.hpp"
 using namespace std;
 
@@ -107,6 +108,16 @@ void GameSceneHall::Update(float deltaTime) {
 		playerChar->Update(deltaTime);
 		if (!mapAllInitialized) return;
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
+
+
+		// * Check Teleportation to Teleport Player into another scene
+		if (playerPos.y == 0 && playerPos.x == 5 && playerChar->directionFacing == DIRECTION_UP){
+			LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+			loadingScene->InitLoadingScreen("start-scene", 1.0f);
+			Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+			return;
+		}
+
 		if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
 			playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
 			for (auto & item : ItemGroup->GetObjects()){
@@ -171,12 +182,6 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
 
-	if (keyCode == 27){ // * Debug Spawn Dialog
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
-		activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
-		cout << "Dialog Screen Initialized\n";
-	}
-
 	if (keyCode == 28 && playerChar){
 		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
 	}
@@ -205,8 +210,8 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		if (playerChar->canInteract == true && activeDialog == nullptr) {
 			cout << "Interacted!\n";
 			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
-				AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
-				activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Ah, " + Engine::GameEngine::currentActivePlayerName +", just the person I was hoping to see. Welcome to your new home, \nmy child...", "Old Man", 2.0f, playerChar, 1));
+				activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
 			}
 
 			else if (playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
@@ -480,10 +485,28 @@ void GameSceneHall::ConstructUI() {
 	
 }
 
-void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
+void GameSceneHall::OnDialogDone(IControl * currActiveDialog){
 	if (currActiveDialog == nullptr) return;
 	RemoveControl(currActiveDialog->controlIterator);
-	activeDialog = nullptr;
+
+	if (activeDialog->dialogID == 1){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Dark times are upon us. The Shadow King has awoken in the depths of the Forgotten Grove, \nand his darkness spreads through our beloved forest. The prophecy foretold of a hero \nwho would rise to challenge him. I believe that hero is you.", "Old Man", 3.0f, playerChar, 2));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
+	} else if (activeDialog->dialogID == 2){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Me? But what can I do against such evil?", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
+	} else if (activeDialog->dialogID == 3){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("You have a brave heart and a strong spirit, " + Engine::GameEngine::currentActivePlayerName + ". The journey ahead will be \nfraught with danger, but you must find the courage within yourself. \nYour first task is to gather the resources hidden within the forest. These resources hold \nthe power to weaken the monsters", "Old Man", 3.0f, playerChar, 4));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));		
+	} else if (activeDialog->dialogID == 4){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I understand, Old Man. I won’t let you down.", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 5));
+		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
+	}
+	
+	
+	
+	
+	else activeDialog = nullptr;
 }
 
 void GameSceneHall::ToogleGamePaused(bool newState){
