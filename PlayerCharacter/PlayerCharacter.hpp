@@ -60,7 +60,7 @@ protected:
 
 public:
     int healthPotion = 0;
-    int missile = 2;
+    int missile = 0;
     int shield = 0;
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID, PlayerEntry entry);
     ~PlayerCharacter();
