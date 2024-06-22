@@ -317,7 +317,7 @@ void GameSceneHall::ReadMap() {
 	
 	// reset dep
 	mapData.clear();
-
+	
 	// read the blocks
 	// try to read blocks item first
     filename = "resource/map/" + Engine::GameEngine::currentActivePlayerName + "_" + Engine::GameEngine::currentActiveScene + "_ItemData.txt";

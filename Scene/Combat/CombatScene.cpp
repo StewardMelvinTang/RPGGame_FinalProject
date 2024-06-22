@@ -103,7 +103,7 @@ void CombatScene::Initialize() {
     AddNewObject(Enemy_ATK_BarFILL);
     AddNewObject(Enemy_TXT_ATKVal);
 
-
+    
 
     //Sprite and Visuals
     Platform = new Engine::Image("bg/buttonSquare_blue.png", x + 1150, items->Position.y, 282, 160, 0.5, 0.5);
@@ -130,7 +130,7 @@ void CombatScene::Initialize() {
     Healing->SetOnClickCallback(bind(&CombatScene::UseHealth, this)); 
     Missile->SetOnClickCallback(bind(&CombatScene::UseMissile, this)); 
     Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this));
-
+    
     AddNewControlObject(Healing, true);
     AddNewControlObject(Missile, true);
     AddNewControlObject(Shield, true);
