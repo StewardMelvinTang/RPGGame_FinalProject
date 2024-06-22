@@ -29,6 +29,8 @@ enum BlockType {
     BLANK,
     BASE_BLOCK,
     BLOCK_CHEST,
+    CHEST_OPENED,
+    NPC_INSPECTOR
 };
 
 enum ItemType{
@@ -99,6 +101,8 @@ public:
     IObject * HotBarBG = nullptr;
     IObject * IMG_Potion = nullptr, * IMG_Missile = nullptr, * IMG_Shield = nullptr;
     IObject * TXT_Potion = nullptr,*  TXT_Missile = nullptr, * TXT_Shield = nullptr;
+
+    IObject * TXT_Interaction = nullptr;
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
@@ -106,6 +110,10 @@ public:
     void CheckPointSave(std::vector<std::vector<ItemType>> itemData, std::vector<std::vector<BlockType>> blockData);
     void LoadPlayerEntryData(std::string ); // * To Load from profile lists
     void SaveSceneItemBlockData(std::vector<std::vector<ItemType>>, std::vector<std::vector<BlockType>>);
+
+    // ? Interaction
+    bool canInteract = false;
+    int objToInteract_PosY = -1, objToInteract_PosX = -1;
 
     bool isMoving = false;
     std::vector<size_t> currentFrame = {0,0,0,0};

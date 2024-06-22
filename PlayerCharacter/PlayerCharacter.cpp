@@ -25,6 +25,7 @@ using namespace std;
 #define KEYBOARD_S 19
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
+#define KEYBOARD_F 6
 
 bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding)
 
@@ -76,6 +77,8 @@ void PlayerCharacter::ConstructPlayerHUD(){
 
     IMG_Shield = new Engine::Image("play/shield.png", 697 + 138, 760, 64, 64);
     TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
+
+    TXT_Interaction = new Engine::Label("Press [F] to Interact", "pixel-font.ttf", 35, 800, 700, 255, 255, 255, 255, 0.5, 0.5);
 }
 
 void PlayerCharacter::DrawPlayerHUD() const{
@@ -121,6 +124,10 @@ void PlayerCharacter::DrawPlayerHUD() const{
         IMG_Shield->Draw(); TXT_Shield->Draw();
     }
     
+
+    if (TXT_Interaction && canInteract) {
+        TXT_Interaction->Draw();
+    }
 }
 
 void PlayerCharacter::DestroyPlayerHUD(){
@@ -175,67 +182,67 @@ void PlayerCharacter::UpdateCharacterDirection(float deltaTime) {
     if (keys[0] && keys[2]) { // W & A key
         newX -= this->speed * 0.6;
         newY -= this->speed * 0.6;
+        this->directionFacing = DIRECTION_UP;
         if (CollisionCheck(newX, newY, DIRECTION_UP)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_UP;
             moved = true;
         }
     } else if (keys[0] && keys[3]) { // W & D key
         newX += this->speed * 0.6;
         newY -= this->speed * 0.6;
+        this->directionFacing = DIRECTION_UP;
         if (CollisionCheck(newX, newY, DIRECTION_UP)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_UP;
             moved = true;
         }
     } else if (keys[1] && keys[2]) { // S & A key
         newX -= this->speed * 0.6;
         newY += this->speed * 0.6;
+        this->directionFacing = DIRECTION_DOWN;
         if (CollisionCheck(newX, newY, DIRECTION_DOWN)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
     } else if (keys[1] && keys[3]) { // S & D key
         newX += this->speed * 0.6;
         newY += this->speed * 0.6;
+        this->directionFacing = DIRECTION_DOWN;
         if (CollisionCheck(newX, newY, DIRECTION_DOWN)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
     }
     // Single Key Directions
     else if (keys[0]) { // W key
         newY -= this->speed;
+        this->directionFacing = DIRECTION_UP;
         if (CollisionCheck(this->x, newY, DIRECTION_UP)) {
             this->y = newY;
-            this->directionFacing = DIRECTION_UP;
             moved = true;
         }
     } else if (keys[1]) { // S key
         newY += this->speed;
+        this->directionFacing = DIRECTION_DOWN;
         if (CollisionCheck(this->x, newY, DIRECTION_DOWN)) {
             this->y = newY;
-            this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
     } else if (keys[2]) { // A key
         newX -= this->speed;
+        this->directionFacing = DIRECTION_LEFT;
         if (CollisionCheck(newX, this->y, DIRECTION_LEFT)) {
             this->x = newX;
-            this->directionFacing = DIRECTION_LEFT;
             moved = true;
         }
     } else if (keys[3]) { // D key
         newX += this->speed;
+        this->directionFacing = DIRECTION_RIGHT;
         if (CollisionCheck(newX, this->y, DIRECTION_RIGHT)) {
             this->x = newX;
-            this->directionFacing = DIRECTION_RIGHT;
             moved = true;
         }
     }
@@ -456,6 +463,10 @@ void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> 
                 parseString[i][j] = '2';
             } else if (blockData[i][j] == BASE_BLOCK) {
                 parseString[i][j] = '1';
+            } else if (blockData[i][j] == CHEST_OPENED){
+                parseString[i][j] = '6';
+            } else if (blockData[i][j] == NPC_INSPECTOR){
+                parseString[i][j] = '7';
             }
 
             file << parseString[i][j];

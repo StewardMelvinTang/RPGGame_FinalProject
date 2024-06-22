@@ -36,6 +36,7 @@ using namespace std;
 #define KEYBOARD_A 1
 #define KEYBOARD_D 4
 #define KEYBOARD_ESC 59
+#define KEYBOARD_F 6
 
 
 bool GameSceneHall::DebugMode = false;
@@ -59,9 +60,13 @@ void GameSceneHall::Initialize() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	// * Group Initialization
+
 	AddNewObject(TileMapGroup = new Group());
+	AddNewObject(new Engine::Image("maps/gamescenehall_overlay.png", 0, 0, 1600, 832));
 	AddNewObject(ItemGroup = new Group());
 	AddNewObject(BlockGroup = new Group());
+
+
 	AddNewControlObject(UIGroup = new Group());
 	AddNewControlObject(CharacterSpriteGroup = new Group());
 
@@ -70,7 +75,7 @@ void GameSceneHall::Initialize() {
 
 	// * Load Player Data from Profile Based Saving System
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
-	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 5, BlockSize);
+	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
 	if (playerEntryData.x != -1 && playerEntryData.y != -1) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 		// cout << "Player Will Spawn at " << playerEntryData.y << " X : " << playerEntryData.x << endl;
@@ -110,6 +115,36 @@ void GameSceneHall::Update(float deltaTime) {
 					mapItems[playerPos.y][playerPos.x] = ITEM_BLANK;
 					break;
 				}
+			}
+		}
+
+
+		// * Detect if Player is near NPC or Chest
+		if (npcList.empty()) return;
+		for (auto & npc : npcList){
+			if ((playerPos.y >= npc.y - 1 && playerPos.y <= npc.y + 1) && (playerPos.x >= npc.x - 1 && playerPos.x <= npc.x + 1)){
+				playerChar->canInteract = true;
+				playerChar->objToInteract_PosX = npc.x;
+				playerChar->objToInteract_PosY = npc.y;
+			} else {
+				playerChar->canInteract = false;
+				playerChar->objToInteract_PosX = -1;
+				playerChar->objToInteract_PosY = -1;
+			}
+		}
+
+		if (playerChar->canInteract) return;
+
+		if (chestList.empty()) return;
+		for (auto & chest : chestList){
+			if (playerPos.y == chest.y + 1 && playerPos.x == chest.x && playerChar->directionFacing == DIRECTION_UP && mapBlocks[chest.y][chest.x] == BLOCK_CHEST){
+				playerChar->canInteract = true;
+				playerChar->objToInteract_PosX = chest.x;
+				playerChar->objToInteract_PosY = chest.y;
+			} else {
+				playerChar->canInteract = false;
+				playerChar->objToInteract_PosX = -1;
+				playerChar->objToInteract_PosY = -1;
 			}
 		}
 	}
@@ -159,10 +194,34 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		playerChar->AddEXP(500);
 	}
 
-	if (keyCode == 6){
+	if (keyCode == 3){
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
 		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
+	}
+
+	if (keyCode == KEYBOARD_F){
+		// * Interaction
+		if (playerChar->canInteract == true && activeDialog == nullptr) {
+			cout << "Interacted!\n";
+			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("This is a test dialog. steven ganteng 3D roblox playerqwdqwdqdqwd", "Arthur", 2.0f, playerChar));
+				activeDialog->SetOnClickCallback(bind(&GameSceneHall::DestroyCurrentActiveDialog, this, activeDialog));
+			}
+
+			else if (playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
+				mapBlocks[chestList[0].y][chestList[0].x] = CHEST_OPENED;
+				cout << "Chest opened up\n";
+				for (auto & block : BlockGroup->GetObjects()){
+					if (block->Position.y == chestList[0].y * BlockSize && block->Position.x == chestList[0].x * BlockSize){
+
+						BlockGroup->RemoveObject(block->GetObjectIterator());
+						ConstructBlock(chestList[0].x, chestList[0].y, CHEST_OPENED);
+						break;
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -244,8 +303,10 @@ void GameSceneHall::ConstructBlock(int locX, int locY, BlockType block) {
 	string blockImgPath = "play/Base_blocks.png";
 	switch (block){
 		case BLANK: blockImgPath = ""; break;
-		case BASE_BLOCK: blockImgPath = "play/Base_blocks.png"; break;
+		case BASE_BLOCK: blockImgPath = "play/block_transparant.png"; break;
 		case BLOCK_CHEST: blockImgPath = "play/chest_closed.png"; break;
+		case CHEST_OPENED: blockImgPath = "play/chest_opened.png"; break;
+		case NPC_INSPECTOR: blockImgPath = "char/npc/npc_idle_1.png"; break;
 	}
 	if (blockImgPath.empty()) return;
 	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
@@ -282,7 +343,6 @@ void GameSceneHall::ReadMap() {
 		case '4': mapData.push_back(TILE_CORNERBTMRIGHT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '5': mapData.push_back(TILE_CORNERTOPLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
 		case '6': mapData.push_back(TILE_CORNERBTMLEFT); break; //3 - 6 Means Path corner. inserting (path = false)
-		case '9': mapData.push_back(TILE_MAR); break;
 		case '\n':
 		case '\r':
 			if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -310,7 +370,6 @@ void GameSceneHall::ReadMap() {
 				case 5: mapState[i][j] = TILE_CORNERTOPLEFT; break;
 				case 6: mapState[i][j] = TILE_CORNERBTMLEFT; break;
 				case 8: mapState[i][j] = TILE_BLOCK; break;
-				case 9: mapState[i][j] = TILE_MAR; break;
 			}
 		}
 	}
@@ -339,6 +398,8 @@ void GameSceneHall::ReadMap() {
 			case '3': mapData.push_back(3); break; // Potion
 			case '4': mapData.push_back(4); break; // Missile
 			case '5': mapData.push_back(5); break; // Shield
+			case '6' : mapData.push_back(6); break; // Chest (Opened)
+			case '7' : mapData.push_back(7); break; //NPC_Inspector
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -361,15 +422,44 @@ void GameSceneHall::ReadMap() {
 		for (int j = 0; j < MapWidth; j++) {
 			const int num = mapData[i * MapWidth + j];
 			switch(num){
-				case 0: mapBlocks[i][j] = BLANK; break;
-				case 1: mapBlocks[i][j] = BASE_BLOCK; break;
-				case 2: mapBlocks[i][j] = BLOCK_CHEST; break;
-				case 3: mapItems[i][j] = ITEM_POTION; break;
-				case 4: mapItems[i][j] = ITEM_MISSILE; break;
-				case 5: mapItems[i][j] = ITEM_SHIELD; break;
+				case 0: 
+					mapBlocks[i][j] = BLANK; 
+					break;
+				case 1: 
+					mapBlocks[i][j] = BASE_BLOCK; 
+					break;
+				case 2: {
+					mapBlocks[i][j] = BLOCK_CHEST; 
+					Engine::Point pChest; 
+					pChest.x = j; 
+					pChest.y = i;
+					chestList.push_back(pChest);
+					break;
+				}
+				case 3: 
+					mapItems[i][j] = ITEM_POTION; 
+					break;
+				case 4: 
+					mapItems[i][j] = ITEM_MISSILE; 
+					break;
+				case 5: 
+					mapItems[i][j] = ITEM_SHIELD; 
+					break;
+				case 6: 
+					mapBlocks[i][j] = CHEST_OPENED; 
+					break;
+				case 7: {
+					mapBlocks[i][j] = NPC_INSPECTOR; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;
+				}
 			}
 		}
 	}
+
 
 	// * construct Map Blocks
 	for (int i = 0; i < MapHeight; i++){
@@ -393,7 +483,7 @@ void GameSceneHall::ConstructUI() {
 void GameSceneHall::DestroyCurrentActiveDialog(IControl * currActiveDialog){
 	if (currActiveDialog == nullptr) return;
 	RemoveControl(currActiveDialog->controlIterator);
-	currActiveDialog = nullptr;
+	activeDialog = nullptr;
 }
 
 void GameSceneHall::ToogleGamePaused(bool newState){

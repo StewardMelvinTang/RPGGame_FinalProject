@@ -77,6 +77,9 @@ public:
 	std::vector<std::vector<BlockType>> mapBlocks;
 	std::vector<std::vector<ItemType>> mapItems;
 	std::vector<std::vector<int>> mapDistance;
+
+	std::vector<Engine::Point> npcList;
+	std::vector<Engine::Point> chestList;
 	std::list<int> keyStrokes;
 
 	static Engine::Point GetClientSize();
