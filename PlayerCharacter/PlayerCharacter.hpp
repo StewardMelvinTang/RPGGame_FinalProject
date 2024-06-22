@@ -112,10 +112,12 @@ public:
     float frameTime = 0.1f; // Time for each frame in second
     float timeSinceLastFrame = 0.0f; // Store delta time here
     std::vector<std::vector<std::string>> walkSprites = {
-        { "char/newchar/char_walk_left_1.png", "char/newchar/char_walk_left_2.png", "char/newchar/char_walk_left_3.png" },
-        { "char/newchar/char_walk_right_1.png", "char/newchar/char_walk_right_2.png", "char/newchar/char_walk_right_3.png" },
-        { "char/newchar/char_walk_up_1.png", "char/newchar/char_walk_up_2.png", "char/newchar/char_walk_up_3.png" },
-        { "char/newchar/char_walk_down_1.png", "char/newchar/char_walk_down_2.png", "char/newchar/char_walk_down_3.png" }
+        { "char_walk_left_1.png", "char_walk_left_2.png", "char_walk_left_3.png" },
+        { "char_walk_right_1.png", "char_walk_right_2.png", "char_walk_right_3.png" },
+        { "char_walk_up_1.png", "char_walk_up_2.png", "char_walk_up_3.png" },
+        { "char_walk_down_1.png", "char_walk_down_2.png", "char_walk_down_3.png" }
     };
+
+    std::vector<std::string> idleSprites = {"char_idle_down.png", "char_idle_up.png", "char_idle_left.png", "char_idle_right.png"};
 };
 #endif // ENEMY_HPP

@@ -29,13 +29,14 @@ using namespace std;
 bool keys[4] = {false, false, false, false}; // W, S, A, D (input holding)
 
 PlayerCharacter::PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, string mapID, PlayerEntry entry): 
-    Engine::Sprite("char/char_idle_down.png", x, y),
+    Engine::Sprite("char/1/char_idle_down.png", x, y),
     currentMapID(mapID)    
 {
     InitializeProfile(entry);
     this->x = x; this->y = y; // Set Position in screen
     this->speed = speed; this->money = money;
-    charSpriteObj = new Engine::Image("char/char_idle_down.png", x, y, size, size);
+
+    charSpriteObj = new Engine::Image("char/" + to_string(entry.avatarID + 1) + "/" + idleSprites[0], x, y, size, size);
     
     ConstructPlayerHUD();
 }
@@ -151,7 +152,6 @@ void PlayerCharacter::OverlapWithItem(ItemType itemType, int posY, int posX){
             TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
         break;
     };
-
 }
 
 PlayerCharacter::~PlayerCharacter(){
@@ -247,7 +247,7 @@ void PlayerCharacter::UpdateCharacterDirection(float deltaTime) {
             timeSinceLastFrame = 0.0f;
             currentFrame[directionFacing] = (currentFrame[directionFacing] + 1) % walkSprites[directionFacing].size();
         }
-        std::string charSpritePath = walkSprites[directionFacing][currentFrame[directionFacing]];
+        std::string charSpritePath = "char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + walkSprites[directionFacing][currentFrame[directionFacing]];
         if (charSpriteObj) delete charSpriteObj;
         charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
     }
@@ -302,6 +302,35 @@ void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
     }
 
     isMoving = keys[0] || keys[1] || keys[2] || keys[3];
+
+    if (isMoving == false){
+        // * set back to idle animation
+        switch (directionFacing){
+            case DIRECTION_UPLEFT:
+            case DIRECTION_UPRIGHT:
+            case DIRECTION_UP:
+            if (charSpriteObj) delete charSpriteObj;
+            charSpriteObj = new Engine::Image("char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + idleSprites[1], x, y, size, size);
+            break;
+
+            case DIRECTION_DOWNLEFT:
+            case DIRECTION_DOWNRIGHT:
+            case DIRECTION_DOWN:
+            if (charSpriteObj) delete charSpriteObj;
+            charSpriteObj = new Engine::Image("char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + idleSprites[0], x, y, size, size);
+            break;
+
+            case DIRECTION_LEFT:
+            if (charSpriteObj) delete charSpriteObj;
+            charSpriteObj = new Engine::Image("char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + idleSprites[2], x, y, size, size);
+            break;
+
+            case DIRECTION_RIGHT:
+            if (charSpriteObj) delete charSpriteObj;
+            charSpriteObj = new Engine::Image("char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + idleSprites[3], x, y, size, size);
+            break;
+        }
+    }
 }
 
 Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
