@@ -3,7 +3,7 @@
 #include <allegro5/allegro_audio.h>
 #include <memory>
 #include "Engine/IScene.hpp"
-
+#include "PlayerCharacter/PlayerCharacter.hpp"
 class CombatScene final : public Engine::IScene {
 public:
     std::string nextScene = "";
@@ -20,7 +20,7 @@ public:
     void Update(float deltaTime) override;
     void InitLoadingScreen(std::string nextScene, float duration);
     // New Inits
-    void BackOnClick();
+    // void BackOnClick();
     // Attack, Items, Escape
     void AttackOnClick();
     void ItemsOnClick();
@@ -31,17 +31,24 @@ public:
     // keydown & up
     void OnKeyDown(int keyCode) override;
     // void OnKeyUp(int keyCode) override;
+    PlayerCharacter * playerChar_combat = nullptr;
+    void enemyATK();
 private:
     //bools
     bool playerturn;
     bool enemydead;
     bool displayitems;
     bool playerdead;
+    bool enemy1;
+    bool enemy2;
+    bool enemy3;
+    bool enemy4;
+    bool boss;
     //Player health values
     IObject * HP_BarBG = nullptr;
     IObject * HP_BarFILL = nullptr;
     Engine::Label * TXT_HPVal = nullptr;
-    float currentHP = 100, maxHP = 100; // remove value when combat can be entered
+    float currentHP, maxHP; // remove value when combat can be entered
     
 
     //Player attack values
@@ -50,6 +57,26 @@ private:
     Engine::Label * TXT_ATKVal = nullptr;
     float playerATK = 20, maxATK = 100;
     int ATK_FILL = 282 * (playerATK / maxATK);
+
+    //<-----ENEMY VALUES:----->
+    //Enemy health values
+    IObject * Enemy_HP_BarBG = nullptr;
+    IObject * Enemy_HP_BarFILL = nullptr;
+    Engine::Label * Enemy_TXT_HPVal = nullptr;
+    float Enemy_currentHP = 100, Enemy_maxHP = 100;
+
+    //Enemy attack values
+    IObject * Enemy_ATK_BarBG = nullptr;
+    IObject * Enemy_ATK_BarFILL = nullptr;
+    Engine::Label * Enemy_TXT_ATKVal = nullptr;
+    float Enemy_ATK = 20, Enemy_maxATK = 100;
+    int Enemy_ATK_FILL = 282 * (Enemy_ATK / Enemy_maxATK);
+
+
+    //Sprites and Visuals
+    IObject * Platform = nullptr;
+    IObject * PlayerSprite = nullptr;
+    IObject * EnemySprite = nullptr;
 };
 
 #endif // LOSESCENE_HPP
