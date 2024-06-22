@@ -39,7 +39,7 @@ enum ItemType{
 };
 
 class PlayerCharacter : public Engine::Sprite {
-protected:
+public:
 	float speedMultiplier = 1.0f;
 	int money = 0;
 
