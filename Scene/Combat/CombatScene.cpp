@@ -113,7 +113,7 @@ void CombatScene::Initialize() {
     PlayerSprite = new Engine::Image(avatarFilePath, 104, 440, 413, 392, 0, 0);
     AddNewObject(PlayerSprite);
 
-    EnemySprite = new Engine::Image("enemy/Enemy1Sprite.png", x + 1150, Enemy_ATK_BarBG->Position.y, 282*4, 160*4, 0.5, 0.5);
+    EnemySprite = new Engine::Image("enemy/enemy_enemy1.png", 1235, 290, 572, 319, 0.5, 0.5);
     AddNewObject(EnemySprite);
     // cout << "Initializeed\n";
 
@@ -126,9 +126,9 @@ void CombatScene::Initialize() {
     Missile = new Engine::ImageButton("btn/btn_missile.png", "btn/btn_missile.png", 1154, 668 , 223, 57);
     Shield = new Engine::ImageButton("btn/btn_shield.png", "btn/btn_shield.png", 1154, 730, 223, 57);
     
-    // Healing_num = new Engine::Label("x " + to_string(static_cast<int>(round(Healing_Amount))), "pixel-font.ttf", 30, x + 8, y + 22, 255, 255, 255, 255, 0.0, 0.5);
-    // Missile_num = new Engine::Label("x " + to_string(static_cast<int>(round(Missile_Amount))), "pixel-font.ttf", 30, x + 8, y + 22, 255, 255, 255, 255, 0.0, 0.5);
-    // Shield_num = new Engine::Label("x " + to_string(static_cast<int>(round(Shield_Amount))), "pixel-font.ttf", 30, x + 8, y + 22, 255, 255, 255, 255, 0.0, 0.5);
+    Healing_num = new Engine::Label("x " + to_string(static_cast<int>(round(Healing_Amount))), "pixel-font.ttf", 22, 1338, 642, 119, 255, 119, 255, 0.0, 0.5);
+    Missile_num = new Engine::Label("x " + to_string(static_cast<int>(round(Missile_Amount))), "pixel-font.ttf", 22, 1338, 705, 119, 255, 119, 255, 0.0, 0.5);
+    Shield_num = new Engine::Label("x " + to_string(static_cast<int>(round(Shield_Amount))), "pixel-font.ttf", 22, 1338, 767, 119, 255, 119, 255, 0.0, 0.5);
     Healing->SetOnClickCallback(bind(&CombatScene::UseHealth, this)); 
     Missile->SetOnClickCallback(bind(&CombatScene::UseMissile, this)); 
     Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this));
@@ -136,7 +136,6 @@ void CombatScene::Initialize() {
     AddNewControlObject(Healing, true);
     AddNewControlObject(Missile, true);
     AddNewControlObject(Shield, true);
-
 
     Extend = new Engine::ImageButton("play/extension.png","play/extension.png", 1133 , 593 , 253, 205);
     AddNewControlObject(Extend, true);
@@ -147,6 +146,7 @@ void CombatScene::Initialize() {
 
 void CombatScene::EscapeOnClick(){
     displayitems = false;
+    RemoveReplace();
     int num = rand() % 50;
     if (num % 2 == 0){
         CombatScene::Terminate();
@@ -159,6 +159,7 @@ void CombatScene::EscapeOnClick(){
 
 void CombatScene::AttackOnClick(){
     displayitems = false;
+    RemoveReplace();
     if(!playerturn){
         return;
     }
@@ -178,41 +179,17 @@ void CombatScene::UpdateEnemyHP(){
 void CombatScene::ItemsOnClick(){
     if(!playerturn) return;
     displayitems = true;
-    // AddNewObject(Extend);
-    // AddNewObject(Healing_num);
-    // AddNewObject(Missile_num);
-    // AddNewObject(Shield_num);
-
-    // Healing = new Engine::ImageButton("play/healthpotion.png", "play/healthpotion.png", x + 750, y, Btn_h*0.96);
-    // Missile = new Engine::ImageButton("play/missile.png", "play/missile.png", x + 850, y, Btn_h*0.96);
-    // Shield = new Engine::ImageButton("play/shield.png", "play/shield.png", x + 950, y, Btn_h*0.96);
     
-
-    // if (!Healing || !Missile || !Shield){
-    //     cout << "ONE OF HEALING/MISSILE/SHIELD BUTTON IS MISSING\n";
-    // }
-    // if (Healing) AddNewControlObject(Healing);
-    // if (Missile) AddNewControlObject(Missile);
-    // if (Shield) AddNewControlObject(Shield); 
     Healing->SetOnClickCallback(bind(&CombatScene::UseHealth, this)); 
     Missile->SetOnClickCallback(bind(&CombatScene::UseMissile, this)); 
-    Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this)); 
-    //display items beside the UI
+    Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this));
 }
 void CombatScene::RemoveReplace(){
     std::cout << "Removing Buttons on Items!../n" << endl;
     displayitems = false;
-    // RemoveObject(Healing_num->GetObjectIterator());
-    // RemoveObject(Missile_num->GetObjectIterator());
-    // RemoveObject(Shield_num->GetObjectIterator());
     Healing->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
     Missile->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
-    Shield->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
-    // RemoveObject(Healing->GetObjectIterator());
-    // RemoveObject(Missile->GetObjectIterator());
-    // RemoveObject(Shield->GetObjectIterator());
-    // RemoveObject(Extend->GetObjectIterator());
-
+    Shield->SetOnClickCallback(bind(&CombatScene::Empty, this));
 }
 void CombatScene::UseHealth(){
     std::cout << "Healing Amount: " << Healing_Amount << endl;
@@ -224,6 +201,7 @@ void CombatScene::UseHealth(){
     else if(currentHP + 15 != maxHP){
         SetPlayerHP(currentHP + 15);
         Healing_Amount -= 1;
+        Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
         std::cout << "Using Healing!...\n";
     }
     RemoveReplace();
@@ -239,6 +217,7 @@ void CombatScene::UseMissile(){
     Enemy_currentHP -= 35;
     UpdateEnemyHP();
     Missile_Amount -= 1;
+    Missile_num->Text = "x " + to_string(static_cast<int>(round(Missile_Amount)));
     std::cout << "Used Missile!...\n";
     RemoveReplace();
     playerturn = false;
@@ -253,6 +232,7 @@ void CombatScene::UseShield(){
     } 
     IsUsingShield = true;
     Shield_Amount -= 1;
+    Shield_num->Text = "x " + to_string(static_cast<int>(round(Shield_Amount)));
     std::cout << "Using Shield!...\n";
     RemoveReplace();
     playerturn = false;
@@ -283,6 +263,9 @@ void CombatScene::VirtualDraw() const {
         if (Missile) Missile->Draw();
         if (Shield) Shield->Draw();
         // if (Auto_btn) Auto_btn->Draw();
+        if (Healing_num) Healing_num->Draw();
+        if (Missile_num) Missile_num->Draw();
+        if (Shield_num) Shield_num->Draw();
     }
 }
 
