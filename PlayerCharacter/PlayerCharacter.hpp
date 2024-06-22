@@ -34,7 +34,8 @@ enum BlockType {
 enum ItemType{
     ITEM_BLANK,
     ITEM_POTION,
-    ITEM_MISSILE
+    ITEM_MISSILE,
+    ITEM_SHIELD,
 };
 
 class PlayerCharacter : public Engine::Sprite {
@@ -58,6 +59,7 @@ protected:
 
     int healthPotion = 0;
     int missile = 0;
+    int shield = 0;
 
 public:
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID, PlayerEntry entry);
@@ -96,11 +98,15 @@ public:
     IObject * HP_BarBG = nullptr, * EXP_BarBG = nullptr;
     IObject * HP_BarFILL = nullptr, * EXP_BarFILL = nullptr;
     Engine::Label * TXT_HPVal = nullptr, * TXT_EXPVal = nullptr;
+    IObject * HotBarBG = nullptr;
+    IObject * IMG_Potion = nullptr, * IMG_Missile = nullptr, * IMG_Shield = nullptr;
+    IObject * TXT_Potion = nullptr,*  TXT_Missile = nullptr, * TXT_Shield = nullptr;
     void ConstructPlayerHUD();
     void DrawPlayerHUD() const;
     void DestroyPlayerHUD();
 
-    void CheckPointSave();
+    void CheckPointSave(std::vector<std::vector<ItemType>> itemData, std::vector<std::vector<BlockType>> blockData);
     void LoadPlayerEntryData(std::string ); // * To Load from profile lists
+    void SaveSceneItemBlockData(std::vector<std::vector<ItemType>>, std::vector<std::vector<BlockType>>);
 };
 #endif // ENEMY_HPP

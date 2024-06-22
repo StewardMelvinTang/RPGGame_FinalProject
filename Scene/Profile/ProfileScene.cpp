@@ -103,7 +103,7 @@ void ProfileScene::InitializeProfileList(int page){
         newComponent.PlayButton = new Engine::ImageButton("btn/profileentry_normal.png", "btn/profileentry_hover.png", 625, 208 + offsetY, 350, 83);
         newComponent.PlayerDifficulty = new Engine::Label(profile.difficulty, "pixel-font.ttf", 19, 707, 254 + offsetY, 255, 255, 255, 255);
         newComponent.PlayerName = new Engine::Label(profile.name, "pixel-font.ttf", profile.name.length() > 10 ? 25 : 35, 707, profile.name.length() > 10 ? 225 + offsetY : 219 + offsetY, 255, 255, 255, 255);
-        newComponent.PlayerMoney = new Engine::Label(to_string(profile.money), "pixel-font.ttf", 19, 942, 241 + offsetY, 255, 255, 255, 255, 1.0);
+        newComponent.PlayerMoney = new Engine::Label("LV " + to_string(profile.playerLevel), "pixel-font.ttf", 23, 955, 237 + offsetY, 255, 255, 255, 255, 1.0);
         newComponent.PlayButton->SetOnClickCallback(bind(&ProfileScene::PlayProfileBtn, this, profiles, offsetY / 85));
         AddNewControlObject(newComponent.PlayButton);
         AddNewObject(newComponent.IMG_Avatar);

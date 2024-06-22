@@ -16,6 +16,9 @@ using namespace std;
 #include "Scene/GameScene_Hall.hpp"
 #include "PlayerCharacter.hpp"
 #include "Engine/Collider.hpp"
+#include <fstream>
+#include <sstream>
+#include <ostream>
 
 // * Keyboard Shortcut Redefinition (for easier use)
 #define KEYBOARD_W 23
@@ -46,8 +49,7 @@ void PlayerCharacter::InitializeProfile(PlayerEntry entry){
     playerLevel = entry.playerLevel;
     healthPotion = entry.healthPotion;
     missile = entry.missile;
-
-    cout << "PLAYER LEVEL : " << entry.playerLevel << endl;
+    shield = entry.shield;
 }
 
 void PlayerCharacter::ConstructPlayerHUD(){
@@ -63,6 +65,16 @@ void PlayerCharacter::ConstructPlayerHUD(){
 
     std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
     TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
+
+    HotBarBG = new Engine::Image("bg/inventory_hotbar_bg.png", 694, 761, 210, 64);
+    IMG_Potion = new Engine::Image("play/healthpotion.png", 697, 760, 64, 64);
+    TXT_Potion = new Engine::Label("x" + to_string(this->healthPotion), "pixel-font.ttf", 27, 756, 795, 35, 240, 35, 255, 1.0f);
+
+    IMG_Missile = new Engine::Image("play/missile.png", 697 + 69, 760, 64, 64);
+    TXT_Missile = new Engine::Label("x" + to_string(this->missile), "pixel-font.ttf", 27, 756 + 69, 795, 35, 240, 35, 255, 1.0f);
+
+    IMG_Shield = new Engine::Image("play/shield.png", 697 + 138, 760, 64, 64);
+    TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
 }
 
 void PlayerCharacter::DrawPlayerHUD() const{
@@ -91,6 +103,22 @@ void PlayerCharacter::DrawPlayerHUD() const{
     if (TXT_EXPVal){
         TXT_EXPVal->Draw();
     }
+
+
+    // * Draw Inventory
+    if (HotBarBG) {
+        HotBarBG->Draw();
+    }
+
+    if (IMG_Potion && TXT_Potion){
+        IMG_Potion->Draw(); TXT_Potion->Draw();
+    }
+    if (IMG_Missile && TXT_Missile){
+        IMG_Missile->Draw(); TXT_Missile->Draw();
+    }
+    if (IMG_Shield && TXT_Shield){
+        IMG_Shield->Draw(); TXT_Shield->Draw();
+    }
     
 }
 
@@ -103,7 +131,27 @@ void PlayerCharacter::Update(float deltaTime) {
 }
 
 void PlayerCharacter::OverlapWithItem(ItemType itemType, int posY, int posX){
-    cout << "OVERLAPPED WITH ITEM " << itemType << endl;
+    if (itemType == ITEM_BLANK) return;
+    switch (itemType){
+        case ITEM_BLANK : return;
+        case ITEM_MISSILE : 
+            missile++;
+            IMG_Missile = new Engine::Image("play/missile.png", 697 + 69, 760, 64, 64);
+            TXT_Missile = new Engine::Label("x" + to_string(this->missile), "pixel-font.ttf", 27, 756 + 69, 795, 35, 240, 35, 255, 1.0f);
+        break;
+        case ITEM_POTION : 
+            healthPotion ++;
+            IMG_Potion = new Engine::Image("play/healthpotion.png", 697, 760, 64, 64);
+            TXT_Potion = new Engine::Label("x" + to_string(this->healthPotion), "pixel-font.ttf", 27, 756, 795, 35, 240, 35, 255, 1.0f);
+        break;
+
+        case ITEM_SHIELD : 
+            shield++;
+            IMG_Shield = new Engine::Image("play/shield.png", 697 + 138, 760, 64, 64);
+            TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
+        break;
+    };
+
 }
 
 PlayerCharacter::~PlayerCharacter(){
@@ -320,7 +368,7 @@ void PlayerCharacter::SetCurrentHP(float newVal, bool shouldClamp){
 }
 
 // * Should be called from scenes.
-void PlayerCharacter::CheckPointSave(){
+void PlayerCharacter::CheckPointSave(std::vector<std::vector<ItemType>> itemData, std::vector<std::vector<BlockType>> blockData){
     // * we have to get the old playerdata from gameengine and set it back
     PlayerEntry entry = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
     entry.atkDMG = this->attackDamage;
@@ -335,7 +383,9 @@ void PlayerCharacter::CheckPointSave(){
     entry.x = this->x;
     entry.y = this->y;
 
-    
+    entry.healthPotion = this->healthPotion;
+    entry.missile = this->missile;
+    entry.shield = this->shield;
 
     // * update the current active player
     Engine::GameEngine::GetInstance().SetCurrentActivePlayer(Engine::GameEngine::GetInstance().currentActivePlayerName, entry);
@@ -344,28 +394,98 @@ void PlayerCharacter::CheckPointSave(){
     auto oldEntries = Engine::GameEngine::GetInstance().LoadProfileBasedSaving();
     Engine::GameEngine::GetInstance().WriteProfileBasedSaving(oldEntries, entry);
 
+    SaveSceneItemBlockData(itemData, blockData);
+
     cout << "Checkpoint Reached, Player Data Saved!!!!\n";
 }
 
 void PlayerCharacter::AddEXP(int amount){
-    if (amount + currentEXP >= maxEXP){
-        // * Level Up
-        int selisih =  (amount + currentEXP) - maxEXP;
-        currentEXP = selisih;
-        maxEXP *= 1.25;
-        playerLevel ++;
+    currentEXP += amount;
 
-        std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
+    while (currentEXP >= maxEXP) {
+        // Level up
+        currentEXP -= maxEXP;
+        maxEXP = static_cast<int>(maxEXP * 1.25);
+        playerLevel++;
+
+        // Update stats and UI for each level up
+        attackDamage *= 1.1f;
+        maxHP += 10;
+
+        std::string expString = "LVL " + std::to_string(playerLevel) + " " + std::to_string(currentEXP) + "/" + std::to_string(maxEXP);
         TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
 
         if (LevelUpBG) LevelUpBG->Position.y = 0;
-        attackDamage *= 1.1f;
-        maxHP += 10;
-        
+    }
+
+    // Update the final EXP string after all potential level ups
+    std::string finalExpString = "LVL " + std::to_string(playerLevel) + " " + std::to_string(currentEXP) + "/" + std::to_string(maxEXP);
+    TXT_EXPVal = new Engine::Label(finalExpString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
+}
+
+void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> itemData, std::vector<std::vector<BlockType>> blockData) {
+    std::string filename = "resource/map/" + Engine::GameEngine::currentActivePlayerName + "_" + Engine::GameEngine::currentActiveScene + "_ItemData.txt";
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file " << filename << " for writing." << std::endl;
         return;
     }
 
-    currentEXP += amount;
-    std::string expString = "LVL " + to_string(playerLevel) + " " + to_string(currentEXP) + "/" + to_string(maxEXP);
-    TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
+    // * Debug print
+    std::cout << "BLOCK DATA DEBUG PRINT\n";
+    for (const auto& row : blockData) {
+        for (const auto& block : row) {
+            std::cout << block;
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "ITEM DATA DEBUG PRINT\n";
+    for (const auto& row : itemData) {
+        for (const auto& item : row) {
+            std::cout << item;
+        }
+        std::cout << std::endl;
+    }
+
+    if (itemData.size() != blockData.size()) {
+        std::cerr << "Error: itemData and blockData have different row counts." << std::endl;
+        return;
+    }
+
+    // Initialize parseString with the correct dimensions
+    std::vector<std::vector<std::string>> parseString(itemData.size(), std::vector<std::string>(itemData[0].size(), "0"));
+
+    for (size_t i = 0; i < itemData.size(); ++i) {
+        if (itemData[i].size() != blockData[i].size()) {
+            std::cerr << "Error: itemData and blockData have different column counts at row " << i << "." << std::endl;
+            return;
+        }
+
+        for (size_t j = 0; j < itemData[i].size(); ++j) {
+            // Initialize with "0"
+            parseString[i][j] = "0";
+            
+            // Parse item data
+            if (itemData[i][j] == ITEM_POTION) {
+                parseString[i][j] = '3';
+            } else if (itemData[i][j] == ITEM_MISSILE) {
+                parseString[i][j] = '4';
+            } else if (itemData[i][j] == ITEM_SHIELD) {
+                parseString[i][j] = '5';
+            } else if (blockData[i][j] == BLANK) {
+                parseString[i][j] = '0';
+            } else if (blockData[i][j] == BLOCK_CHEST) {
+                parseString[i][j] = '2';
+            } else if (blockData[i][j] == BASE_BLOCK) {
+                parseString[i][j] = '1';
+            }
+
+            file << parseString[i][j];
+        }
+        file << std::endl;
+    }
+
+    file.close();
+    std::cout << "Item and block data saved to " << filename << std::endl;
 }

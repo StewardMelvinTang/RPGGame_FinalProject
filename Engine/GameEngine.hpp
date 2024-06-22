@@ -41,11 +41,13 @@ struct PlayerEntry // * For Profile Based Saving
 	float currentHP = 100, maxHP = 100;
 	float atkDMG = 5;
 	int currentEXP = 0, maxEXP = 50;
-	int playerLevel = 1;
+	int playerLevel = 1; 
 
 	std::string lastScene = "gamescene_hall";
 	int healthPotion = 0;
 	int missile = 0;
+	int shield = 0;
+
 };
 
 
@@ -212,6 +214,7 @@ namespace Engine {
 		DateTime GetCurrentDateTime();
 
 		static std::string currentActivePlayerName;
+		static std::string currentActiveScene;
 		PlayerEntry currentActivePlayerEntry;
 
 		// * Profile Based Saving

@@ -58,9 +58,6 @@ public:
 
 	float ticks;
 	float deathCountDown;
-
-    string currentMapID;
-
 	bool isGameOver = false;
 
 	PlayerEntry playerEntryData;

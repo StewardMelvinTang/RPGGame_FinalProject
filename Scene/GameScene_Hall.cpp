@@ -48,7 +48,8 @@ Engine::Point GameSceneHall::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
 void GameSceneHall::Initialize() {
-    currentMapID = "hall";
+	Engine::GameEngine::currentActiveScene = "gamescene_hall";
+
 	mapState.clear();
 	keyStrokes.clear();
 	ticks = 0;
@@ -73,7 +74,7 @@ void GameSceneHall::Initialize() {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 		// cout << "Player Will Spawn at " << playerEntryData.y << " X : " << playerEntryData.x << endl;
 	}
-	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, currentMapID, playerEntryData);
+	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 
 	for (int i = 0; i < MapHeight; i++){
@@ -102,6 +103,13 @@ void GameSceneHall::Update(float deltaTime) {
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
 		if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
 			playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
+			for (auto & item : ItemGroup->GetObjects()){
+				if (item->Position.y == playerPos.y * BlockSize && item->Position.x == playerPos.x * BlockSize){
+					ItemGroup->RemoveObject(item->GetObjectIterator());
+					mapItems[playerPos.y][playerPos.x] = ITEM_BLANK;
+					break;
+				}
+			}
 		}
 	}
 }
@@ -142,12 +150,12 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 29){
-		playerChar->CheckPointSave();
+		playerChar->CheckPointSave(mapItems, mapBlocks);
 	}
 
 	if (keyCode == 30){
 		// * debug : add EXP
-		playerChar->AddEXP(49);
+		playerChar->AddEXP(500);
 	}
 }
 
@@ -244,6 +252,7 @@ void GameSceneHall::ConstructItem(int locX, int locY, ItemType item){
 		case ITEM_BLANK: itemImgPath = ""; break;
 		case ITEM_POTION: itemImgPath = "play/potion.png"; break;
 		case ITEM_MISSILE: itemImgPath = "play/missile.png"; break;
+		case ITEM_SHIELD: itemImgPath = "play/shield.png"; break;
 	}
 
 	cout << itemImgPath << endl;
@@ -252,7 +261,7 @@ void GameSceneHall::ConstructItem(int locX, int locY, ItemType item){
 }
 
 void GameSceneHall::ReadMap() {
-	std::string filename = std::string("Resource/map") + currentMapID + ".txt";
+	std::string filename = std::string("Resource/map/") + Engine::GameEngine::currentActiveScene + "_path.txt";
 	// Read map file.
     cout << filename << endl;
 	char c;
@@ -303,16 +312,26 @@ void GameSceneHall::ReadMap() {
 	mapData.clear();
 
 	// read the blocks
-	filename = std::string("Resource/map") + currentMapID + "_blocks.txt";
-	cout << filename << endl;
+	// try to read blocks item first
+    filename = "resource/map/" + Engine::GameEngine::currentActivePlayerName + "_" + Engine::GameEngine::currentActiveScene + "_ItemData.txt";
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file " << filename << " for reading." << std::endl;
+		filename = std::string("Resource/map/") + Engine::GameEngine::currentActiveScene + "_blocks.txt";
+		cout << "LOADED SCENE ITEM BLOCK FROM SCENE DEFAULT " << filename << endl;
+    } else {
+		cout << "LOADED SCENE ITEM BLOCK DATA FROM PLAYER " << filename << endl;
+	}
+
 	fin.open(filename, std::ifstream::in);
 	while(fin >> c) {
 		switch(c) {
-			case '0': mapData.push_back(0); break;
-			case '1': mapData.push_back(1); break;
-			case '2': mapData.push_back(2); break;
-			case '3': mapData.push_back(3); break;
-			case '4': mapData.push_back(4); break;
+			case '0': mapData.push_back(0); break; // Blank
+			case '1': mapData.push_back(1); break; // Wall
+			case '2': mapData.push_back(2); break; // Chest
+			case '3': mapData.push_back(3); break; // Potion
+			case '4': mapData.push_back(4); break; // Missile
+			case '5': mapData.push_back(5); break; // Shield
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -340,6 +359,7 @@ void GameSceneHall::ReadMap() {
 				case 2: mapBlocks[i][j] = BLOCK_CHEST; break;
 				case 3: mapItems[i][j] = ITEM_POTION; break;
 				case 4: mapItems[i][j] = ITEM_MISSILE; break;
+				case 5: mapItems[i][j] = ITEM_SHIELD; break;
 			}
 		}
 	}
@@ -347,34 +367,12 @@ void GameSceneHall::ReadMap() {
 	// * construct Map Blocks
 	for (int i = 0; i < MapHeight; i++){
 		for (int j = 0; j < MapWidth; j++){
-			if (mapState[i][j] == TILE_FLOOR){
-				// TileMapGroup->AddNewObject(new Engine::Image("play/floor.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
-				ConstructGenerativeGrassTile(j , i);
-			} 
-			// else if(mapState[i][j] == TILE_BLOCK) ConstructBlock(j, i);	
-			else {
-				ConstructGenerativePathTile(j , i);
-			}
-
-			if(mapBlocks[i][j]) 
-				ConstructBlock(j, i, mapBlocks[i][j]);
-			
-			if (mapItems[i][j]){
-				ConstructItem(j, i, mapItems[i][j]);
-				cout << "Constructing Item\n";
-			}
+			if (mapState[i][j] == TILE_FLOOR)ConstructGenerativeGrassTile(j , i);
+			else ConstructGenerativePathTile(j , i);
+			if(mapBlocks[i][j]) ConstructBlock(j, i, mapBlocks[i][j]);
+			if(mapItems[i][j]) ConstructItem(j, i, mapItems[i][j]);
 		}
 	}
-
-
-	// construct mapBlocks
-	// for (int i = 0; i < MapHeight; i++){
-	// 	for (int j = 0; j < MapWidth; j++){
-	// 		if (mapBlocks[i][j] == BASE_BLOCK) {
-	// 			ConstructBlock(j, i);
-	// 		}
-	// 	}
-	// }
 }
 
 void GameSceneHall::ConstructUI() {

@@ -23,6 +23,7 @@
 using namespace std;
 
 std::string Engine::GameEngine::currentActivePlayerName = "PLAYER";
+std::string Engine::GameEngine::currentActiveScene = "";
 namespace Engine {
 	void GameEngine::initAllegro5() {
 		if (!al_init()) throw Allegro5Exception("failed to initialize allegro");
@@ -441,6 +442,8 @@ namespace Engine {
 			std::getline(iss, token, '|');
 			entry.missile = std::stoi(token);
 			std::getline(iss, token, '|');
+			entry.shield = std::stoi(token);
+			std::getline(iss, token, '|');
 			entry.currentEXP = std::stoi(token);
 			std::getline(iss, token, '|');
 			entry.maxEXP = std::stoi(token);
@@ -501,6 +504,7 @@ namespace Engine {
 				<< data.atkDMG << "|"
 				<< data.healthPotion << "|"
 				<< data.missile << "|"
+				<< data.shield << "|"
 				<< data.currentEXP << "|"
 				<< data.maxEXP << "|"
 				<< data.playerLevel << "|"
