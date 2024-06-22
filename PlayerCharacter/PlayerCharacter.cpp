@@ -191,7 +191,7 @@ void PlayerCharacter::UpdateCharacterDirection() {
         std::string charSpritePath;
         switch (this->directionFacing) {
             case DIRECTION_DOWN:
-                charSpritePath = "char/char_idle_down.png";s
+                charSpritePath = "char/char_idle_down.png";
                 break;
             case DIRECTION_UP:
                 charSpritePath = "char/char_idle_up.png";
