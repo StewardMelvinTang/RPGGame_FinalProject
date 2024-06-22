@@ -122,9 +122,9 @@ void CombatScene::Initialize() {
     Missile_Amount = playerChar_combat->missile;
     Shield_Amount = playerChar_combat->shield;
 
-    Healing = new Engine::ImageButton("play/healthpotion.png", "play/healthpotion.png", x + 750, items->Position.y, Btn_h*0.96);
-    Missile = new Engine::ImageButton("play/missile.png", "play/missile.png", x + 850, items->Position.y, Btn_h*0.96);
-    Shield = new Engine::ImageButton("play/shield.png", "play/shield.png", x + 950, items->Position.y, Btn_h*0.96);
+    Healing = new Engine::ImageButton("btn/btn_health.png", "btn/btn_health.png", 1154, 605, 223, 58);
+    Missile = new Engine::ImageButton("btn/btn_missile.png", "btn/btn_missile.png", 1154, 668 , 223, 57);
+    Shield = new Engine::ImageButton("btn/btn_shield.png", "btn/btn_shield.png", 1154, 730, 223, 57);
     
     // Healing_num = new Engine::Label("x " + to_string(static_cast<int>(round(Healing_Amount))), "pixel-font.ttf", 30, x + 8, y + 22, 255, 255, 255, 255, 0.0, 0.5);
     // Missile_num = new Engine::Label("x " + to_string(static_cast<int>(round(Missile_Amount))), "pixel-font.ttf", 30, x + 8, y + 22, 255, 255, 255, 255, 0.0, 0.5);
@@ -136,9 +136,17 @@ void CombatScene::Initialize() {
     AddNewControlObject(Healing, true);
     AddNewControlObject(Missile, true);
     AddNewControlObject(Shield, true);
+
+
+    Extend = new Engine::ImageButton("play/extension.png","play/extension.png", 1133 , 593 , 253, 205);
+    AddNewControlObject(Extend, true);
+
+    Auto_btn = new Engine::ImageButton("btn/btn_auto.png","btn/btn_auto.png", 1395 , 736 , 156, 60);
+    AddNewControlObject(Auto_btn);
 }
 
 void CombatScene::EscapeOnClick(){
+    displayitems = false;
     int num = rand() % 50;
     if (num % 2 == 0){
         CombatScene::Terminate();
@@ -150,6 +158,7 @@ void CombatScene::EscapeOnClick(){
 }
 
 void CombatScene::AttackOnClick(){
+    displayitems = false;
     if(!playerturn){
         return;
     }
@@ -169,7 +178,7 @@ void CombatScene::UpdateEnemyHP(){
 void CombatScene::ItemsOnClick(){
     if(!playerturn) return;
     displayitems = true;
-
+    // AddNewObject(Extend);
     // AddNewObject(Healing_num);
     // AddNewObject(Missile_num);
     // AddNewObject(Shield_num);
@@ -185,9 +194,9 @@ void CombatScene::ItemsOnClick(){
     // if (Healing) AddNewControlObject(Healing);
     // if (Missile) AddNewControlObject(Missile);
     // if (Shield) AddNewControlObject(Shield); 
-    // if (Healing) Healing->SetOnClickCallback(bind(&CombatScene::UseHealth, this)); 
-    // if (Missile) Missile->SetOnClickCallback(bind(&CombatScene::UseMissile, this)); 
-    // if (Shield) Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this)); 
+    Healing->SetOnClickCallback(bind(&CombatScene::UseHealth, this)); 
+    Missile->SetOnClickCallback(bind(&CombatScene::UseMissile, this)); 
+    Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this)); 
     //display items beside the UI
 }
 void CombatScene::RemoveReplace(){
@@ -196,12 +205,13 @@ void CombatScene::RemoveReplace(){
     // RemoveObject(Healing_num->GetObjectIterator());
     // RemoveObject(Missile_num->GetObjectIterator());
     // RemoveObject(Shield_num->GetObjectIterator());
-    // Healing->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
-    // Missile->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
-    // Shield->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
+    Healing->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
+    Missile->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
+    Shield->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
     // RemoveObject(Healing->GetObjectIterator());
     // RemoveObject(Missile->GetObjectIterator());
     // RemoveObject(Shield->GetObjectIterator());
+    // RemoveObject(Extend->GetObjectIterator());
 
 }
 void CombatScene::UseHealth(){
@@ -268,9 +278,11 @@ void CombatScene::OnKeyDown(int keycode){
 
 void CombatScene::VirtualDraw() const {
     if (displayitems){
+        if (Extend) Extend->Draw();
         if (Healing) Healing->Draw();
         if (Missile) Missile->Draw();
         if (Shield) Shield->Draw();
+        // if (Auto_btn) Auto_btn->Draw();
     }
 }
 
