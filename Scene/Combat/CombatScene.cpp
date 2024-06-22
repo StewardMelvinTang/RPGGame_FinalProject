@@ -311,13 +311,14 @@ void CombatScene::Update(float deltaTime) {
         // std::cout << "counter: " << counter << endl;
         int temp;
         //fix later 
-        while(currentHP > counter){
-            temp = currentHP - 0.05*deltaTime;
-            SetPlayerHP(temp);
-            if(currentHP <= counter){
-                break;
-            }
-        }
+        // while(currentHP > counter){
+        //     temp = currentHP - 0.05*deltaTime;
+        //     SetPlayerHP(temp);
+        //     if(currentHP <= counter){
+        //         break;
+        //     }
+        // }
+        SetPlayerHP(currentHP - Enemy_ATK);
         std::cout<<"END! Curr_HP: " << currentHP << endl;
         playerturn = true;
     }

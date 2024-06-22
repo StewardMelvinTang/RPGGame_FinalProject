@@ -348,7 +348,7 @@ void GameSceneHall::ReadMap() {
 		}
 	}
 	fin.close();
-
+	
 	// Validate block data.
 	if (static_cast<int>(mapData.size()) != MapWidth * MapHeight)
 		throw std::ios_base::failure("Map block data is corrupted: width and height does not match");
