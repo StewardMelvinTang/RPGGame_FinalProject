@@ -57,11 +57,11 @@ protected:
 
     std::string currentScene = "gamescene_hall";
 
-    int healthPotion = 0;
-    int missile = 0;
-    int shield = 0;
 
 public:
+    int healthPotion = 0;
+    int missile = 2;
+    int shield = 0;
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID, PlayerEntry entry);
     ~PlayerCharacter();
 	void Update(float deltaTime) override;

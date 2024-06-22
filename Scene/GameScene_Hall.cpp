@@ -25,6 +25,7 @@
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include "Scene/Combat/CombatScene.hpp"
 // #include "GameScene_Hall.hpp"
 using namespace std;
 
@@ -156,6 +157,12 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	if (keyCode == 30){
 		// * debug : add EXP
 		playerChar->AddEXP(500);
+	}
+
+	if (keyCode == 6){
+		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
+		Player->playerChar_combat = this->playerChar;
+		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
 	}
 }
 

@@ -33,6 +33,11 @@ public:
     // void OnKeyUp(int keyCode) override;
     PlayerCharacter * playerChar_combat = nullptr;
     void enemyATK();
+    void UseHealth();
+    void UseMissile();
+    void UseShield();
+    //SetEnemy
+    void UpdateEnemyHP();
 private:
     //bools
     bool playerturn;
@@ -44,6 +49,7 @@ private:
     bool enemy3;
     bool enemy4;
     bool boss;
+    bool IsUsingShield;
     //Player health values
     IObject * HP_BarBG = nullptr;
     IObject * HP_BarFILL = nullptr;
@@ -77,6 +83,25 @@ private:
     IObject * Platform = nullptr;
     IObject * PlayerSprite = nullptr;
     IObject * EnemySprite = nullptr;
+
+    //Items
+    float Healing_Amount;
+    float Missile_Amount;
+    float Shield_Amount;
+    Engine::ImageButton* Healing = nullptr;
+    Engine::ImageButton* Missile = nullptr;
+    Engine::ImageButton* Shield = nullptr;
+    Engine::Label * Healing_num = nullptr;
+    Engine::Label * Missile_num = nullptr;
+    Engine::Label * Shield_num = nullptr;
+
+    //Empty Function
+    void Empty();
+    void RemoveReplace();
+
+    void CheckState();
+
+    void VirtualDraw() const override;
 };
 
 #endif // LOSESCENE_HPP
