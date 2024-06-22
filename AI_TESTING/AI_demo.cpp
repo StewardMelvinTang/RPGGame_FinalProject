@@ -12,9 +12,16 @@ enum ItemName {
     FIREBALL,
     HEAL_POTION,
     FORCE_FIELD
-}
+};
 
-struct Item {
+class Item {
+public:
+    Item(ItemName _name, ItemType _type, int _weight):
+        name(_name),
+        type(_type),
+        weight(_weight)
+    {}
+
     ItemName name;
     ItemType type;
     int weight; // weight will be used according to the item type (ex. if it's a healing type item, weight is the healing value)
@@ -32,12 +39,22 @@ public:
         Item item3(HEAL_POTION, HEALING, 20);
         Item item4(FORCE_FIELD, DEFENDING, 12);
         Item item5(FORCE_FIELD, DEFENDING, 12);
+        Item item6(FIREBALL, ATTACKING, 15);
+        Item item7(FIREBALL, ATTACKING, 15);
+        Item item8(FIREBALL, ATTACKING, 15);
+        Item item9(FIREBALL, ATTACKING, 15);
+        Item item10(FIREBALL, ATTACKING, 15);
 
         items.push_back(item1);
         items.push_back(item2);
         items.push_back(item3);
         items.push_back(item4);
         items.push_back(item5);
+        items.push_back(item6);
+        items.push_back(item7);
+        items.push_back(item8);
+        items.push_back(item9);
+        items.push_back(item10);
     }
 
     list<Item> items;
@@ -50,7 +67,7 @@ class Enemy {
 public:
     Enemy() {
         basicAttack = 12;
-        maxHp = 80;
+        maxHp = 180;
         hp = maxHp;
 
         Item item1(FIREBALL, ATTACKING, 15);
@@ -69,6 +86,8 @@ public:
     int hp;
     int maxHp;
 };
+
+
 
 // evaluate the current position (represent them numerically)
 int evaluateScenarioValue(const Player& player, const Enemy& enemy) {
@@ -98,8 +117,20 @@ int evaluateScenarioValue(const Player& player, const Enemy& enemy) {
         if(ite.type == HEALING) enemyHealCount++;
     }
 
-    // eval items (here we prioritize the number of attacking items left)
-    value += (playerAttackCount - enemyAttackCount) * 10;
+    // eval the values based on the current remaining skills (only a rough estimation for now)
+    int playerAttackNet = playerAttackCount - enemyDefendCount;
+    int enemyAttackNet = enemyAttackCount - playerDefendCount;
+    int playerHealNet = (player.maxHp - player.hp) * playerHealCount;
+    int enemyHealNet = (enemy.maxHp - enemy.hp) * enemyHealCount;
+
+    value += (playerAttackNet - enemyAttackNet) * 15; // 15 is the average skills damage
+    value += (playerHealNet - enemyHealNet) * 10; // 10 is the average healing
+
+    return value;
+}
+
+int search(int depth, const Player& player, const Enemy& enemy) {
+    if(depth == 0) return evaluateScenarioValue(player, enemy);
 
 
 }
