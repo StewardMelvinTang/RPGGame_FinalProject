@@ -22,7 +22,7 @@ enum Enum_Direction{
     DIRECTION_UPLEFT, // 4
     DIRECTION_UPRIGHT,// 5
     DIRECTION_DOWNLEFT,// 6
-    DIRECTION_DOWNRIGHT// 7
+    DIRECTION_DOWNRIGHT, // 7
 };
 
 enum BlockType {
@@ -55,8 +55,6 @@ protected:
     Enum_Direction directionFacing = DIRECTION_DOWN;
     IObject * charSpriteObj = nullptr;
 
-    std::string currentScene = "gamescene_hall";
-
     int healthPotion = 0;
     int missile = 0;
     int shield = 0;
@@ -73,7 +71,7 @@ public:
     std::string currentMapID;
 
     // * Player Functionalities
-    void UpdateCharacterDirection();
+    void UpdateCharacterDirection(float deltaTime);
     bool CollisionCheck(float x, float y, Enum_Direction dir);
     void SetMovementState(int keycode, bool keyDown);
     void OnPlayerDead();
@@ -108,5 +106,16 @@ public:
     void CheckPointSave(std::vector<std::vector<ItemType>> itemData, std::vector<std::vector<BlockType>> blockData);
     void LoadPlayerEntryData(std::string ); // * To Load from profile lists
     void SaveSceneItemBlockData(std::vector<std::vector<ItemType>>, std::vector<std::vector<BlockType>>);
+
+    bool isMoving = false;
+    std::vector<size_t> currentFrame = {0,0,0,0};
+    float frameTime = 0.1f; // Time for each frame in second
+    float timeSinceLastFrame = 0.0f; // Store delta time here
+    std::vector<std::vector<std::string>> walkSprites = {
+        { "char/newchar/char_walk_left_1.png", "char/newchar/char_walk_left_2.png", "char/newchar/char_walk_left_3.png" },
+        { "char/newchar/char_walk_right_1.png", "char/newchar/char_walk_right_2.png", "char/newchar/char_walk_right_3.png" },
+        { "char/newchar/char_walk_up_1.png", "char/newchar/char_walk_up_2.png", "char/newchar/char_walk_up_3.png" },
+        { "char/newchar/char_walk_down_1.png", "char/newchar/char_walk_down_2.png", "char/newchar/char_walk_down_3.png" }
+    };
 };
 #endif // ENEMY_HPP

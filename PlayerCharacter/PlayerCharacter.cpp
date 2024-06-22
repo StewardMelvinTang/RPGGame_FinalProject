@@ -127,7 +127,7 @@ void PlayerCharacter::DestroyPlayerHUD(){
 }
 
 void PlayerCharacter::Update(float deltaTime) {
-    UpdateCharacterDirection();
+    UpdateCharacterDirection(deltaTime);
 }
 
 void PlayerCharacter::OverlapWithItem(ItemType itemType, int posY, int posX){
@@ -166,7 +166,7 @@ void PlayerCharacter::Draw() const {
     DrawPlayerHUD(); // CALL DRAW PLAYER HUD IN SCENE
 }
 
-void PlayerCharacter::UpdateCharacterDirection() {
+void PlayerCharacter::UpdateCharacterDirection(float deltaTime) {
     bool moved = false;
     float newX = this->x;
     float newY = this->y;
@@ -175,40 +175,37 @@ void PlayerCharacter::UpdateCharacterDirection() {
     if (keys[0] && keys[2]) { // W & A key
         newX -= this->speed * 0.6;
         newY -= this->speed * 0.6;
-        if (CollisionCheck(newX, newY, DIRECTION_UPLEFT)) {
+        if (CollisionCheck(newX, newY, DIRECTION_UP)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_UPLEFT;
+            this->directionFacing = DIRECTION_UP;
             moved = true;
         }
-    }
-    else if (keys[0] && keys[3]) { // W & D key
+    } else if (keys[0] && keys[3]) { // W & D key
         newX += this->speed * 0.6;
         newY -= this->speed * 0.6;
-        if (CollisionCheck(newX, newY, DIRECTION_UPRIGHT)) {
+        if (CollisionCheck(newX, newY, DIRECTION_UP)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_UPRIGHT;
+            this->directionFacing = DIRECTION_UP;
             moved = true;
         }
-    }
-    else if (keys[1] && keys[2]) { // S & A key
+    } else if (keys[1] && keys[2]) { // S & A key
         newX -= this->speed * 0.6;
         newY += this->speed * 0.6;
-        if (CollisionCheck(newX, newY, DIRECTION_DOWNLEFT)) {
+        if (CollisionCheck(newX, newY, DIRECTION_DOWN)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_DOWNLEFT;
+            this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
-    }
-    else if (keys[1] && keys[3]) { // S & D key
+    } else if (keys[1] && keys[3]) { // S & D key
         newX += this->speed * 0.6;
         newY += this->speed * 0.6;
-        if (CollisionCheck(newX, newY, DIRECTION_DOWNRIGHT)) {
+        if (CollisionCheck(newX, newY, DIRECTION_DOWN)) {
             this->x = newX;
             this->y = newY;
-            this->directionFacing = DIRECTION_DOWNRIGHT;
+            this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
     }
@@ -220,24 +217,21 @@ void PlayerCharacter::UpdateCharacterDirection() {
             this->directionFacing = DIRECTION_UP;
             moved = true;
         }
-    }
-    else if (keys[1]) { // S key
+    } else if (keys[1]) { // S key
         newY += this->speed;
         if (CollisionCheck(this->x, newY, DIRECTION_DOWN)) {
             this->y = newY;
             this->directionFacing = DIRECTION_DOWN;
             moved = true;
         }
-    }
-    else if (keys[2]) { // A key
+    } else if (keys[2]) { // A key
         newX -= this->speed;
         if (CollisionCheck(newX, this->y, DIRECTION_LEFT)) {
             this->x = newX;
             this->directionFacing = DIRECTION_LEFT;
             moved = true;
         }
-    }
-    else if (keys[3]) { // D key
+    } else if (keys[3]) { // D key
         newX += this->speed;
         if (CollisionCheck(newX, this->y, DIRECTION_RIGHT)) {
             this->x = newX;
@@ -248,37 +242,17 @@ void PlayerCharacter::UpdateCharacterDirection() {
 
     // Update Sprite Based on DIRECTION ENUM if character moved
     if (moved) {
-        std::string charSpritePath;
-        switch (this->directionFacing) {
-            case DIRECTION_DOWN:
-                charSpritePath = "char/char_idle_down.png";
-                break;
-            case DIRECTION_UP:
-                charSpritePath = "char/char_idle_up.png";
-                break;
-            case DIRECTION_RIGHT:
-                charSpritePath = "char/char_idle_right.png";
-                break;
-            case DIRECTION_LEFT:
-                charSpritePath = "char/char_idle_left.png";
-                break;
-            case DIRECTION_UPLEFT:
-                charSpritePath = "char/char_idle_upleft.png";
-                break;
-            case DIRECTION_UPRIGHT:
-                charSpritePath = "char/char_idle_upright.png";
-                break;
-            case DIRECTION_DOWNLEFT:
-                charSpritePath = "char/char_idle_downleft.png";
-                break;
-            case DIRECTION_DOWNRIGHT:
-                charSpritePath = "char/char_idle_downright.png";
-                break;
+        timeSinceLastFrame += deltaTime;
+        if (timeSinceLastFrame >= frameTime) {
+            timeSinceLastFrame = 0.0f;
+            currentFrame[directionFacing] = (currentFrame[directionFacing] + 1) % walkSprites[directionFacing].size();
         }
-        if (charSpriteObj) delete charSpriteObj; 
+        std::string charSpritePath = walkSprites[directionFacing][currentFrame[directionFacing]];
+        if (charSpriteObj) delete charSpriteObj;
         charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
     }
 }
+
 
 bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir) {
     int w = Engine::GameEngine::GetInstance().GetScreenSize().x - size;
@@ -286,12 +260,6 @@ bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir)
 
     GameSceneHall* currScene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
     std::list<IObject*> blocks = currScene->BlockGroup->GetObjects();
-
-    // if(this->currentMapID == "hall") {
-    //     GameSceneHall* currScene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("hall"));
-    // }
-    // Engine::GameEngine::GetActiveScene().       
-
 
     if (newX < 0 || newX > w || newY < 0 || newY > h) {
         if (newX <= 0) newX = 0;
@@ -332,6 +300,8 @@ void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
             keys[3] = keyDown;
             break;
     }
+
+    isMoving = keys[0] || keys[1] || keys[2] || keys[3];
 }
 
 Engine::Point PlayerCharacter::GetPlayerPositionAtMap(){
@@ -374,7 +344,7 @@ void PlayerCharacter::CheckPointSave(std::vector<std::vector<ItemType>> itemData
     entry.atkDMG = this->attackDamage;
     entry.currentHP = this->currentHP;
     entry.maxHP = this->maxHP;
-    entry.lastScene = currentScene;
+    entry.lastScene = Engine::GameEngine::currentActiveScene;
     entry.money = this->money;
     entry.speed = this->speed;
     entry.currentEXP = this->currentEXP;
@@ -428,28 +398,6 @@ void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> 
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Failed to open file " << filename << " for writing." << std::endl;
-        return;
-    }
-
-    // * Debug print
-    std::cout << "BLOCK DATA DEBUG PRINT\n";
-    for (const auto& row : blockData) {
-        for (const auto& block : row) {
-            std::cout << block;
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << "ITEM DATA DEBUG PRINT\n";
-    for (const auto& row : itemData) {
-        for (const auto& item : row) {
-            std::cout << item;
-        }
-        std::cout << std::endl;
-    }
-
-    if (itemData.size() != blockData.size()) {
-        std::cerr << "Error: itemData and blockData have different row counts." << std::endl;
         return;
     }
 
