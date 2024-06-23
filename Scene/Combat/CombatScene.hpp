@@ -44,7 +44,7 @@ public:
     void UseMissile();
     void UseShield();
     //SetEnemy
-    void UpdateEnemyHP();
+    void UpdateEnemyHP(int dmg);
 public:
     //bools
     bool playerturn;
@@ -53,7 +53,7 @@ public:
     bool playerdead;
     bool enemy1;
     bool enemy2;
-    bool enemy3;
+    bool enemy3;//melvin
     bool enemy4;
     bool boss;
     bool isUsingHealth;

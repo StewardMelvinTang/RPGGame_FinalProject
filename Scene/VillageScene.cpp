@@ -606,7 +606,9 @@ void VillageScene::OnDialogDone(IControl * currActiveDialog){
 
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
-		Player->enemy1 = true;
+		Player->enemy2 = true;
+
+		activeDialog = nullptr;
 	}
 	
 	else activeDialog = nullptr;

@@ -92,6 +92,8 @@ void GameSceneHall::Initialize() {
 	}
 
 	if (playerChar == nullptr){
+
+		cout << "y " << spawnPoint.y << " x : " << spawnPoint.x << endl;
 		// spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
 		if (spawnPoint.y > 25 || spawnPoint.x > 25){
 			playerChar = new PlayerCharacter(spawnPoint.x , spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
@@ -100,8 +102,15 @@ void GameSceneHall::Initialize() {
 			playerChar = new PlayerCharacter(spawnPoint.x * BlockSize, spawnPoint.y * BlockSize , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 		}
 	} else {
-		playerChar->x = spawnPoint.x * BlockSize;
+
+		if (spawnPoint.x > 25 || spawnPoint.y > 25){
+			playerChar->x = spawnPoint.x;
+		playerChar->y = spawnPoint.y;
+		} else {
+						playerChar->x = spawnPoint.x * BlockSize;
 		playerChar->y = spawnPoint.y * BlockSize;
+		}
+
         playerChar->UpdateSprite();
 	}
 
