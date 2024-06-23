@@ -352,10 +352,9 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
-    // currDelay -= 1.0f * deltaTime;
-    // && currDelay <= 0.0f
-    if(isAuto) {
-        // currDelay = delayDuration;
+    currDelay -= 1.0f * deltaTime;
+    if(isAuto && currDelay <= 0.0f) {
+        currDelay = delayDuration;
         
         Move toMove = search(10);
 

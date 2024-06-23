@@ -86,7 +86,6 @@ private:
     int temp;
     float temp2;
     int targethealth;
-    const float delayDuration = 5.0f;
     float currDelay;
 
     //Player health values
