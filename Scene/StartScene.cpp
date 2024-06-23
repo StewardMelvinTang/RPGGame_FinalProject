@@ -93,7 +93,7 @@ void StartScene::Initialize() {
     // TXT_Name = new Engine::Label(NAMEPLAYER, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
     // AddNewObject(TXT_Name);
 }
-
+    
 void StartScene::AddNewPlayerBtn(){
     Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
 }

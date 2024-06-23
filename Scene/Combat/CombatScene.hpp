@@ -37,8 +37,8 @@ public:
     // void OnKeyUp(int keyCode) override;
     PlayerCharacter * playerChar_combat = nullptr;
 
-    int health_weight = 15;
-    int missile_weight = 35;
+    int health_weight = 25;
+    int missile_weight = 45;
 
     void enemyATK();
     void UseHealth();
@@ -57,10 +57,19 @@ private:
     bool enemy3;
     bool enemy4;
     bool boss;
+    bool isUsingHealth;
+    bool isUsingMissile;
     bool IsUsingShield;
     bool isAuto;
-    
-    const float delayDuration = 2.0f;
+    bool isPlayerATK;
+    //more bools
+    bool Health_out;
+    bool Missile_out;
+    bool Shield_out;
+    int temp;
+    float temp2;
+    int targethealth;
+    const float delayDuration = 5.0f;
     float currDelay;
 
     //Player health values
