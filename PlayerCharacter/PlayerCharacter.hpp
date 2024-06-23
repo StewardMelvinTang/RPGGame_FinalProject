@@ -91,6 +91,7 @@ public:
     int GetCurrentEXP() { return currentEXP;}
     int GetCurrentLevel() { return playerLevel;}
 
+
     // * Player HUD (UI) RESOURCES
     IObject * LevelUpBG = nullptr;
     IObject * HP_BarBG = nullptr, * EXP_BarBG = nullptr;

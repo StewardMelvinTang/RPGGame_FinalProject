@@ -32,6 +32,10 @@ public:
     void OnKeyDown(int keyCode) override;
     // void OnKeyUp(int keyCode) override;
     PlayerCharacter * playerChar_combat = nullptr;
+
+    int health_weight = 15;
+    int missile_weight = 35;
+
     void enemyATK();
     void UseHealth();
     void UseMissile();
@@ -94,6 +98,30 @@ private:
     Engine::Label * Healing_num = nullptr;
     Engine::Label * Missile_num = nullptr;
     Engine::Label * Shield_num = nullptr;
+
+    // * AI
+    enum Move {
+        USE_MISSILE,
+        USE_HEALING,
+        USE_SHIELD,
+        ATTACK,
+        ESCAPE
+    };
+
+    struct State {
+        float playerHp;
+        int shieldCount;
+        int healingCount;
+        int missileCount;
+        float enemyHp;
+        Move move;
+        float scenarioValue;
+    };
+
+    vector<State> generateMoves(State& s);
+    float evaluateScenarioValue(State& s);
+    Move search(int depth);
+    string hashState(State& s);
 
     //Empty Function
     void Empty();
