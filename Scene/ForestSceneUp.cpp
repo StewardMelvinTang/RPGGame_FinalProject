@@ -190,24 +190,9 @@ void ForestScene::OnMouseUp(int button, int mx, int my) {
 void ForestScene::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (playerChar != nullptr && playerChar->canMove) playerChar->SetMovementState(keyCode, true);
-
-	if (keyCode == 28 && playerChar){
-		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
-	}
-
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
 		ToogleGamePaused(!isGamePaused);
 	}
-
-	if (keyCode == 29){
-		playerChar->CheckPointSave(mapItems, mapBlocks);
-	}
-
-	if (keyCode == 30){
-		// * debug : add EXP
-		playerChar->AddEXP(500);
-	}
-
 	if (keyCode == 3){
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
@@ -219,13 +204,12 @@ void ForestScene::OnKeyDown(int keyCode) {
 		if (playerChar->canInteract == true && activeDialog == nullptr) {
 			cout << "Interacted!\n";
 			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
-				AddNewControlObject(activeDialog = new Engine::DialogScreen("Ah, " + Engine::GameEngine::currentActivePlayerName +", just the person I was hoping to see. Welcome to your new home, \nmy child...", "Old Man", 2.0f, playerChar, 1));
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Who are you?", Engine::GameEngine::currentActivePlayerName ,2.0f, playerChar, 1));
 				activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
 			}
 
 			else if (playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
 				mapBlocks[chestList[0].y][chestList[0].x] = CHEST_OPENED;
-				cout << "Chest opened up\n";
 				for (auto & block : BlockGroup->GetObjects()){
 					if (block->Position.y == chestList[0].y * BlockSize && block->Position.x == chestList[0].x * BlockSize){
 
@@ -235,12 +219,14 @@ void ForestScene::OnKeyDown(int keyCode) {
 					}
 				}
 				if (playerChar->ChestObtainBG) delete playerChar->ChestObtainBG;
-				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_01.png", 1, 0, 1600, 832);
+				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_02.png", 1, 0, 1600, 832);
 				playerChar->chestBGdelay = 1.5f;
 
 				playerChar->healthPotion++;
 				playerChar->shield++;
-				playerChar->AddEXP(40);
+				playerChar->missile++;
+				playerChar->AddEXP(120);
+				playerChar->UpdateItemHotBar();
 			} 
 		}
 	}
@@ -327,6 +313,8 @@ void ForestScene::ConstructBlock(int locX, int locY, BlockType block) {
 		case BLOCK_CHEST: blockImgPath = "play/chest_closed.png"; break;
 		case CHEST_OPENED: blockImgPath = "play/chest_opened.png"; break;
 		case NPC_INSPECTOR: blockImgPath = "char/npc/npc_idle_1.png"; break;
+		case ENEMY_KNIGHT: blockImgPath = "enemy/enemy_knight_idle.png"; break;
+		default: break;
 	}
 	if (blockImgPath.empty()) return;
 	BlockGroup->AddNewObject(new Engine::Image(blockImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
@@ -341,6 +329,7 @@ void ForestScene::ConstructItem(int locX, int locY, ItemType item){
 		case ITEM_POTION: itemImgPath = "play/potion.png"; break;
 		case ITEM_MISSILE: itemImgPath = "play/missile.png"; break;
 		case ITEM_SHIELD: itemImgPath = "play/shield.png"; break;
+		default: break;
 	}
 
 	cout << itemImgPath << endl;
@@ -420,6 +409,7 @@ void ForestScene::ReadMap() {
 			case '5': mapData.push_back(5); break; // Shield
 			case '6' : mapData.push_back(6); break; // Chest (Opened)
 			case '7' : mapData.push_back(7); break; //NPC_Inspector
+			case '8' : mapData.push_back(8); break;
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -476,6 +466,16 @@ void ForestScene::ReadMap() {
 					npcList.push_back(p);
 					break;
 				}
+				case 8: {
+					mapBlocks[i][j] = ENEMY_KNIGHT; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
+
+				default:
 			}
 		}
 	}
@@ -505,21 +505,28 @@ void ForestScene::OnDialogDone(IControl * currActiveDialog){
 	RemoveControl(currActiveDialog->controlIterator);
 
 	if (activeDialog->dialogID == 1){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("Dark times are upon us. The Shadow King has awoken in the depths of the Forgotten Grove, \nand his darkness spreads through our beloved forest. The prophecy foretold of a hero \nwho would rise to challenge him. I believe that hero is you.", "Old Man", 3.0f, playerChar, 2));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am the guardian of this forest, a sentinel sworn to protect the ancient shrine. \nNone shall pass without proving their worth.", "Gold Knight", 2.0f, playerChar, 2));
 		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
 	} else if (activeDialog->dialogID == 2){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("Me? But what can I do against such evil?", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am " + Engine::GameEngine::currentActivePlayerName + ", sent by Old Man. I seek resources to defeat the monsters.", Engine::GameEngine::currentActivePlayerName, 1.5f, playerChar, 3));
 		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
 	} else if (activeDialog->dialogID == 3){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("You have a brave heart and a strong spirit, " + Engine::GameEngine::currentActivePlayerName + ". The journey ahead will be \nfraught with danger, but you must find the courage within yourself. \nYour first task is to gather the resources hidden within the forest. These resources hold \nthe power to weaken the monsters", "Old Man", 3.0f, playerChar, 4));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("The relic holds great power and must not fall into the wrong hands. \nTo claim it, you must first defeat me in combat. \nOnly then will you be deemed worthy. ", "Gold Knight", 3.0f, playerChar, 4));
 		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));		
 	} else if (activeDialog->dialogID == 4){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("I understand, Old Man. I won’t let you down.", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 5));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Prepare yourself, brave one. \nLet us see if you have the strength and courage required.", "Gold Knight", 3.0f, playerChar, 5));
 		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
+	} else if (activeDialog->dialogID == 5){
+		playerChar->CheckPointSave(mapItems, mapBlocks);
+
+		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+		loadingScene->InitLoadingScreen("combat-scene", 0.5f);
+		Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+
+		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
+		Player->playerChar_combat = this->playerChar;
+		Player->enemy1 = true;
 	}
-	
-	
-	
 	
 	else activeDialog = nullptr;
 }

@@ -12,6 +12,7 @@
 #include "Scene/ScoreBoardScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
 #include "Scene/ForestSceneUp.hpp"
+#include "Scene/VillageScene.hpp"
 //Loading Scene
 #include "Scene/Loading/LoadingScene.hpp"
 //Death Scene
@@ -31,9 +32,9 @@ int main(int argc, char **argv) {
 	game.AddNewScene("settings", new SettingsScene());
 	game.AddNewScene("gamescene_hall", new GameSceneHall());
 	game.AddNewScene("forestscene_up", new ForestScene());
+	game.AddNewScene("villagescene", new VillageScene());
 
 	game.AddNewScene("stage-select", new StageSelectScene());
-
 
 	game.AddNewScene("start-scene", new StartScene());
 	game.AddNewScene("score-board", new ScoreBoardScene());

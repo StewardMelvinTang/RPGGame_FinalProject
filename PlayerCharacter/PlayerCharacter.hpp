@@ -30,7 +30,9 @@ enum BlockType {
     BASE_BLOCK,
     BLOCK_CHEST,
     CHEST_OPENED,
-    NPC_INSPECTOR
+    NPC_INSPECTOR,
+    ENEMY_KNIGHT,
+    NPC_JASON
 };
 
 enum ItemType{

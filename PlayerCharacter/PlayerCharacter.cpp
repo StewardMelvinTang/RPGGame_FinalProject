@@ -15,6 +15,7 @@ using namespace std;
 #include "Scene/Loading/LoadingScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
 #include "Scene/ForestSceneUp.hpp"
+#include "Scene/VillageScene.hpp"
 #include "PlayerCharacter.hpp"
 #include "Engine/Collider.hpp"
 #include <fstream>
@@ -293,7 +294,10 @@ bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir)
     } else if (Engine::GameEngine::currentActiveScene == "forestscene_up"){
         ForestScene* currScene = dynamic_cast<ForestScene*>(Engine::GameEngine::GetInstance().GetScene("forestscene_up"));
         blocks = currScene->BlockGroup->GetObjects();
-    }
+    } else if (Engine::GameEngine::currentActiveScene == "villagescene"){
+        VillageScene* currScene = dynamic_cast<VillageScene*>(Engine::GameEngine::GetInstance().GetScene("villagescene"));
+        blocks = currScene->BlockGroup->GetObjects();
+    } 
 
     if (newX < 0 || newX > w || newY < 0 || newY > h) {
         if (newX <= 0) newX = 0;
@@ -498,6 +502,10 @@ void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> 
                 parseString[i][j] = '6';
             } else if (blockData[i][j] == NPC_INSPECTOR){
                 parseString[i][j] = '7';
+            } else if (blockData[i][j] == ENEMY_KNIGHT){
+                parseString[i][j] = '8';
+            } else if (blockData[i][j] == NPC_JASON){
+                parseString[i][j] = '9';
             }
 
             file << parseString[i][j];

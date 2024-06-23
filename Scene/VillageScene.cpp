@@ -21,14 +21,14 @@
 
 #include "PlayerCharacter/PlayerCharacter.hpp"
 
-#include "GameScene_Hall.hpp"
+#include "Scene/ForestSceneUp.hpp"
+#include "Scene/GameScene_Hall.hpp"
+#include "Scene/VillageScene.hpp"
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include "Scene/Combat/CombatScene.hpp"
 #include "Scene/Loading/LoadingScene.hpp"
-#include "Scene/ForestSceneUp.hpp"
-#include "Scene/VillageScene.hpp"
 using namespace std;
 
 
@@ -41,22 +41,20 @@ using namespace std;
 #define KEYBOARD_F 6
 
 
-bool GameSceneHall::DebugMode = false;
-const std::vector<Engine::Point> GameSceneHall::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
-const int GameSceneHall::MapWidth = 25, GameSceneHall::MapHeight = 13;
-const int GameSceneHall::BlockSize = 64;
+const std::vector<Engine::Point> VillageScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
+const int VillageScene::MapWidth = 25, VillageScene::MapHeight = 13;
+const int VillageScene::BlockSize = 64;
 
-bool mapAllInitialized = false;
+bool village_mapAllInitialized = false;
 
-Engine::Point GameSceneHall::GetClientSize() {
+Engine::Point VillageScene::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
-void GameSceneHall::Initialize() {
-	Engine::GameEngine::currentActiveScene = "gamescene_hall";
-
-	mapItems.clear();
-	mapBlocks.clear();
+void VillageScene::Initialize() {
+	Engine::GameEngine::currentActiveScene = "villagescene";
 	mapState.clear();
+    mapItems.clear();
+	mapBlocks.clear();
 	keyStrokes.clear();
 	ticks = 0;
 	SpeedMult = 1;
@@ -66,7 +64,7 @@ void GameSceneHall::Initialize() {
 	// * Group Initialization
 
 	AddNewObject(TileMapGroup = new Group());
-	AddNewObject(new Engine::Image("maps/gamescenehall_overlay.png", 0, 0, 1600, 832));
+	AddNewObject(new Engine::Image("maps/villagescene_overlay.png", 0, 0, 1600, 832));
 	AddNewObject(ItemGroup = new Group());
 	AddNewObject(BlockGroup = new Group());
 
@@ -77,16 +75,15 @@ void GameSceneHall::Initialize() {
 	ReadMap();
 	ConstructUI();
 
-	// * Load Player Data from Profile Based Saving System
+
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
 	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 	}
 
-	if (lastScene == "forestscene_up"){
-        spawnPoint.y = 0; spawnPoint.x = 5;
-		playerChar->directionFacing = DIRECTION_DOWN;
+    if (lastScene == "gamescene_hall"){
+        spawnPoint.y = 10; spawnPoint.x = 0;
     }
 
 	if (playerChar == nullptr){
@@ -94,85 +91,65 @@ void GameSceneHall::Initialize() {
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
 		playerChar->y = spawnPoint.y * BlockSize;
-		playerChar->UpdateSprite();
+        playerChar->UpdateSprite();
 	}
 
-	playerChar->canMove = true;
-
-	mapAllInitialized = true;
+    if (playerChar) playerChar->canMove = true;
+	village_mapAllInitialized = true;
 }
 
 
-void GameSceneHall::Terminate() {
-	// AudioHelper::StopBGM(bgmId);
-	// AudioHelper::StopSample(deathBGMInstance);
-	// deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
-	cout << "Terminated\n";
+void VillageScene::Terminate() {
 	IScene::Terminate();
 
 }
-void GameSceneHall::Update(float deltaTime) {
+void VillageScene::Update(float deltaTime) {
     if (playerChar != nullptr) {
 		playerChar->Update(deltaTime);
-		if (!mapAllInitialized) return;
+		if (!village_mapAllInitialized) return;
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
 
 
-		// * Check Teleportation to Teleport Player into another scene
-		// * Check Teleportation to Teleport Player into another scene (FOREST UP)
-		// cout << playerPos.y << " " << playerPos.x << endl;
-		if (playerPos.y == 0 && playerPos.x == 5 && playerChar->directionFacing == DIRECTION_UP && playerChar->canMove){
-			playerChar->canMove = false;
+		// * Back into gamescene hall
+		if (playerPos.y == 11 && playerPos.x == 20 && playerChar->directionFacing == DIRECTION_DOWN){
+			// playerChar->canMove = false;
+            playerChar->ResetMovementInput();
 			playerChar->CheckPointSave(mapItems, mapBlocks);
-			// LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
-			// loadingScene->InitLoadingScreen("forestscene_up", 0.5f);
-
-			ForestScene * scene = dynamic_cast<ForestScene*>(Engine::GameEngine::GetInstance().GetScene("forestscene_up"));
+			GameSceneHall * scene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
 			scene->playerChar = this->playerChar;
-			scene->lastScene = "gamescene_hall";
-			Engine::GameEngine::GetInstance().ChangeScene("forestscene_up");
-			// Engine::GameEngine::GetInstance().ChangeScene("forestscene_up");
-
-			return;
-		} 
-		// * Check Teleportation to Teleport Player into another scene (FOREST UP)
-		else if (playerPos.y == 9 && playerPos.x == 24 && playerChar->directionFacing == DIRECTION_RIGHT && playerChar->canMove){
-			playerChar->canMove = false;
-			playerChar->CheckPointSave(mapItems, mapBlocks);
-			VillageScene * scene = dynamic_cast<VillageScene*>(Engine::GameEngine::GetInstance().GetScene("villagescene"));
-			scene->playerChar = this->playerChar;
-			scene->lastScene = "gamescene_hall";
-			Engine::GameEngine::GetInstance().ChangeScene("villagescene");
-			// Engine::GameEngine::GetInstance().ChangeScene("forestscene_up");
-
-			return;
+			scene->lastScene = "forestscene_up";
+			Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
 		}
 
-		if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
-			playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
-			for (auto & item : ItemGroup->GetObjects()){
-				if (item->Position.y == playerPos.y * BlockSize && item->Position.x == playerPos.x * BlockSize){
-					ItemGroup->RemoveObject(item->GetObjectIterator());
-					mapItems[playerPos.y][playerPos.x] = ITEM_BLANK;
-					break;
-				}
-			}
-		}
+        if (!mapItems.empty()) {
+            if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
+                playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
+                for (auto & item : ItemGroup->GetObjects()){
+                    if (item->Position.y == playerPos.y * BlockSize && item->Position.x == playerPos.x * BlockSize){
+                        ItemGroup->RemoveObject(item->GetObjectIterator());
+                        mapItems[playerPos.y][playerPos.x] = ITEM_BLANK;
+                        break;
+                    }
+                }
+            }
+
+        }
 
 
 		// * Detect if Player is near NPC or Chest
-		if (npcList.empty()) return;
-		for (auto & npc : npcList){
-			if ((playerPos.y >= npc.y - 1 && playerPos.y <= npc.y + 1) && (playerPos.x >= npc.x - 1 && playerPos.x <= npc.x + 1)){
-				playerChar->canInteract = true;
-				playerChar->objToInteract_PosX = npc.x;
-				playerChar->objToInteract_PosY = npc.y;
-			} else {
-				playerChar->canInteract = false;
-				playerChar->objToInteract_PosX = -1;
-				playerChar->objToInteract_PosY = -1;
-			}
-		}
+		if (!npcList.empty()){
+            for (auto & npc : npcList){
+                if ((playerPos.y >= npc.y - 1 && playerPos.y <= npc.y + 1) && (playerPos.x >= npc.x - 1 && playerPos.x <= npc.x + 1)){
+                    playerChar->canInteract = true;
+                    playerChar->objToInteract_PosX = npc.x;
+                    playerChar->objToInteract_PosY = npc.y;
+                } else {
+                    playerChar->canInteract = false;
+                    playerChar->objToInteract_PosX = -1;
+                    playerChar->objToInteract_PosY = -1;
+                }
+            }
+        }
 
 		if (playerChar->canInteract) return;
 
@@ -184,7 +161,9 @@ void GameSceneHall::Update(float deltaTime) {
 				playerChar->objToInteract_PosX = chest.x;
 				playerChar->objToInteract_PosY = chest.y;
 				foundChest = true;
-			} 
+			} else {
+                foundChest = false;
+            }
 		}
 		if (foundChest == false) {
 			playerChar->canInteract = false;
@@ -193,27 +172,27 @@ void GameSceneHall::Update(float deltaTime) {
 		}
 	}
 }
-void GameSceneHall::Draw() const {
+void VillageScene::Draw() const {
 	IScene::Draw();
     if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false) && !isGamePaused){
 		playerChar->Draw();
 	} 
 }
-void GameSceneHall::OnMouseDown(int button, int mx, int my) {
+void VillageScene::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
 }
-void GameSceneHall::OnMouseMove(int mx, int my) {
+void VillageScene::OnMouseMove(int mx, int my) {
 	IScene::OnMouseMove(mx, my);
 	const int x = mx / BlockSize;
 	const int y = my / BlockSize;
 }
 
-void GameSceneHall::OnMouseUp(int button, int mx, int my) {
+void VillageScene::OnMouseUp(int button, int mx, int my) {
 	IScene::OnMouseUp(button, mx, my);
 }
-void GameSceneHall::OnKeyDown(int keyCode) {
+void VillageScene::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
-	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
+	if (playerChar != nullptr && playerChar->canMove) playerChar->SetMovementState(keyCode, true);
 
 	if (keyCode == 28 && playerChar){
 		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
@@ -233,22 +212,9 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 3){
-<<<<<<< Updated upstream
-		playerChar->CheckPointSave(mapItems, mapBlocks);
-=======
-		// CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
-		// Player->playerChar_combat = this->playerChar;
-		// Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
-
-		playerChar->CheckPointSave(mapItems, mapBlocks);
-
-		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
-		loadingScene->InitLoadingScreen("combat-scene", 0.5f);
-		Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
-
->>>>>>> Stashed changes
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
+		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
 	}
 
 	if (keyCode == KEYBOARD_F){
@@ -256,11 +222,12 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		if (playerChar->canInteract == true && activeDialog == nullptr) {
 			cout << "Interacted!\n";
 			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
-				AddNewControlObject(activeDialog = new Engine::DialogScreen("Ah, " + Engine::GameEngine::currentActivePlayerName +", just the person I was hoping to see. Welcome to your new home, \nmy child...", "Old Man", 2.0f, playerChar, 1));
-				activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Is that you Jason???", Engine::GameEngine::currentActivePlayerName ,1.0f, playerChar, 1));
+				activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
 			}
 
-			else if (playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
+            
+			if (!chestList.empty() && playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
 				mapBlocks[chestList[0].y][chestList[0].x] = CHEST_OPENED;
 				cout << "Chest opened up\n";
 				for (auto & block : BlockGroup->GetObjects()){
@@ -272,28 +239,30 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 					}
 				}
 				if (playerChar->ChestObtainBG) delete playerChar->ChestObtainBG;
-				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_01.png", 1, 0, 1600, 832);
+				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_03.png", 1, 0, 1600, 832);
 				playerChar->chestBGdelay = 1.5f;
 
-				playerChar->healthPotion++;
-				playerChar->shield++;
-				playerChar->AddEXP(40);
-				playerChar->UpdateItemHotBar();
+				playerChar->healthPotion += 2;
+				playerChar->shield += 2;
+                playerChar->missile ++;
+				playerChar->AddEXP(250);
+                playerChar->UpdateItemHotBar();
+                playerChar->canInteract = false;
 			} 
 		}
 	}
 }
 
-void GameSceneHall::OnKeyUp(int keyCode) {
+void VillageScene::OnKeyUp(int keyCode) {
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, false);
 }
 
-int GameSceneHall::ClampMapPos(int pos, int max){
+int VillageScene::ClampMapPos(int pos, int max){
 	if (pos >= max) {
 		return max;
 	} else return pos;
 }
-void GameSceneHall::ConstructGenerativeGrassTile(int locX, int locY){
+void VillageScene::ConstructGenerativeGrassTile(int locX, int locY){
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	int tileRandom = rand() % 10; // 10 % Grasses, 10% Flower, 60% Default Grass Tile
 	string grassTilePath = "play/grass_1.png";
@@ -311,16 +280,15 @@ void GameSceneHall::ConstructGenerativeGrassTile(int locX, int locY){
 
 	TileMapGroup->AddNewObject(new Engine::Image(grassTilePath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
-void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
+void VillageScene::ConstructGenerativePathTile(int locX, int locY){
 
 	// cout << "Curr Loc Y : " << locY << " Loc X : " << locX << " + Y : " << ClampMapPos(locY + 1, MapHeight - 1) << " : " << (mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_FLOOR ? " FLOOR " : " DIRT ") << endl;
 	if (locY == MapHeight - 1 && mapState[locY][locX] == TILE_DIRT){
 		int topBottomTileRand = rand() % 2;
-		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
-		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 	}
 	else if (mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_FLOOR && mapState[locY][locX] != TILE_CORNERBTMLEFT && mapState[locY][locX] != TILE_CORNERBTMRIGHT && mapState[locY][locX] != TILE_CORNERTOPLEFT && mapState[locY][locX] != TILE_CORNERTOPRIGHT) { // * Bottom is a floor, creating different tiles
-		// cout << "Bottom is a floor Loc Y : " << locY << " Loc X : " << locX;
 		int topBottomTileRand = rand() % 2;
 		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
@@ -357,7 +325,7 @@ void GameSceneHall::ConstructGenerativePathTile(int locX, int locY){
 	
 }
 
-void GameSceneHall::ConstructBlock(int locX, int locY, BlockType block) {
+void VillageScene::ConstructBlock(int locX, int locY, BlockType block) {
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	string blockImgPath = "play/Base_blocks.png";
 	switch (block){
@@ -366,6 +334,8 @@ void GameSceneHall::ConstructBlock(int locX, int locY, BlockType block) {
 		case BLOCK_CHEST: blockImgPath = "play/chest_closed.png"; break;
 		case CHEST_OPENED: blockImgPath = "play/chest_opened.png"; break;
 		case NPC_INSPECTOR: blockImgPath = "char/npc/npc_idle_1.png"; break;
+		case ENEMY_KNIGHT: blockImgPath = "enemy/enemy_knight_idle.png"; break;
+        case NPC_JASON : blockImgPath = "char/npc/npc2_idle.png"; break;
 		default: break;
 	}
 	if (blockImgPath.empty()) return;
@@ -373,7 +343,7 @@ void GameSceneHall::ConstructBlock(int locX, int locY, BlockType block) {
 	
 }
 
-void GameSceneHall::ConstructItem(int locX, int locY, ItemType item){
+void VillageScene::ConstructItem(int locX, int locY, ItemType item){
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	string itemImgPath = "play/Base_blocks.png";
 	switch (item){
@@ -389,7 +359,7 @@ void GameSceneHall::ConstructItem(int locX, int locY, ItemType item){
 	ItemGroup->AddNewObject(new Engine::Image(itemImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
 
-void GameSceneHall::ReadMap() {
+void VillageScene::ReadMap() {
 	std::string filename = std::string("Resource/map/") + Engine::GameEngine::currentActiveScene + "_path.txt";
 	// Read map file.
     cout << filename << endl;
@@ -414,8 +384,8 @@ void GameSceneHall::ReadMap() {
 	}
 	fin.close();
 	// Validate map data.
-	if (static_cast<int>(mapData.size()) != MapWidth * MapHeight)
-		throw std::ios_base::failure("Map data is corrupted. 3 ");
+	// if (static_cast<int>(mapData.size()) != MapWidth * MapHeight)
+	// 	throw std::ios_base::failure("Map data is corrupted. 3 ");
 	// Store map in 2d array.
 	mapState = std::vector<std::vector<TileType>>(MapHeight, std::vector<TileType>(MapWidth));
 	for (int i = 0; i < MapHeight; i++) {
@@ -461,6 +431,8 @@ void GameSceneHall::ReadMap() {
 			case '5': mapData.push_back(5); break; // Shield
 			case '6' : mapData.push_back(6); break; // Chest (Opened)
 			case '7' : mapData.push_back(7); break; //NPC_Inspector
+			case '8' : mapData.push_back(8); break; // Enemy
+			case '9' : mapData.push_back(9); break; // NPC_Jason
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -517,6 +489,24 @@ void GameSceneHall::ReadMap() {
 					npcList.push_back(p);
 					break;
 				}
+				case 8: {
+					mapBlocks[i][j] = ENEMY_KNIGHT; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
+                case 9: {
+					mapBlocks[i][j] = NPC_JASON; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;
+				}
+
+				default:
 			}
 		}
 	}
@@ -533,7 +523,7 @@ void GameSceneHall::ReadMap() {
 	}
 }
 
-void GameSceneHall::ConstructUI() {
+void VillageScene::ConstructUI() {
 	
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -541,34 +531,24 @@ void GameSceneHall::ConstructUI() {
 	
 }
 
-void GameSceneHall::OnDialogDone(IControl * currActiveDialog){
+void VillageScene::OnDialogDone(IControl * currActiveDialog){
 	if (currActiveDialog == nullptr) return;
 	RemoveControl(currActiveDialog->controlIterator);
 
 	if (activeDialog->dialogID == 1){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("Dark times are upon us. The Shadow King has awoken in the depths of the Forgotten Grove, \nand his darkness spreads through our beloved forest. The prophecy foretold of a hero \nwho would rise to challenge him. I believe that hero is you.", "Old Man", 3.0f, playerChar, 2));
-		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I'm Jason, a friend of Old Man. I've been sent to assist you. \nHead forward if you are ready for the final boss fight...", "Jason", 2.0f, playerChar, 2));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
 	} else if (activeDialog->dialogID == 2){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("Me? But what can I do against such evil?", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
-		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
-	} else if (activeDialog->dialogID == 3){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("You have a brave heart and a strong spirit, " + Engine::GameEngine::currentActivePlayerName + ". The journey ahead will be \nfraught with danger, but you must find the courage within yourself. \nYour first task is to gather the resources hidden within the forest. These resources hold \nthe power to weaken the monsters", "Old Man", 3.0f, playerChar, 4));
-		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));		
-	} else if (activeDialog->dialogID == 4){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("I understand, Old Man. I won’t let you down.", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 5));
-		activeDialog->SetOnClickCallback(bind(&GameSceneHall::OnDialogDone, this, activeDialog));
-	}
-	
-	
-	
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am more than ready", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
+	} 
 	
 	else activeDialog = nullptr;
 }
 
-void GameSceneHall::ToogleGamePaused(bool newState){
+void VillageScene::ToogleGamePaused(bool newState){
 	if (isGameOver == true || !playerChar) return;
 	this->isGamePaused = newState;
-	playerChar->canMove = !newState;
 	std::cout << "Paused Function Called!\n";
 	if (newState){
 		AddNewObject(IMG_PauseMenuBG = new Engine::Image("bg/PauseMenu_bg.png", 0, 0, 1600, 832));
@@ -576,9 +556,9 @@ void GameSceneHall::ToogleGamePaused(bool newState){
 		AddNewControlObject(BTNPause_LoadCP = new Engine::ImageButton("btn/btn_loadcheckpoint_normal.png", "btn/btn_loadcheckpoint_hover.png", 681, 311, 238, 57));
 		AddNewControlObject(BTNPause_BackMenu = new Engine::ImageButton("btn/btn_mainmenu_normal.png", "btn/btn_mainmenu_hover.png", 681, 388, 238, 57));
 
-		BTNPause_Resume->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNResume, this));
-		BTNPause_LoadCP->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNLoadCheckpoint, this));
-		BTNPause_BackMenu->SetOnClickCallback(std::bind(&GameSceneHall::OnClickBTNBackMenu, this));
+		BTNPause_Resume->SetOnClickCallback(std::bind(&VillageScene::OnClickBTNResume, this));
+		BTNPause_LoadCP->SetOnClickCallback(std::bind(&VillageScene::OnClickBTNLoadCheckpoint, this));
+		BTNPause_BackMenu->SetOnClickCallback(std::bind(&VillageScene::OnClickBTNBackMenu, this));
 	} else {
 		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
 		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
@@ -589,17 +569,17 @@ void GameSceneHall::ToogleGamePaused(bool newState){
 	
 }
 
-void GameSceneHall::OnClickBTNResume(){
+void VillageScene::OnClickBTNResume(){
 	ToogleGamePaused(false);
 }
-void GameSceneHall::OnClickBTNBackMenu(){
+void VillageScene::OnClickBTNBackMenu(){
     if (playerChar) {
         delete playerChar;
         playerChar = nullptr;
     }
 	Engine::GameEngine::GetInstance().ChangeScene("start-scene");
 }
-void GameSceneHall::OnClickBTNLoadCheckpoint(){
+void VillageScene::OnClickBTNLoadCheckpoint(){
 
 }
 
