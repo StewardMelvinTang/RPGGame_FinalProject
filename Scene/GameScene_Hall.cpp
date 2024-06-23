@@ -118,7 +118,6 @@ void GameSceneHall::Update(float deltaTime) {
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
 
 
-		// * Check Teleportation to Teleport Player into another scene
 		// * Check Teleportation to Teleport Player into another scene (FOREST UP)
 		// cout << playerPos.y << " " << playerPos.x << endl;
 		if (playerPos.y == 0 && playerPos.x == 5 && playerChar->directionFacing == DIRECTION_UP && playerChar->canMove){
