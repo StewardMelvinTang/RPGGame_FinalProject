@@ -88,8 +88,13 @@ void VillageScene::Initialize() {
     }
 
 	if (playerChar == nullptr){
-		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
-		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+		// spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
+		if (spawnPoint.y > 25 || spawnPoint.x > 25){
+			playerChar = new PlayerCharacter(spawnPoint.x , spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+
+		} else {
+			playerChar = new PlayerCharacter(spawnPoint.x * BlockSize, spawnPoint.y * BlockSize , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+		}
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
 		playerChar->y = spawnPoint.y * BlockSize;
