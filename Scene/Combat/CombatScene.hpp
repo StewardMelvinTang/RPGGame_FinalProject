@@ -19,15 +19,19 @@ public:
 	void Terminate() override;
     void Update(float deltaTime) override;
     void InitLoadingScreen(std::string nextScene, float duration);
+
     // New Inits
     // void BackOnClick();
     // Attack, Items, Escape
     void AttackOnClick();
     void ItemsOnClick();
     void EscapeOnClick();
+    void AutoOnClick();
+
 	// SetPlayerHp
     void SetPlayerHP(float val);
     void UpdateHP();
+
     // keydown & up
     void OnKeyDown(int keyCode) override;
     // void OnKeyUp(int keyCode) override;
@@ -54,6 +58,8 @@ private:
     bool enemy4;
     bool boss;
     bool IsUsingShield;
+    bool isAuto;
+
     //Player health values
     IObject * HP_BarBG = nullptr;
     IObject * HP_BarFILL = nullptr;
@@ -144,8 +150,8 @@ private:
 
     std::vector<State> generateMoves(const State& s, bool isInit);
     float evaluateScenarioValue(const State& s);
-    Move search(int depth);
     std::string hashState(const State& s);
+    Move search(int depth);
 
     //Empty Function
     void Empty();

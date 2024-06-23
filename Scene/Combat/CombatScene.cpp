@@ -38,6 +38,8 @@ void CombatScene::Initialize() {
     playerturn = true;
     playerdead = false;
     IsUsingShield = false;
+    isAuto = false;
+
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int halfW = w / 2;
@@ -108,8 +110,6 @@ void CombatScene::Initialize() {
     AddNewObject(Enemy_ATK_BarFILL);
     AddNewObject(Enemy_TXT_ATKVal);
 
-    
-
     //Sprite and Visuals
     // Platform = new Engine::Image("bg/buttonSquare_blue.png", x + 1150, items->Position.y, 282, 160, 0.5, 0.5);
     // AddNewObject(Platform);
@@ -147,6 +147,14 @@ void CombatScene::Initialize() {
 
     Auto_btn = new Engine::ImageButton("btn/btn_auto.png","btn/btn_auto.png", 1395 , 736 , 156, 60);
     AddNewControlObject(Auto_btn);
+    Auto_btn->SetOnClickCallback(bind(&CombatScene::AutoOnClick, this));
+}
+
+void CombatScene::AutoOnClick() {
+    this->isAuto = !this->isAuto;
+    
+    if(this->isAuto) cout << "Enabled autoplay!\n";
+    else cout << "Disabled autoplay!\n";
 }
 
 void CombatScene::EscapeOnClick(){
@@ -299,6 +307,31 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
+    if(isAuto) {
+        Move toMove = search(10);
+
+        cout << ">>>>>>>>> used: ";
+        switch(toMove) {
+            case USE_MISSILE: cout << "missile!\n"; break;
+            case USE_HEALING: cout << "healing!\n"; break;
+            case USE_SHIELD: cout << "shield!\n"; break;
+            case ATTACK: cout << "attack!\n"; break;
+            case ESCAPE: cout << "escape!\n"; break;
+            default: cout << "what?\n";
+        }
+
+        switch(toMove) {
+            case USE_MISSILE: UseMissile(); break;
+            case USE_HEALING: UseHealth(); break;
+            case USE_SHIELD: UseShield(); break;
+            case ATTACK: AttackOnClick(); break;
+            case ESCAPE: EscapeOnClick(); break;
+            default: cout << "what?\n";
+        }
+    }
+    
+    CombatScene::CheckState();
+
     if(!playerturn){
         if(IsUsingShield){
             SetPlayerHP(currentHP - (Enemy_ATK/2));
@@ -331,8 +364,8 @@ void CombatScene::Empty(){
 
 // * ============= ai thing, kinda cool ??
 float CombatScene::evaluateScenarioValue(const State& s) {
-    if(s.enemyHp == 0) return 999999999.0f;
-    else if(s.playerHp == 0) return -999999999.0f;
+    if(s.enemyHp <= 0.001) return 999999999.0f;
+    else if(s.playerHp <= 0.001) return -999999999.0f;
 
     // positive: player is in advantage, negative: disadvantage
     float value = 0;
@@ -443,28 +476,46 @@ CombatScene::Move CombatScene::search(int depth) {
     // the initial last move and scenario can be ignored
 
     set<string> explored;
-
     priority_queue<State, vector<State>, CompareScenarioValue> pq;
+    int searched = 0;
 
-    for(State& initMoves : generateMoves(init, true)) 
+    for(State& initMoves : generateMoves(init, true)) {
         pq.push(initMoves);
+        searched++;
+    }
 
     while(!pq.empty() && depth--) {
         const State& curr = pq.top(); pq.pop();
         explored.insert(hashState(curr));
 
+
+        if(curr.enemyHp <= 0.0001) {
+            cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+            return curr.move;
+        }
+
         for(State& next : generateMoves(curr, false)) {
             // possible transposition usage here
             if(explored.find(hashState(next)) != explored.end()) continue;
 
-            // possible floating point error
-            if(next.enemyHp <= 0) return next.move;
-            else if(next.playerHp <= 0) continue;
+            // ! possible floating point error
+            if(next.enemyHp <= 0.0001) {
+                cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+                return next.move;
+            }
+            else if(next.playerHp <= 0.0001) continue;
 
             // alpha beta pruning here?
             pq.push(next);
+            searched++;
         }
     }
+
+    cout << "<==================>\n";
+    cout << "enemyHP: " << Enemy_currentHP << endl;
+    cout << "playerHP: " << currentHP << endl;
+
+    cout << ">>>>>>>> Seached " << searched << " moves." << endl;
 
     if(pq.empty()) return ESCAPE;
     else return pq.top().move;
