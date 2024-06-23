@@ -115,8 +115,20 @@ public:
     Engine::Label * Enemy_TXT_ATKVal = nullptr;
     float Enemy_ATK = 20, Enemy_maxATK = 100;
     int Enemy_ATK_FILL = 282 * (Enemy_ATK / Enemy_maxATK);
-
-
+    
+    //Difficulty
+    //Easy
+    float Enemy_ATK_Easy = Enemy_ATK * 0.7;
+    float Enemy_maxATK_Easy = Enemy_maxATK * 0.7;
+    float Enemy_currentHP_Easy = Enemy_currentHP;
+    float Enemy_maxHP_Easy = Enemy_maxHP;
+    //Hard
+    float Enemy_ATK_Hard = Enemy_ATK * 1.7;
+    float Enemy_maxATK_Hard = Enemy_maxATK * 1.7;
+    float Enemy_currentHP_Hard = Enemy_currentHP * 1.5;
+    float Enemy_maxHP_Hard = Enemy_maxHP * 1.5;
+    
+    
     //Sprites and Visuals
     IObject * Platform = nullptr;
     IObject * PlayerSprite = nullptr;
