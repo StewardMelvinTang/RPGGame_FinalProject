@@ -213,7 +213,8 @@ void ForestScene::OnKeyDown(int keyCode) {
 
 	if (keyCode == 3){
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
-		Player->playerChar_combat = this->playerChar;
+		Player->playerChar_combat = this->playerChar;\
+		Player->enemy1 = true;
 		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
 	}
 
