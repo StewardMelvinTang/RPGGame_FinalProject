@@ -1,6 +1,11 @@
 #include <functional>
+#include <queue>
+#include <set>
+#include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <sstream>
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
 #include "UI/Component/Image.hpp"
@@ -33,6 +38,8 @@ void CombatScene::Initialize() {
     playerturn = true;
     playerdead = false;
     IsUsingShield = false;
+    isAuto = false;
+
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int halfW = w / 2;
@@ -103,8 +110,6 @@ void CombatScene::Initialize() {
     AddNewObject(Enemy_ATK_BarFILL);
     AddNewObject(Enemy_TXT_ATKVal);
 
-    
-
     //Sprite and Visuals
     // Platform = new Engine::Image("bg/buttonSquare_blue.png", x + 1150, items->Position.y, 282, 160, 0.5, 0.5);
     // AddNewObject(Platform);
@@ -142,6 +147,14 @@ void CombatScene::Initialize() {
 
     Auto_btn = new Engine::ImageButton("btn/btn_auto.png","btn/btn_auto.png", 1395 , 736 , 156, 60);
     AddNewControlObject(Auto_btn);
+    Auto_btn->SetOnClickCallback(bind(&CombatScene::AutoOnClick, this));
+}
+
+void CombatScene::AutoOnClick() {
+    this->isAuto = !this->isAuto;
+    
+    if(this->isAuto) cout << "Enabled autoplay!\n";
+    else cout << "Disabled autoplay!\n";
 }
 
 void CombatScene::EscapeOnClick(){
@@ -198,8 +211,8 @@ void CombatScene::UseHealth(){
         RemoveReplace();
         return;
     }
-    else if(currentHP + 15 != maxHP){
-        SetPlayerHP(currentHP + 15);
+    else if(currentHP + health_weight != maxHP){
+        SetPlayerHP(currentHP + health_weight);
         Healing_Amount -= 1;
         Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
         std::cout << "Using Healing!...\n";
@@ -214,7 +227,7 @@ void CombatScene::UseMissile(){
         RemoveReplace();
         return;
     }
-    Enemy_currentHP -= 35;
+    Enemy_currentHP -= missile_weight;
     UpdateEnemyHP();
     Missile_Amount -= 1;
     Missile_num->Text = "x " + to_string(static_cast<int>(round(Missile_Amount)));
@@ -294,6 +307,31 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
+    if(isAuto) {
+        Move toMove = search(10);
+
+        cout << ">>>>>>>>> used: ";
+        switch(toMove) {
+            case USE_MISSILE: cout << "missile!\n"; break;
+            case USE_HEALING: cout << "healing!\n"; break;
+            case USE_SHIELD: cout << "shield!\n"; break;
+            case ATTACK: cout << "attack!\n"; break;
+            case ESCAPE: cout << "escape!\n"; break;
+            default: cout << "what?\n";
+        }
+
+        switch(toMove) {
+            case USE_MISSILE: UseMissile(); break;
+            case USE_HEALING: UseHealth(); break;
+            case USE_SHIELD: UseShield(); break;
+            case ATTACK: AttackOnClick(); break;
+            case ESCAPE: EscapeOnClick(); break;
+            default: cout << "what?\n";
+        }
+    }
+    
+    CombatScene::CheckState();
+
     if(!playerturn){
         if(IsUsingShield){
             SetPlayerHP(currentHP - (Enemy_ATK/2));
@@ -324,3 +362,161 @@ void CombatScene::Empty(){
     // Haha
 }
 
+// * ============= ai thing, kinda cool ??
+float CombatScene::evaluateScenarioValue(const State& s) {
+    if(s.enemyHp <= 0.001) return 999999999.0f;
+    else if(s.playerHp <= 0.001) return -999999999.0f;
+
+    // positive: player is in advantage, negative: disadvantage
+    float value = 0;
+
+    // hp
+    value += (s.playerHp - s.enemyHp);
+
+    // eval the values based on the current remaining skills (only a rough estimation for now)
+    // 0 is the current placeholder because the boss is not coded yet
+    int playerAttackNet = s.missileCount - 0;
+    int enemyAttackNet = 0 - s.shieldCount;
+    float playerHealNet = (maxHP - s.playerHp) * s.healingCount;
+    float enemyHealNet = (Enemy_maxHP - s.enemyHp) * 0;
+
+    // net heuristic value
+    value += (playerAttackNet - enemyAttackNet) * 15; // 15 is the average skills damage
+    value += (playerHealNet - enemyHealNet) * 10; // 10 is the average healing
+
+    return value;
+}
+
+// helper hash function (hash the current state)
+string CombatScene::hashState(const State& s) {
+    std::stringstream input;
+    input << s.playerHp << s.enemyHp << s.shieldCount << s.healingCount << s.missileCount;
+
+    string res;
+    getline(input, res);
+
+    return res;
+}
+
+std::vector<CombatScene::State> CombatScene::generateMoves(const CombatScene::State& s, bool isInit) {
+    vector<State> moves;
+    
+    // move order priority: missile -> basic attack -> shield -> heal
+
+    // missile 
+    if(s.missileCount > 0) {
+        State newState = s;
+
+        // attack the enemy
+        newState.enemyHp = max(0.0f, s.enemyHp - missile_weight);
+        newState.missileCount--;
+        newState.move = isInit ? USE_MISSILE : s.move;
+
+        // enemy attacks
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
+
+        // evaluate the scenario value
+        newState.scenarioValue = evaluateScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    // basic attack
+    {
+        State newState = s;
+
+        // attack the enemy
+        newState.enemyHp = max(0.0f, s.enemyHp - playerATK);
+        newState.move = isInit ? ATTACK : s.move;
+
+        // enemy attacks
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
+
+        // evaluate the scenario value
+        newState.scenarioValue = evaluateScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    if(s.shieldCount > 0) {
+        State newState = s;
+
+        // enemy attacks
+        newState.playerHp = max(0.0f, s.playerHp - (Enemy_ATK/2.0f));
+        newState.move = isInit ? USE_SHIELD : s.move;
+        
+        // eval
+        newState.scenarioValue = evaluateScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    if(s.healingCount > 0) {
+        State newState = s;
+
+        // heal player
+        newState.playerHp = min(maxHP, newState.playerHp + health_weight);
+        newState.healingCount--;
+        newState.move = isInit ? USE_HEALING : s.move;
+
+        // enemy attacks
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
+        
+        // eval
+        newState.scenarioValue = evaluateScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    return moves;
+}
+
+CombatScene::Move CombatScene::search(int depth) {
+    State init{currentHP, Shield_Amount, Healing_Amount, Missile_Amount, Enemy_currentHP, ATTACK, INT32_MIN};
+    // the initial last move and scenario can be ignored
+
+    set<string> explored;
+    priority_queue<State, vector<State>, CompareScenarioValue> pq;
+    int searched = 0;
+
+    for(State& initMoves : generateMoves(init, true)) {
+        pq.push(initMoves);
+        searched++;
+    }
+
+    while(!pq.empty() && depth--) {
+        const State& curr = pq.top(); pq.pop();
+        explored.insert(hashState(curr));
+
+
+        if(curr.enemyHp <= 0.0001) {
+            cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+            return curr.move;
+        }
+
+        for(State& next : generateMoves(curr, false)) {
+            // possible transposition usage here
+            if(explored.find(hashState(next)) != explored.end()) continue;
+
+            // ! possible floating point error
+            if(next.enemyHp <= 0.0001) {
+                cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+                return next.move;
+            }
+            else if(next.playerHp <= 0.0001) continue;
+
+            // alpha beta pruning here?
+            pq.push(next);
+            searched++;
+        }
+    }
+
+    cout << "<==================>\n";
+    cout << "enemyHP: " << Enemy_currentHP << endl;
+    cout << "playerHP: " << currentHP << endl;
+
+    cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+
+    if(pq.empty()) return ESCAPE;
+    else return pq.top().move;
+}
