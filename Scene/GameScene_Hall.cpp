@@ -27,7 +27,7 @@
 #include <allegro5/allegro_primitives.h>
 #include "Scene/Combat/CombatScene.hpp"
 #include "Scene/Loading/LoadingScene.hpp"
-// #include "GameScene_Hall.hpp"
+#include "Scene/ForestSceneUp.hpp"
 using namespace std;
 
 
@@ -53,6 +53,8 @@ Engine::Point GameSceneHall::GetClientSize() {
 void GameSceneHall::Initialize() {
 	Engine::GameEngine::currentActiveScene = "gamescene_hall";
 
+	mapItems.clear();
+	mapBlocks.clear();
 	mapState.clear();
 	keyStrokes.clear();
 	ticks = 0;
@@ -77,19 +79,24 @@ void GameSceneHall::Initialize() {
 	// * Load Player Data from Profile Based Saving System
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
 	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
-	if (playerEntryData.x != -1 && playerEntryData.y != -1) {
+	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
-		// cout << "Player Will Spawn at " << playerEntryData.y << " X : " << playerEntryData.x << endl;
 	}
-	playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
-	cout << "INITIALIZED WITH NAME " << playerEntryData.name << endl;
 
-	for (int i = 0; i < MapHeight; i++){
-		for (int j = 0; j < MapWidth; j++){
-			cout << mapItems[i][j];
-		}
-		cout << endl;
+	if (lastScene == "forestscene_up"){
+        spawnPoint.y = 0; spawnPoint.x = 5;
+		playerChar->directionFacing = DIRECTION_DOWN;
+    }
+
+	if (playerChar == nullptr){
+		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+	} else {
+		playerChar->x = spawnPoint.x * BlockSize;
+		playerChar->y = spawnPoint.y * BlockSize;
+		playerChar->UpdateSprite();
 	}
+
+	playerChar->canMove = true;
 
 	mapAllInitialized = true;
 }
@@ -111,10 +118,18 @@ void GameSceneHall::Update(float deltaTime) {
 
 
 		// * Check Teleportation to Teleport Player into another scene
-		if (playerPos.y == 0 && playerPos.x == 5 && playerChar->directionFacing == DIRECTION_UP){
-			LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
-			loadingScene->InitLoadingScreen("start-scene", 1.0f);
-			Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+		if (playerPos.y == 0 && playerPos.x == 5 && playerChar->directionFacing == DIRECTION_UP && playerChar->canMove){
+			playerChar->canMove = false;
+			playerChar->CheckPointSave(mapItems, mapBlocks);
+			// LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+			// loadingScene->InitLoadingScreen("forestscene_up", 0.5f);
+
+			ForestScene * scene = dynamic_cast<ForestScene*>(Engine::GameEngine::GetInstance().GetScene("forestscene_up"));
+			scene->playerChar = this->playerChar;
+			scene->lastScene = "gamescene_hall";
+			Engine::GameEngine::GetInstance().ChangeScene("forestscene_up");
+			// Engine::GameEngine::GetInstance().ChangeScene("forestscene_up");
+
 			return;
 		}
 
@@ -522,6 +537,7 @@ void GameSceneHall::OnDialogDone(IControl * currActiveDialog){
 void GameSceneHall::ToogleGamePaused(bool newState){
 	if (isGameOver == true || !playerChar) return;
 	this->isGamePaused = newState;
+	playerChar->canMove = !newState;
 	std::cout << "Paused Function Called!\n";
 	if (newState){
 		AddNewObject(IMG_PauseMenuBG = new Engine::Image("bg/PauseMenu_bg.png", 0, 0, 1600, 832));
@@ -546,6 +562,10 @@ void GameSceneHall::OnClickBTNResume(){
 	ToogleGamePaused(false);
 }
 void GameSceneHall::OnClickBTNBackMenu(){
+    if (playerChar) {
+        delete playerChar;
+        playerChar = nullptr;
+    }
 	Engine::GameEngine::GetInstance().ChangeScene("start-scene");
 }
 void GameSceneHall::OnClickBTNLoadCheckpoint(){

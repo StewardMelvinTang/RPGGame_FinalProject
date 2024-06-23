@@ -33,13 +33,24 @@ using namespace std;
 // make animation
 // int y = items->Position.y;
 void CombatScene::Initialize() {
+    Health_out = false;
+    Missile_out = false;
+    Shield_out = false;
     Enemy_maxHP = 100;
     Enemy_currentHP = 100;
-    playerturn = true;
     playerdead = false;
+    playerturn = true;
+    isPlayerATK = false;
+    // Items
+    isUsingHealth = false;
+    isUsingMissile = false;
     IsUsingShield = false;
+
     isAuto = false;
     currDelay = delayDuration;
+    temp = 0;
+    temp2 = 20.0f;
+    targethealth = 25;
 
     isBoss = true; // !DEBUG
     boss_healing_amount = 10;
@@ -88,7 +99,7 @@ void CombatScene::Initialize() {
     std::cout<<"Max_HP: " << maxHP << endl;
 
     //Player Health Values:
-        int x = (halfW - (Btn_w*0.96)*3.07);
+    int x = (halfW - (Btn_w*0.96)*3.07);
     int y = halfH - (Btn_h*0.96) + 275;
     HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 20, 305, 282, 40);
     HP_BarFILL = new Engine::Image("bg/progressbar_fill.png", 20, 305, 282, 40);
@@ -139,7 +150,7 @@ void CombatScene::Initialize() {
 
     //Items
     Healing_Amount = playerChar_combat->healthPotion;
-    Missile_Amount = playerChar_combat->missile;
+    Missile_Amount = playerChar_combat->missile + 5;
     Shield_Amount = playerChar_combat->shield;
 
     // !DEBUG
@@ -178,8 +189,8 @@ void CombatScene::AutoOnClick() {
 }
 
 void CombatScene::EscapeOnClick(){
+    if(displayitems) RemoveReplace();
     displayitems = false;
-    RemoveReplace();
     int num = rand() % 50;
     if (num % 2 == 0){
         CombatScene::Terminate();
@@ -191,17 +202,18 @@ void CombatScene::EscapeOnClick(){
 }
 
 void CombatScene::AttackOnClick(){
+    if(displayitems) RemoveReplace();
     displayitems = false;
-    RemoveReplace();
     if(!playerturn){
         return;
     }
-    UpdateEnemyHP();
-    CombatScene::CheckState();
-    playerturn = false;
+    isPlayerATK = true;
+    // UpdateEnemyHP();
+    // CombatScene::CheckState();
+    // playerturn = false;
 }
 void CombatScene::UpdateEnemyHP(){
-    Enemy_currentHP -= playerATK;
+    Enemy_currentHP -= 1;
     if (Enemy_TXT_HPVal) Enemy_TXT_HPVal->Text = "HP: " + to_string(static_cast<int>(round(Enemy_currentHP)));
     if (Enemy_HP_BarFILL) {
         std::cout<<"Enemy_Curr_HP: " << currentHP << endl;
@@ -228,33 +240,36 @@ void CombatScene::UseHealth(){
     std::cout << "Healing Amount: " << Healing_Amount << endl;
     if(Healing_Amount <= 0){
         std::cout << "Ran out of healing!...\n";
+        Health_out = true;
         RemoveReplace();
         return;
     }
-
-    int newHp = min(maxHP, currentHP + health_weight);
-    SetPlayerHP(newHp);
+    // int newHp = min(maxHP, currentHP + health_weight);
+    // SetPlayerHP(newHp);
+    isUsingHealth = true;
     Healing_Amount -= 1;
     Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
     std::cout << "Using Healing!...\n";
-
     RemoveReplace();
-    playerturn = false;
+    // playerturn = false;
 }
 void CombatScene::UseMissile(){
     std::cout << "Missile Amount: " << Missile_Amount << endl;
     if(Missile_Amount <= 0){
         std::cout << "Ran out of Missiles!...\n";
+        Missile_out = true;
         RemoveReplace();
         return;
     }
-    Enemy_currentHP -= missile_weight;
-    UpdateEnemyHP();
+    // Enemy_currentHP -= missile_weight;
+
+    // UpdateEnemyHP();
+    isUsingMissile = true;
     Missile_Amount -= 1;
     Missile_num->Text = "x " + to_string(static_cast<int>(round(Missile_Amount)));
     std::cout << "Used Missile!...\n";
     RemoveReplace();
-    playerturn = false;
+    // playerturn = false;
     CombatScene::CheckState();
 }
 
@@ -262,6 +277,7 @@ void CombatScene::UseShield(){
     std::cout << "Shield Amount: " << Shield_Amount << endl;
     if(Shield_Amount <= 0){
         std::cout << "Ran out of Shields!...\n";
+        Shield_out = true;
         RemoveReplace();
         return;
     } 
@@ -275,7 +291,7 @@ void CombatScene::UseShield(){
 
 void CombatScene::SetPlayerHP(float val){
     this->currentHP = val;
-    std::cout << "Current HP: " << currentHP << "\n";
+    // std::cout << "Current HP: " << currentHP << "\n";
     UpdateHP();
     if(this->currentHP <= 0){
         // playerdead = true;
@@ -305,6 +321,9 @@ void CombatScene::VirtualDraw() const {
         if (Healing_num) Healing_num->Draw();
         if (Missile_num) Missile_num->Draw();
         if (Shield_num) Shield_num->Draw();
+        // if (Health_out);
+        // if (Missile_out);
+        // if (Shield_out);
     }
 }
 
@@ -333,11 +352,11 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
-    currDelay -= 1.0f * deltaTime;
-
-    if(isAuto && currDelay <= 0.0f) {
-        currDelay = delayDuration;
-
+    // currDelay -= 1.0f * deltaTime;
+    // && currDelay <= 0.0f
+    if(isAuto) {
+        // currDelay = delayDuration;
+        
         Move toMove = search(10);
 
         cout << ">>>>>>>>> used: ";
@@ -362,30 +381,88 @@ void CombatScene::Update(float deltaTime) {
     
     CombatScene::CheckState();
 
-    if(!playerturn){
+    if(!playerturn && !isUsingHealth && !isUsingMissile){
+        
+        currDelay -= 1.0f * deltaTime;
+        // cout << "currdelay: " << currDelay << endl;
+        //Used Shield Actions!
         if(IsUsingShield){
-            SetPlayerHP(currentHP - (Enemy_ATK/2));
-            IsUsingShield = false;
-            playerturn = true;
-            std::cout << "Shield Used!...\n";
-            return;
+            temp += 1;
+            SetPlayerHP(currentHP - 1);
+            if(currDelay <= 0 || temp == Enemy_ATK/2){
+                temp = 0;
+                IsUsingShield = false;
+                playerturn = true;
+                currDelay = delayDuration;
+                std::cout << "Shield Used!...\n";
+                return;
+            }
         }
-        int counter = currentHP - Enemy_ATK;
-        // std::cout << "counter: " << counter << endl;
-        int temp;
-        //fix later 
-        // while(currentHP > counter){
-        //     temp = currentHP - 0.05*deltaTime;
-        //     SetPlayerHP(temp);
-        //     if(currentHP <= counter){
-        //         break;
-        //     }
+        // else if(currDelay <= 0){
+            // SetPlayerHP(currentHP - Enemy_ATK);
+            // playerturn = true;
+            // currDelay = delayDuration;  
+            // std::cout<<"END! Curr_HP: " << currentHP << endl;
         // }
-        SetPlayerHP(currentHP - Enemy_ATK);
-        std::cout<<"END! Curr_HP: " << currentHP << endl;
-        playerturn = true;
+        else if(!playerturn && !isUsingMissile){
+            SetPlayerHP(currentHP - 1);
+            temp += 1;
+            // cout << "temp is: " << temp << endl;
+            if(currDelay <= 0 || temp == Enemy_ATK){
+                playerturn = true;
+                currDelay = delayDuration;  
+                temp = 0;
+                // std::cout<<"END! Curr_HP: " << currentHP << endl;
+            }
+        }
     }
 
+    else if(playerturn && isPlayerATK){
+        currDelay -= 1.0f * deltaTime;
+        temp += 1;
+        UpdateEnemyHP();
+        if(currDelay <= 0 || temp == playerATK){
+            temp = 0;
+            playerturn = false;
+            isPlayerATK = false;
+            currDelay = delayDuration;  
+            // std::cout<<"END! Curr_HP: " << currentHP << endl;
+        }
+    }
+
+    // HealthPotion
+    else if(playerturn && isUsingHealth){
+        if(temp == health_weight || currentHP >= maxHP){
+            // currDelay -= 1.0f * deltaTime;
+            temp2 -= 50.0f*deltaTime;
+            std::cout<<"temp2!: " << temp2 << endl;
+            temp = 0;
+            CombatScene::CheckState();
+            if(temp2 <= 0){
+                isUsingHealth = false;
+                playerturn = false;
+                currDelay = delayDuration; 
+                temp2 = 20; 
+                return;
+            }
+        }
+        else{
+            SetPlayerHP(currentHP + 1);
+            temp += 1;
+        }
+    }
+    // Missile
+    else if(playerturn && isUsingMissile){
+        currDelay -= 1.0f * deltaTime;
+        temp += 1;
+        UpdateEnemyHP();
+        if(currDelay <= 0 || temp == missile_weight){
+            temp = 0;
+            playerturn = false;
+            isUsingMissile = false;
+            currDelay = delayDuration;  
+        }
+    }
     CombatScene::CheckState();
 }
 void CombatScene::Empty(){

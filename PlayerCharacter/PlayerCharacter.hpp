@@ -61,6 +61,7 @@ public:
     int missile = 0;
     int shield = 0;
 
+    bool canMove = true;
 public:
 	PlayerCharacter(float x, float y, float speed, float hp, int money, int blockSize, std::string mapID, PlayerEntry entry);
     ~PlayerCharacter();
@@ -77,6 +78,8 @@ public:
     bool CollisionCheck(float x, float y, Enum_Direction dir);
     void SetMovementState(int keycode, bool keyDown);
     void OnPlayerDead();
+    void UpdateSprite();
+    void ResetMovementInput();
 
     // * helper function & getter setter
     Engine::Point GetPlayerPositionAtMap();

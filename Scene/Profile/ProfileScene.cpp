@@ -123,9 +123,9 @@ void ProfileScene::PlayProfileBtn(vector<PlayerEntry> & entries, int id){
 
     Engine::GameEngine::GetInstance().SetCurrentActivePlayer(entries[id].name, entries[id]);
 
-    Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
+    Engine::GameEngine::GetInstance().ChangeScene(entries[id].lastScene);
 
-    GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
+    // GameSceneHall * gameHallScene = dynamic_cast<GameSceneHall *>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
     
     if (bgmInstance){
         AudioHelper::StopSample(bgmInstance);

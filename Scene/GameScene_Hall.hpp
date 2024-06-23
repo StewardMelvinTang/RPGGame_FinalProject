@@ -15,19 +15,6 @@
 #include "PlayerCharacter/PlayerCharacter.hpp"
 using namespace std;
 
-// * HANDLE CURRENT PROFILE' PLAYER STATS
-struct PlayerStats
-{
-    string name = "PLAYER";
-    float currentHP =- 100, maxHP = 100;
-    int gold = 0;
-
-    string weaponName = "Sword";
-    float attackDMG = 15.0f;
-    float attackCooldown = 1.0f;
-};
-
-
 
 class GameSceneHall final : public Engine::IScene {
 private:
@@ -61,6 +48,8 @@ public:
 	bool isGameOver = false;
 
 	PlayerEntry playerEntryData;
+
+	std::string lastScene = "";
 
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
