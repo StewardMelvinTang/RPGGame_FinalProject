@@ -51,6 +51,18 @@ void CombatScene::Initialize() {
     temp = 0;
     temp2 = 20.0f;
     targethealth = 25;
+
+    isBoss = true; // !DEBUG
+    boss_healing_amount = 10;
+    boss_missile_amount = 4;
+    boss_shield_amount = 2;
+    boss_maxHp = 120;
+    boss_currentHp = boss_maxHp;
+    boss_attack_weight = 10;
+    boss_healing_weight = 25;
+    boss_missile_weight = 20;
+
+
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int halfW = w / 2;
@@ -80,6 +92,9 @@ void CombatScene::Initialize() {
     //set currentHP and maxHP
     currentHP = playerChar_combat->GetCurrentHP();
     maxHP = playerChar_combat->GetMaxHP();
+    // !DEBUG
+    // currentHP = 50;
+    // maxHP = 50;
     std::cout<<"Curr_HP: " << currentHP << endl;
     std::cout<<"Max_HP: " << maxHP << endl;
 
@@ -137,6 +152,11 @@ void CombatScene::Initialize() {
     Healing_Amount = playerChar_combat->healthPotion;
     Missile_Amount = playerChar_combat->missile;
     Shield_Amount = playerChar_combat->shield;
+
+    // !DEBUG
+    // Healing_Amount = 100;
+    // Missile_Amount = 100;
+    // Shield_Amount = 100;
 
     Healing = new Engine::ImageButton("btn/btn_health.png", "btn/btn_health.png", 1154, 605, 223, 58);
     Missile = new Engine::ImageButton("btn/btn_missile.png", "btn/btn_missile.png", 1154, 668 , 223, 57);
@@ -259,6 +279,7 @@ void CombatScene::UseMissile(){
     // playerturn = false;
     // CombatScene::CheckState();
 }
+
 void CombatScene::UseShield(){
     std::cout << "Shield Amount: " << Shield_Amount << endl;
     No_Shield->Position.x = 1154;
@@ -276,6 +297,7 @@ void CombatScene::UseShield(){
     RemoveReplace();
     playerturn = false;
 }
+
 void CombatScene::SetPlayerHP(float val){
     this->currentHP = val;
     // std::cout << "Current HP: " << currentHP << "\n";
@@ -285,6 +307,9 @@ void CombatScene::SetPlayerHP(float val){
         Engine::GameEngine::GetInstance().ChangeScene("death-scene");
     }
 }
+
+
+
 void CombatScene::OnKeyDown(int keycode){
     Engine::IScene::OnKeyDown(keycode);
     if(keycode == ALLEGRO_KEY_P){
@@ -308,26 +333,17 @@ void CombatScene::VirtualDraw() const {
 
     }
     if (Health_out && No_Healing->Position.x < 1600){
-            
-            No_Healing->Draw();
-            No_Healing->Position.x += 5.0f;
-            
-    
-        }
-        if (Missile_out && No_Missile->Position.x < 1600){
-            
-            No_Missile->Draw();
-            No_Missile->Position.x += 5.0f;
-            
-            
-        }
-        if (Shield_out && No_Shield->Position.x < 1600){
-            
-            No_Shield->Draw();
-            No_Shield->Position.x += 5.0f;
-            
-            
-        }
+        No_Healing->Draw();
+        No_Healing->Position.x += 5.0f;
+    }
+    if (Missile_out && No_Missile->Position.x < 1600){
+        No_Missile->Draw();
+        No_Missile->Position.x += 5.0f;
+    }
+    if (Shield_out && No_Shield->Position.x < 1600){    
+        No_Shield->Draw();
+        No_Shield->Position.x += 5.0f;
+    }
 }
 
 void CombatScene::UpdateHP(){
@@ -355,11 +371,10 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
-    // currDelay -= 1.0f * deltaTime;
-    // && currDelay <= 0.0f
-    if(isAuto) {
-        // currDelay = delayDuration;
-
+    currDelay -= 1.0f * deltaTime;
+    if(isAuto && currDelay <= 0.0f) {
+        currDelay = delayDuration;
+        
         Move toMove = search(10);
 
         cout << ">>>>>>>>> used: ";
@@ -629,5 +644,205 @@ CombatScene::Move CombatScene::search(int depth) {
     cout << ">>>>>>>> Seached " << searched << " moves." << endl;
 
     if(pq.empty()) return ESCAPE;
+    else return pq.top().move;
+}
+
+// * boss ai
+float CombatScene::evaluateBossScenarioValue(const BossState& s) {
+    if(s.enemyHp <= 0.0f) return 999999999.0f;
+    else if(s.playerHp <= 0.0f) return -999999999.0f;
+
+    // positive: player is in advantage, negative: disadvantage
+    float value = 0;
+
+    // hp
+    value += (s.playerHp - s.enemyHp);
+
+    // eval the values based on the current remaining skills (only a rough estimation for now)
+    // 0 is the current placeholder because the boss is not coded yet
+    int playerAttackNet = s.missileCount - s.EshieldCount;
+    int enemyAttackNet = s.EmissileCount - s.shieldCount;
+    float playerHealNet = (s.maxHp - s.playerHp) * s.healingCount;
+    float enemyHealNet = (s.EmaxHp - s.enemyHp) * s.EhealingCount;
+
+    // net heuristic value
+    value += (playerAttackNet - enemyAttackNet) * 25; 
+    value += (playerHealNet - enemyHealNet) * 25; 
+
+    return value;
+}
+
+void CombatScene::processMove(BossState& s, Move move) {
+    if(move == USE_HEALING) {
+        s.playerHp = min(s.maxHp, s.playerHp + s.healingW);
+        s.healingCount--;
+    }
+    else if(move == USE_MISSILE) {
+        if(s.EisShieldActive) {
+            s.EisShieldActive = false;
+            return;
+        }
+        s.enemyHp = max(0.0f, s.enemyHp - s.missileW);
+        s.missileCount--;
+    }
+    else if(move == USE_SHIELD) {
+        s.isShieldActive = true;
+        s.shieldCount--;
+    }
+    else if(move == ATTACK) {
+        if(s.EisShieldActive) {
+            s.EisShieldActive = false;
+            return;
+        }
+        s.enemyHp = max(0.0f, s.enemyHp - s.attackW);
+    }
+}
+
+std::vector<CombatScene::BossState> CombatScene::generateBossMoves(const BossState& s, bool isInit, int depth) {
+    vector<BossState> moves;
+    
+    // move order priority: missile -> basic attack -> shield -> heal
+
+    // missile 
+    if(s.missileCount > 0) {
+        BossState newState = s;
+
+        // attack the enemy
+        processMove(newState, USE_MISSILE);
+        newState.move = isInit ? USE_MISSILE : s.move;
+
+        // enemy's turn
+        invertBossState(newState);
+        Move toMove = bossSearch(depth, newState);
+        processMove(newState, toMove);
+        invertBossState(newState);
+
+        // evaluate the scenario value
+        newState.scenarioValue = evaluateBossScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    // basic attack
+    {
+        BossState newState = s;
+
+        // attack the enemy
+        processMove(newState, ATTACK);
+        newState.move = isInit ? ATTACK : s.move;
+
+        // enemy's turn
+        invertBossState(newState);
+        Move toMove = bossSearch(depth, newState);
+        processMove(newState, toMove);
+        invertBossState(newState);
+
+        // evaluate the scenario value
+        newState.scenarioValue = evaluateBossScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    if(s.shieldCount > 0) {
+        BossState newState = s;
+
+        processMove(newState, USE_SHIELD);
+        newState.move = isInit ? USE_SHIELD : s.move;
+
+        // enemy's turn
+        invertBossState(newState);
+        Move toMove = bossSearch(depth, newState);
+        processMove(newState, toMove);
+        invertBossState(newState);
+        
+        // eval
+        newState.scenarioValue = evaluateBossScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    if(s.healingCount > 0) {
+        BossState newState = s;
+
+        // heal player
+        processMove(newState, USE_HEALING);
+        newState.move = isInit ? USE_HEALING : s.move;
+
+        // enemy attacks
+        invertBossState(newState);
+        Move toMove = bossSearch(depth, newState);
+        processMove(newState, toMove);
+        invertBossState(newState);
+        
+        // eval
+        newState.scenarioValue = evaluateBossScenarioValue(newState);
+
+        moves.push_back(newState);
+    }
+
+    return moves;
+}
+
+std::string CombatScene::hashBossState(const BossState& s) {
+    std::stringstream input;
+    input << s.isShieldActive << s.EisShieldActive;
+    input << s.playerHp << s.enemyHp << s.shieldCount << s.EshieldCount;
+    input << s.missileCount << s.EmissileCount << s.healingCount << s.healingCount;
+
+    string res;
+    getline(input, res);
+
+    return res;   
+}
+
+CombatScene::Move CombatScene::bossSearch(int depth, BossState& init) {
+    set<string> explored;
+    priority_queue<BossState, vector<BossState>, CompareBossScenarioValue> pq;
+    int searched = 0;
+
+    Move latestMove;
+
+    for(BossState& initMoves : generateBossMoves(init, true, depth)) {
+        pq.push(initMoves);
+        latestMove = initMoves.move;
+        searched++;
+    }
+
+    while(!pq.empty() && depth--) {
+        const BossState& curr = pq.top(); pq.pop();
+        explored.insert(hashBossState(curr));
+
+        if(curr.enemyHp <= 0.0f) {
+            cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+            return curr.move;
+        }
+
+        for(BossState& next : generateBossMoves(curr, false, depth)) {
+            // possible transposition usage here
+            if(explored.find(hashBossState(next)) != explored.end()) continue;
+
+            if(next.enemyHp <= 0.0f) {
+                cout << ">>>>>>>> Seached " << searched << " moves." << endl;
+                return next.move;
+            }
+            else if(next.playerHp <= 0.0f) continue;
+
+            // alpha beta pruning here?
+            pq.push(next);
+            searched++;
+        }
+
+        latestMove = curr.move;
+    }
+
+    cout << "<==================>\n";
+    cout << "enemyHP: " << Enemy_currentHP << endl;
+    cout << "playerHP: " << currentHP << endl;
+
+    cout << "Seached " << searched << " moves." << endl;
+    cout << "<==================>\n";
+
+
+    if(pq.empty()) return latestMove;
     else return pq.top().move;
 }

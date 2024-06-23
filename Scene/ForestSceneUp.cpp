@@ -476,7 +476,7 @@ void ForestScene::ReadMap() {
 					break;					
 				}
 
-				default:
+				// default:
 			}
 		}
 	}

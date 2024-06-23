@@ -60,10 +60,10 @@ void StartScene::Initialize() {
     int halfW = w / 2;
     int halfH = h / 2;
     Engine::ImageButton* btn;
-
-    AddNewObject(new Engine::Label("RPG Game", "pixel-font.ttf", 120, halfW, halfH / 3 + 50, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Image("bg/bg_menu.png", 0 ,0 , 1600, 832, 0.0, 0.0));
+    // AddNewObject(new Engine::Label("RPG Game", "pixel-font.ttf", 120, halfW, halfH / 3 + 50, 255, 255, 255, 255, 0.5, 0.5));
     AddNewObject(new Engine::Label("V 1.0 I2P Demo", "pixel-font.ttf", 28, 5, h - 30, 255, 255, 255, 150, 0.0, 0.0));
-
+    AddNewObject(new Engine::Image("bg/logo_menu.png", 487 ,73 , 616, 252, 0.0, 0.0));
     btn = new Engine::ImageButton("btn/btn_long.png", "btn/btn_long_hover.png", halfW - 200, halfH / 2 + 285 , 350, 88);
     btn->SetOnClickCallback(std::bind(&StartScene::PlayOnClick, this));
     AddNewControlObject(btn);
@@ -82,7 +82,7 @@ void StartScene::Initialize() {
     btn->SetOnClickCallback(bind(&StartScene::CreditBtn, this));
     AddNewControlObject(btn);
 
-    btn = new Engine::ImageButton("btn/scoreboard_normal.png", "btn/scoreboard_hover.png", 315, 15, 70, 70);
+    btn = new Engine::ImageButton("btn/scoreboard_normal.png", "btn/scoreboard_hover.png", 5, 15, 70, 70);
     btn->SetOnClickCallback(bind(&StartScene::ScoreBoardBtn, this));
     AddNewControlObject(btn);
 
@@ -93,7 +93,7 @@ void StartScene::Initialize() {
     // TXT_Name = new Engine::Label(NAMEPLAYER, "pixel-font.ttf", 30, 95, 35, 255, 255, 255, 255, 0, 0);
     // AddNewObject(TXT_Name);
 }
-    
+
 void StartScene::AddNewPlayerBtn(){
     Engine::GameEngine::GetInstance().ChangeScene("profile-scene");
 }
