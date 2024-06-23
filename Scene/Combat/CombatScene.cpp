@@ -39,6 +39,7 @@ void CombatScene::Initialize() {
     playerdead = false;
     IsUsingShield = false;
     isAuto = false;
+    currDelay = delayDuration;
 
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -211,12 +212,13 @@ void CombatScene::UseHealth(){
         RemoveReplace();
         return;
     }
-    else if(currentHP + health_weight != maxHP){
-        SetPlayerHP(currentHP + health_weight);
-        Healing_Amount -= 1;
-        Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
-        std::cout << "Using Healing!...\n";
-    }
+
+    int newHp = min(maxHP, currentHP + health_weight);
+    SetPlayerHP(newHp);
+    Healing_Amount -= 1;
+    Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
+    std::cout << "Using Healing!...\n";
+
     RemoveReplace();
     playerturn = false;
 }
@@ -307,7 +309,11 @@ void CombatScene::CheckState(){
     }
 }
 void CombatScene::Update(float deltaTime) {
-    if(isAuto) {
+    currDelay -= 1.0f * deltaTime;
+
+    if(isAuto && currDelay <= 0.0f) {
+        currDelay = delayDuration;
+
         Move toMove = search(10);
 
         cout << ">>>>>>>>> used: ";
@@ -455,12 +461,12 @@ std::vector<CombatScene::State> CombatScene::generateMoves(const CombatScene::St
         State newState = s;
 
         // heal player
-        newState.playerHp = min(maxHP, newState.playerHp + health_weight);
+        newState.playerHp = min(maxHP, s.playerHp + health_weight);
         newState.healingCount--;
         newState.move = isInit ? USE_HEALING : s.move;
 
         // enemy attacks
-        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
+        newState.playerHp = max(0.0f, newState.playerHp - Enemy_ATK);
         
         // eval
         newState.scenarioValue = evaluateScenarioValue(newState);
