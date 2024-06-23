@@ -147,7 +147,7 @@ namespace Engine {
 		/// <param name="freeMemoryOnSceneChanged">Determines whether to free memory between scenes.</param>
 		void Start(const std::string& firstSceneName, int fps = 60, int screenW = 800, int screenH = 600, int reserveSamples = 1000,
 				   const char* title = "THE FORGOTTEN GROVE (I2P II Final Project)",
-				   const char* icon = "logo_new.png", bool freeMemoryOnSceneChanged = false,
+				   const char* icon = "LOGO_ICON.png", bool freeMemoryOnSceneChanged = false,
 				   float deltaTimeThreshold = 0.05);
 		/// <summary>
 		/// Add a new scene to the game. Should only be called once for each scene.
