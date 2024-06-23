@@ -40,7 +40,6 @@ public:
     int health_weight = 25;
     int missile_weight = 45;
 
-    void enemyATK();
     void UseHealth();
     void UseMissile();
     void UseShield();
@@ -61,6 +60,24 @@ public:
     bool isUsingMissile;
     bool IsUsingShield;
     bool isAuto;
+
+    bool isBoss;
+    float boss_healing_amount;
+    float boss_missile_amount;
+    float boss_shield_amount;
+
+    float boss_maxHp;
+    float boss_currentHp;
+
+    float boss_attack_weight;
+    float boss_healing_weight;
+    float boss_missile_weight;
+
+    void BossUseHealth();
+    void BossUseMissile();
+    void BossUseShield();
+    
+    const float delayDuration = 2.0f;
     bool isPlayerATK;
     //more bools
     bool Health_out;
@@ -69,7 +86,6 @@ public:
     int temp;
     float temp2;
     int targethealth;
-    const float delayDuration = 5.0f;
     float currDelay;
 
     //Player health values
@@ -117,11 +133,7 @@ public:
     Engine::Label * Missile_num = nullptr;
     Engine::Label * Shield_num = nullptr;
 
-    Engine::Image * No_Healing = nullptr;
-    Engine::Image * No_Missile = nullptr;
-    Engine::Image * No_Shield = nullptr;
-
-    // * AI
+    // * AI for base enemy
     enum Move {
         USE_MISSILE,
         USE_HEALING,
@@ -144,23 +156,23 @@ public:
         bool operator() (const State& a, const State& b) {
             if(a.scenarioValue == b.scenarioValue) {
                 // we prioritize using basic attack to conserve item
-                if(b.move == ATTACK) return true;
                 if(a.move == ATTACK) return false;
+                if(b.move == ATTACK) return true;
 
                 // then we the next priority is attack item;
-                if(b.move == USE_MISSILE) return true;
                 if(a.move == USE_MISSILE) return false;
+                if(b.move == USE_MISSILE) return true;
 
                 // then shield item
-                if(b.move == USE_SHIELD) return true;
                 if(a.move == USE_SHIELD) return false;
+                if(b.move == USE_SHIELD) return true;
 
                 // then healing item
-                if(b.move == USE_HEALING) return true;
                 if(a.move == USE_HEALING) return false;
-                else return false;
+                if(b.move == USE_HEALING) return true;
+                else return true;
             }
-            else return b.scenarioValue < a.scenarioValue;
+            else return a.scenarioValue < b.scenarioValue;
         }
     };
 
@@ -168,6 +180,79 @@ public:
     float evaluateScenarioValue(const State& s);
     std::string hashState(const State& s);
     Move search(int depth);
+
+    // * AI for boss enemy
+    struct BossState {
+        float playerHp;
+        float maxHp;
+        float attackW;
+        float shieldW;
+        float healingW;
+        float missileW;
+        float shieldCount;
+        float healingCount;
+        float missileCount;
+        bool isShieldActive;
+
+        float enemyHp;
+        float EmaxHp;
+        float EattackW;
+        float EshieldW;
+        float EhealingW;
+        float EmissileW;
+        float EshieldCount;
+        float EhealingCount;
+        float EmissileCount;
+        bool EisShieldActive;
+
+        Move move;
+        float scenarioValue;
+    };
+
+    void invertBossState(BossState& s) {
+        std::swap(s.playerHp, s.enemyHp);
+        std::swap(s.maxHp, s.EmaxHp);
+        std::swap(s.attackW, s.EattackW);
+        std::swap(s.shieldW, s.EshieldW);
+        std::swap(s.healingW, s.EhealingW);
+        std::swap(s.missileW, s.EmissileW);
+        std::swap(s.shieldCount, s.EshieldCount);
+        std::swap(s.healingCount, s.EhealingCount);
+        std::swap(s.missileCount, s.EmissileCount);
+        std::swap(s.isShieldActive, s.EisShieldActive);
+    }
+
+    void processMove(BossState& s, Move move);
+
+    struct CompareBossScenarioValue {
+        bool operator() (const BossState& a, const BossState& b) {
+            if(a.scenarioValue == b.scenarioValue) {
+                // we prioritize using basic attack to conserve item
+                if(a.move == ATTACK) return false;
+                if(b.move == ATTACK) return true;
+
+                // then we the next priority is attack item;
+                if(a.move == USE_MISSILE) return false;
+                if(b.move == USE_MISSILE) return true;
+
+                // then shield item
+                if(a.move == USE_SHIELD) return false;
+                if(b.move == USE_SHIELD) return true;
+
+                // then healing item
+                if(a.move == USE_HEALING) return false;
+                if(b.move == USE_HEALING) return true;
+                else return true;
+            }
+            else return a.scenarioValue < b.scenarioValue;
+        }
+    };
+
+    std::vector<BossState> generateBossMoves(const BossState& s, bool isInit, int depth);
+    std::string hashBossState(const BossState& s);
+    Move bossSearch(int depth, BossState& init);
+    float evaluateBossScenarioValue(const BossState& s);
+    void processMove(BossState& s, Move move, bool isPlayer, float lastDMG);
 
     //Empty Function
     void Empty();
