@@ -59,6 +59,9 @@ private:
     bool boss;
     bool IsUsingShield;
     bool isAuto;
+    
+    const float delayDuration = 2.0f;
+    float currDelay;
 
     //Player health values
     IObject * HP_BarBG = nullptr;
@@ -144,7 +147,7 @@ private:
                 if(a.move == USE_HEALING) return false;
                 else return false;
             }
-            else return b.scenarioValue > a.scenarioValue;
+            else return b.scenarioValue < a.scenarioValue;
         }
     };
 
