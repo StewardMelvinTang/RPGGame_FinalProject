@@ -218,6 +218,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 3){
+		playerChar->CheckPointSave(mapItems, mapBlocks);
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
 		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
