@@ -159,19 +159,16 @@ void PlayerCharacter::OverlapWithItem(ItemType itemType, int posY, int posX){
         case ITEM_BLANK : return;
         case ITEM_MISSILE : 
             missile++;
-            IMG_Missile = new Engine::Image("play/missile.png", 697 + 69, 760, 64, 64);
-            TXT_Missile = new Engine::Label("x" + to_string(this->missile), "pixel-font.ttf", 27, 756 + 69, 795, 35, 240, 35, 255, 1.0f);
+            UpdateItemHotBar();
         break;
         case ITEM_POTION : 
             healthPotion ++;
-            IMG_Potion = new Engine::Image("play/healthpotion.png", 697, 760, 64, 64);
-            TXT_Potion = new Engine::Label("x" + to_string(this->healthPotion), "pixel-font.ttf", 27, 756, 795, 35, 240, 35, 255, 1.0f);
+            UpdateItemHotBar();
         break;
 
         case ITEM_SHIELD : 
             shield++;
-            IMG_Shield = new Engine::Image("play/shield.png", 697 + 138, 760, 64, 64);
-            TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
+            UpdateItemHotBar();
         break;
     };
 }
@@ -491,4 +488,19 @@ void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> 
 
     file.close();
     std::cout << "Item and block data saved to " << filename << std::endl;
+}
+
+void PlayerCharacter::UpdateItemHotBar(){
+    if (IMG_Missile) delete IMG_Missile;
+    IMG_Missile = new Engine::Image("play/missile.png", 697 + 69, 760, 64, 64);
+    if (TXT_Missile) delete TXT_Missile;
+    TXT_Missile = new Engine::Label("x" + to_string(this->missile), "pixel-font.ttf", 27, 756 + 69, 795, 35, 240, 35, 255, 1.0f);
+    if (IMG_Potion) delete IMG_Potion;
+    IMG_Potion = new Engine::Image("play/healthpotion.png", 697, 760, 64, 64);
+    if (TXT_Potion) delete TXT_Potion;
+    TXT_Potion = new Engine::Label("x" + to_string(this->healthPotion), "pixel-font.ttf", 27, 756, 795, 35, 240, 35, 255, 1.0f);
+    if (IMG_Shield) delete IMG_Shield;
+    IMG_Shield = new Engine::Image("play/shield.png", 697 + 138, 760, 64, 64);
+    if (TXT_Shield) delete TXT_Shield;
+    TXT_Shield = new Engine::Label("x" + to_string(this->shield), "pixel-font.ttf", 27, 756 + 138, 795, 35, 240, 35, 255, 1.0f);
 }

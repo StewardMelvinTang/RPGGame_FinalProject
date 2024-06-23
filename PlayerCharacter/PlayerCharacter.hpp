@@ -111,6 +111,8 @@ public:
     void LoadPlayerEntryData(std::string ); // * To Load from profile lists
     void SaveSceneItemBlockData(std::vector<std::vector<ItemType>>, std::vector<std::vector<BlockType>>);
 
+    void UpdateItemHotBar(); // * to update UI amount of items
+
     // ? Interaction
     bool canInteract = false;
     int objToInteract_PosY = -1, objToInteract_PosX = -1;
