@@ -110,18 +110,42 @@ private:
 
     struct State {
         float playerHp;
-        int shieldCount;
-        int healingCount;
-        int missileCount;
+        float shieldCount;
+        float healingCount;
+        float missileCount;
         float enemyHp;
         Move move;
         float scenarioValue;
     };
 
-    vector<State> generateMoves(State& s);
-    float evaluateScenarioValue(State& s);
+    struct CompareScenarioValue {
+        bool operator() (const State& a, const State& b) {
+            if(a.scenarioValue == b.scenarioValue) {
+                // we prioritize using basic attack to conserve item
+                if(b.move == ATTACK) return true;
+                if(a.move == ATTACK) return false;
+
+                // then we the next priority is attack item;
+                if(b.move == USE_MISSILE) return true;
+                if(a.move == USE_MISSILE) return false;
+
+                // then shield item
+                if(b.move == USE_SHIELD) return true;
+                if(a.move == USE_SHIELD) return false;
+
+                // then healing item
+                if(b.move == USE_HEALING) return true;
+                if(a.move == USE_HEALING) return false;
+                else return false;
+            }
+            else return b.scenarioValue > a.scenarioValue;
+        }
+    };
+
+    std::vector<State> generateMoves(const State& s, bool isInit);
+    float evaluateScenarioValue(const State& s);
     Move search(int depth);
-    string hashState(State& s);
+    std::string hashState(const State& s);
 
     //Empty Function
     void Empty();

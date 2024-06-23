@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <sstream>
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -329,9 +330,9 @@ void CombatScene::Empty(){
 }
 
 // * ============= ai thing, kinda cool ??
-float CombatScene::evaluateScenarioValue(State& s) {
-    if(s.enemyHp == 0) return INT32_MAX;
-    else if(s.playerHp == 0) return INT32_MIN;
+float CombatScene::evaluateScenarioValue(const State& s) {
+    if(s.enemyHp == 0) return 999999999.0f;
+    else if(s.playerHp == 0) return -999999999.0f;
 
     // positive: player is in advantage, negative: disadvantage
     float value = 0;
@@ -354,7 +355,7 @@ float CombatScene::evaluateScenarioValue(State& s) {
 }
 
 // helper hash function (hash the current state)
-string CombatScene::hashState(State& s) {
+string CombatScene::hashState(const State& s) {
     std::stringstream input;
     input << s.playerHp << s.enemyHp << s.shieldCount << s.healingCount << s.missileCount;
 
@@ -364,30 +365,7 @@ string CombatScene::hashState(State& s) {
     return res;
 }
 
-struct CompareScenarioValue {
-    bool operator() (const State& a, const State& b) {
-        if(a.ScenarioValue == b.ScenarioValue) {
-            // we prioritize using basic attack to conserve item
-            if(b.move == CombatScene::ATTACK) return true;
-            if(a.move == CombatScene::ATTACK) return false;
-
-            // then we the next priority is attack item;
-            if(b.move == CombatScene::USE_MISSILE) return true;
-            if(a.move == CombatScene::USE_MISSILE) return false;
-
-            // then shield item
-            if(b.move == CombatScene::USE_SHIELD) return true;
-            if(a.move == CombatScene::USE_SHIELD) return false;
-
-            // then healing item
-            if(b.move == CombatScene::USE_HEALING) return true;
-            if(a.move == CombatScene::USE_HEALING) return false;
-        }
-        else return b.ScenarioValue > a.ScenarioValue;
-    }
-};
-
-vector<State> CombatScene::generateMoves(State& s, bool isInit) {
+std::vector<CombatScene::State> CombatScene::generateMoves(const CombatScene::State& s, bool isInit) {
     vector<State> moves;
     
     // move order priority: missile -> basic attack -> shield -> heal
@@ -397,12 +375,12 @@ vector<State> CombatScene::generateMoves(State& s, bool isInit) {
         State newState = s;
 
         // attack the enemy
-        newState.enemyHp = max(0, s.enemyHp - missile_weight);
+        newState.enemyHp = max(0.0f, s.enemyHp - missile_weight);
         newState.missileCount--;
         newState.move = isInit ? USE_MISSILE : s.move;
 
         // enemy attacks
-        newState.playerHp = max(0, s.playerHp - enemyATK);
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
 
         // evaluate the scenario value
         newState.scenarioValue = evaluateScenarioValue(newState);
@@ -415,11 +393,11 @@ vector<State> CombatScene::generateMoves(State& s, bool isInit) {
         State newState = s;
 
         // attack the enemy
-        newState.enemyHp = max(0, s.enemyHp - playerATK);
+        newState.enemyHp = max(0.0f, s.enemyHp - playerATK);
         newState.move = isInit ? ATTACK : s.move;
 
         // enemy attacks
-        newState.playerHp = max(0, s.playerHp - Enemy_ATK);
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
 
         // evaluate the scenario value
         newState.scenarioValue = evaluateScenarioValue(newState);
@@ -431,7 +409,7 @@ vector<State> CombatScene::generateMoves(State& s, bool isInit) {
         State newState = s;
 
         // enemy attacks
-        newState.playerHp = max(0, s.playerHp - (Enemy_ATK/2.0));
+        newState.playerHp = max(0.0f, s.playerHp - (Enemy_ATK/2.0f));
         newState.move = isInit ? USE_SHIELD : s.move;
         
         // eval
@@ -449,17 +427,19 @@ vector<State> CombatScene::generateMoves(State& s, bool isInit) {
         newState.move = isInit ? USE_HEALING : s.move;
 
         // enemy attacks
-        newState.playerHp = max(0, s.playerHp - Enemy_ATK);
+        newState.playerHp = max(0.0f, s.playerHp - Enemy_ATK);
         
         // eval
         newState.scenarioValue = evaluateScenarioValue(newState);
 
         moves.push_back(newState);
     }
+
+    return moves;
 }
 
-Move CombatScene::search(int depth) {
-    State init(currentHP, Shield_Amount, Healing_Amount, Missile_Amount, Enemy_currentHP, ATTACK, INT32_MIN);
+CombatScene::Move CombatScene::search(int depth) {
+    State init{currentHP, Shield_Amount, Healing_Amount, Missile_Amount, Enemy_currentHP, ATTACK, INT32_MIN};
     // the initial last move and scenario can be ignored
 
     set<string> explored;
@@ -470,15 +450,16 @@ Move CombatScene::search(int depth) {
         pq.push(initMoves);
 
     while(!pq.empty() && depth--) {
-        State& curr = pq.top(); pq.pop();
+        const State& curr = pq.top(); pq.pop();
         explored.insert(hashState(curr));
 
         for(State& next : generateMoves(curr, false)) {
             // possible transposition usage here
             if(explored.find(hashState(next)) != explored.end()) continue;
 
-            if(next.scenarioValue == INT32_MAX) return next.move;
-            else if(next.scenarioValue == INT32_MIN) continue;
+            // possible floating point error
+            if(next.enemyHp <= 0) return next.move;
+            else if(next.playerHp <= 0) continue;
 
             // alpha beta pruning here?
             pq.push(next);
