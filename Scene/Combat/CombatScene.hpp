@@ -133,6 +133,10 @@ public:
     Engine::Label * Missile_num = nullptr;
     Engine::Label * Shield_num = nullptr;
 
+
+    Engine::Image * No_Healing = nullptr;
+    Engine::Image * No_Shield = nullptr;
+    Engine::Image * No_Missile = nullptr;
     // * AI for base enemy
     enum Move {
         USE_MISSILE,
