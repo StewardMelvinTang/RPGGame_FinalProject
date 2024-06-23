@@ -146,7 +146,7 @@ namespace Engine {
 		/// <param name="icon">Window's icon image path.</param>
 		/// <param name="freeMemoryOnSceneChanged">Determines whether to free memory between scenes.</param>
 		void Start(const std::string& firstSceneName, int fps = 60, int screenW = 800, int screenH = 600, int reserveSamples = 1000,
-				   const char* title = "RPG GAME (I2P(II)_2024 Mini Project 2))",
+				   const char* title = "THE FORGOTTEN GROVE (I2P II Final Project)",
 				   const char* icon = "logo_new.png", bool freeMemoryOnSceneChanged = false,
 				   float deltaTimeThreshold = 0.05);
 		/// <summary>

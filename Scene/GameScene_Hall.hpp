@@ -77,6 +77,9 @@ public:
 	std::vector<std::vector<BlockType>> mapBlocks;
 	std::vector<std::vector<ItemType>> mapItems;
 	std::vector<std::vector<int>> mapDistance;
+
+	std::vector<Engine::Point> npcList;
+	std::vector<Engine::Point> chestList;
 	std::list<int> keyStrokes;
 
 	static Engine::Point GetClientSize();
@@ -106,7 +109,7 @@ public:
 	void ConstructItem(int, int, ItemType);
 	int ClampMapPos(int, int);
 
-	void DestroyCurrentActiveDialog(IControl * currActiveDialog);
+	void OnDialogDone(IControl * currActiveDialog);
 
     bool isGamePaused = false;
 	IObject * IMG_PauseMenuBG;

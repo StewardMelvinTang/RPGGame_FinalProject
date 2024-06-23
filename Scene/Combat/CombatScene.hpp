@@ -130,6 +130,8 @@ private:
     void CheckState();
 
     void VirtualDraw() const override;
+    Engine::ImageButton* Extend = nullptr;
+    Engine::ImageButton* Auto_btn = nullptr;
 };
 
 #endif // LOSESCENE_HPP

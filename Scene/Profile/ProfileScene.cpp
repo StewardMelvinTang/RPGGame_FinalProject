@@ -74,8 +74,6 @@ void ProfileScene::CreateNewProfile(){
 }
 
 void ProfileScene::InitializeProfileList(int page){
-
-    cout << "Player Hve " << playerEntryComps.size() << endl;
     if (playerEntryComps.size() > 0){
         for (auto & comp : playerEntryComps){
             RemoveObject(comp.PlayerName->GetObjectIterator());
@@ -93,6 +91,7 @@ void ProfileScene::InitializeProfileList(int page){
 
     
     maxPage = floor(totalEntry / 5) + 1;
+    if (totalEntry % 5 == 0) maxPage --;
 
     int startIndex = (currPage - 1 ) * 5;
     for (int i = startIndex; i < startIndex + 5 && i < profiles.size(); i++){
@@ -104,7 +103,7 @@ void ProfileScene::InitializeProfileList(int page){
         newComponent.PlayerDifficulty = new Engine::Label(profile.difficulty, "pixel-font.ttf", 19, 707, 254 + offsetY, 255, 255, 255, 255);
         newComponent.PlayerName = new Engine::Label(profile.name, "pixel-font.ttf", profile.name.length() > 10 ? 25 : 35, 707, profile.name.length() > 10 ? 225 + offsetY : 219 + offsetY, 255, 255, 255, 255);
         newComponent.PlayerMoney = new Engine::Label("LV " + to_string(profile.playerLevel), "pixel-font.ttf", 23, 955, 237 + offsetY, 255, 255, 255, 255, 1.0);
-        newComponent.PlayButton->SetOnClickCallback(bind(&ProfileScene::PlayProfileBtn, this, profiles, offsetY / 85));
+        newComponent.PlayButton->SetOnClickCallback(bind(&ProfileScene::PlayProfileBtn, this, profiles, i));
         AddNewControlObject(newComponent.PlayButton);
         AddNewObject(newComponent.IMG_Avatar);
         AddNewObject(newComponent.PlayerDifficulty);

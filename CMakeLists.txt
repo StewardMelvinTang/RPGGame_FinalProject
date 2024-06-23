@@ -84,6 +84,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Engine/Resources.hpp
         UI/Component/Slider.cpp
         UI/Component/Slider.hpp
+        UI/Component/MultiLineLabel.hpp
+        UI/Component/MultiLineLabel.cpp
         Enemy/SoldierEnemy.cpp
         Enemy/SoldierEnemy.hpp
         Enemy/WarriorEnemy.cpp
