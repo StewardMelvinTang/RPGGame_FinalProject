@@ -76,7 +76,7 @@ void ForestScene::Initialize() {
 
 
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
-	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
+	Engine::Point spawnPoint; spawnPoint.y = 6; spawnPoint.x = 10;
 	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 	}
@@ -86,8 +86,13 @@ void ForestScene::Initialize() {
     }
 
 	if (playerChar == nullptr){
-		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
-		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+		// spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
+		if (spawnPoint.y > 25 || spawnPoint.x > 25){
+			playerChar = new PlayerCharacter(spawnPoint.x , spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+
+		} else {
+			playerChar = new PlayerCharacter(spawnPoint.x * BlockSize, spawnPoint.y * BlockSize , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
+		}
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
 		playerChar->y = spawnPoint.y * BlockSize;
@@ -194,6 +199,11 @@ void ForestScene::OnKeyDown(int keyCode) {
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
 		ToogleGamePaused(!isGamePaused);
 	}
+
+	if (keyCode == 29){
+		playerChar->CheckPointSave(mapItems, mapBlocks);
+	}
+
 	if (keyCode == 3){
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;\

@@ -88,7 +88,7 @@ void BossArenaScene::Initialize() {
     }
 
 	if (playerChar == nullptr){
-        spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
+        // spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
 		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
