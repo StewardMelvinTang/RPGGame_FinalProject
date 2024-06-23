@@ -52,15 +52,15 @@ void CombatScene::Initialize() {
     temp2 = 20.0f;
     targethealth = 25;
 
-    isBoss = true; // !DEBUG
-    boss_healing_amount = 10;
-    boss_missile_amount = 4;
-    boss_shield_amount = 2;
-    boss_maxHp = 120;
-    boss_currentHp = boss_maxHp;
-    boss_attack_weight = 10;
-    boss_healing_weight = 25;
-    boss_missile_weight = 20;
+    // isBoss = true; // !DEBUG
+    // boss_healing_amount = 10;
+    // boss_missile_amount = 4;
+    // boss_shield_amount = 2;
+    // boss_maxHp = 120;
+    // boss_currentHp = boss_maxHp;
+    // boss_attack_weight = 10;
+    // boss_healing_weight = 25;
+    // boss_missile_weight = 20;
 
     std::string difficulty = Engine::GameEngine::GetInstance().GetCurrentActivePlayer().difficulty;
 
@@ -421,7 +421,7 @@ void CombatScene::Update(float deltaTime) {
         currDelay = delayDuration;
         
         Move toMove = search(10);
-
+        
         cout << ">>>>>>>>> used: ";
         switch(toMove) {
             case USE_MISSILE: cout << "missile!\n"; break;
@@ -445,8 +445,7 @@ void CombatScene::Update(float deltaTime) {
     CombatScene::CheckState();
 
     if(!playerturn && !isUsingHealth && !isUsingMissile){
-        
-        currDelay -= 1.0f * deltaTime;
+        // currDelay -= 1.0f * deltaTime;
         // cout << "currdelay: " << currDelay << endl;
         //Used Shield Actions!
         if(IsUsingShield){
@@ -460,6 +459,7 @@ void CombatScene::Update(float deltaTime) {
             //     std::cout << "Shield Used!...\n";
             //     return;
             // }
+            cout << "currdelay: "<<currDelay<<endl;
             if(currDelay <= 0){
                 SetPlayerHP(currentHP - Enemy_ATK/2);
                 playerturn = true;
@@ -483,6 +483,7 @@ void CombatScene::Update(float deltaTime) {
             //     temp = 0;
             //     // std::cout<<"END! Curr_HP: " << currentHP << endl;
             // }
+            cout << "currdelay: "<<currDelay<<endl;
             if(currDelay <= 0){
                 SetPlayerHP(currentHP - Enemy_ATK);
                 playerturn = true;
