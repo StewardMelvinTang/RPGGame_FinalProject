@@ -144,8 +144,15 @@ void CombatScene::Initialize() {
     PlayerSprite = new Engine::Image(avatarFilePath, 104, 440, 413, 392, 0, 0);
     AddNewObject(PlayerSprite);
 
-    EnemySprite = new Engine::Image("enemy/enemy_enemy1.png", 1235, 290, 572, 319, 0.5, 0.5);
-    AddNewObject(EnemySprite);
+    if(enemy1){
+        EnemySprite = new Engine::Image("enemy/enemy_knight_combat.png", 1235, 290, 572, 319, 0.5, 0.5);
+        AddNewObject(EnemySprite);
+    }
+    else if(enemy2){
+        EnemySprite = new Engine::Image("enemy/enemy_axolot_combat.png", 1235, 290, 572, 319, 0.5, 0.5);
+        AddNewObject(EnemySprite);  
+    }
+    
     // cout << "Initializeed\n";
 
     //Items
@@ -367,7 +374,10 @@ void CombatScene::CheckState(){
     }
 
     if(Enemy_currentHP <= 0){
-        Engine::GameEngine::GetInstance().ChangeScene(backGameHall);
+        enemy1 = false;
+        enemy2 = false;
+        Engine::GameEngine::GetInstance().ChangeScene(Engine::GameEngine::currentActiveScene);
+
     }
 }
 void CombatScene::Update(float deltaTime) {
