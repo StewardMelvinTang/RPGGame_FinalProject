@@ -14,6 +14,7 @@ using namespace std;
 #include "Engine/LOG.hpp"
 #include "Scene/Loading/LoadingScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
+#include "Scene/ForestSceneUp.hpp"
 #include "PlayerCharacter.hpp"
 #include "Engine/Collider.hpp"
 #include <fstream>
@@ -186,6 +187,7 @@ void PlayerCharacter::Draw() const {
 }
 
 void PlayerCharacter::UpdateCharacterDirection(float deltaTime) {
+    if (canMove == false) return;
     bool moved = false;
     float newX = this->x;
     float newY = this->y;
@@ -266,19 +268,32 @@ void PlayerCharacter::UpdateCharacterDirection(float deltaTime) {
             timeSinceLastFrame = 0.0f;
             currentFrame[directionFacing] = (currentFrame[directionFacing] + 1) % walkSprites[directionFacing].size();
         }
-        std::string charSpritePath = "char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + walkSprites[directionFacing][currentFrame[directionFacing]];
-        if (charSpriteObj) delete charSpriteObj;
-        charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
+        UpdateSprite();
     }
 }
 
+void PlayerCharacter::ResetMovementInput(){
+    keys[0] = false; keys[1] = false; keys[2] = false; keys[3] = false;
+}
+
+void PlayerCharacter::UpdateSprite(){
+    std::string charSpritePath = "char/" + to_string(Engine::GameEngine::GetInstance().GetCurrentActivePlayer().avatarID + 1) + "/" + walkSprites[directionFacing][currentFrame[directionFacing]];
+    if (charSpriteObj) delete charSpriteObj;
+    charSpriteObj = new Engine::Image(charSpritePath, x, y, size, size);
+}
 
 bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir) {
     int w = Engine::GameEngine::GetInstance().GetScreenSize().x - size;
     int h = Engine::GameEngine::GetInstance().GetScreenSize().y - size;
 
-    GameSceneHall* currScene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
-    std::list<IObject*> blocks = currScene->BlockGroup->GetObjects();
+    std::list<IObject*> blocks;
+    if (Engine::GameEngine::currentActiveScene == "gamescene_hall"){
+        GameSceneHall* currScene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
+        blocks = currScene->BlockGroup->GetObjects();
+    } else if (Engine::GameEngine::currentActiveScene == "forestscene_up"){
+        ForestScene* currScene = dynamic_cast<ForestScene*>(Engine::GameEngine::GetInstance().GetScene("forestscene_up"));
+        blocks = currScene->BlockGroup->GetObjects();
+    }
 
     if (newX < 0 || newX > w || newY < 0 || newY > h) {
         if (newX <= 0) newX = 0;
@@ -305,6 +320,10 @@ bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir)
 
 // * Make sure to include this in all scene OnkeyDown and OnKeyUp
 void PlayerCharacter::SetMovementState(int keycode, bool keyDown){
+    if (canMove == false) {
+        keys[0] = false; keys[1] = false; keys[2] = false; keys[3] = false;
+        return;
+    }
     switch(keycode){
         case KEYBOARD_W:
             keys[0] = keyDown;

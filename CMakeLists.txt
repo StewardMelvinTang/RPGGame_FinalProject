@@ -78,6 +78,8 @@ add_executable(2024_I2P2_TowerDefense_with_answer
         Scene/PlayScene.hpp
         Scene/GameScene_Hall.hpp
         Scene/GameScene_Hall.cpp
+        Scene/ForestSceneUp.cpp
+        Scene/ForestSceneUp.hpp
         Engine/Point.cpp
         Engine/Point.hpp
         Engine/Resources.cpp
