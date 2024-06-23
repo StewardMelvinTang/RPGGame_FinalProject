@@ -147,16 +147,19 @@ void GameSceneHall::Update(float deltaTime) {
 		if (playerChar->canInteract) return;
 
 		if (chestList.empty()) return;
+		bool foundChest = false;
 		for (auto & chest : chestList){
 			if (playerPos.y == chest.y + 1 && playerPos.x == chest.x && playerChar->directionFacing == DIRECTION_UP && mapBlocks[chest.y][chest.x] == BLOCK_CHEST){
 				playerChar->canInteract = true;
 				playerChar->objToInteract_PosX = chest.x;
 				playerChar->objToInteract_PosY = chest.y;
-			} else {
-				playerChar->canInteract = false;
-				playerChar->objToInteract_PosX = -1;
-				playerChar->objToInteract_PosY = -1;
-			}
+				foundChest = true;
+			} 
+		}
+		if (foundChest == false) {
+			playerChar->canInteract = false;
+			playerChar->objToInteract_PosX = -1;
+			playerChar->objToInteract_PosY = -1;
 		}
 	}
 }
@@ -225,7 +228,14 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 						break;
 					}
 				}
-			}
+				if (playerChar->ChestObtainBG) delete playerChar->ChestObtainBG;
+				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_01.png", 1, 0, 1600, 832);
+				playerChar->chestBGdelay = 1.5f;
+
+				playerChar->healthPotion++;
+				playerChar->shield++;
+				playerChar->AddEXP(40);
+			} 
 		}
 	}
 }

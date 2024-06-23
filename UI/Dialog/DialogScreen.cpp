@@ -8,7 +8,7 @@
 #include "Engine/Resources.hpp"
 #include "UI/Component/Label.hpp"
 #include "UI/Component/MultiLineLabel.hpp"
-#include "Engine/Group.hpp"
+#include "Engine/Group.hpp" 
 #include <iostream>
 #include <string>
 #include <allegro5/allegro_primitives.h>
@@ -33,8 +33,6 @@ namespace Engine {
         TXT_Dialog = new Engine::MultiLineLabel(displayedText, "pixel-font.ttf", 30, 190, 565, 255, 255, 255, 255);
 
         durationPerChar = (duration / dialogText.length()) / 1.5;
-        cout << "Duration Per Char : " << durationPerChar << endl;
-        cout << "Dialog Duration : " << duration << endl;
         tempDur = durationPerChar;
     }
 

@@ -94,7 +94,7 @@ public:
     int GetCurrentLevel() { return playerLevel;}
 
     // * Player HUD (UI) RESOURCES
-    IObject * LevelUpBG = nullptr;
+    IObject * LevelUpBG = nullptr, * ChestObtainBG = nullptr;
     IObject * HP_BarBG = nullptr, * EXP_BarBG = nullptr;
     IObject * HP_BarFILL = nullptr, * EXP_BarFILL = nullptr;
     Engine::Label * TXT_HPVal = nullptr, * TXT_EXPVal = nullptr;
@@ -127,5 +127,7 @@ public:
     };
 
     std::vector<std::string> idleSprites = {"char_idle_down.png", "char_idle_up.png", "char_idle_left.png", "char_idle_right.png"};
+
+    mutable float chestBGdelay = 1.5f;
 };
 #endif // ENEMY_HPP

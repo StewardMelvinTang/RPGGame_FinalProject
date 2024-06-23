@@ -58,6 +58,7 @@ void PlayerCharacter::ConstructPlayerHUD(){
     // * Size 282 x 40, 282 * (maxHP / currHP) to track progressbar percent
 
     LevelUpBG = new Engine::Image("bg/levelup_screen.png", 0, -300, 1600, 832);
+    ChestObtainBG = new Engine::Image("bg/chestobtain_01.png", -400, 0, 1600, 832);
     HP_BarBG = new Engine::Image("bg/progressbar_bg.png", 16, 770, 282, 40 );
     HP_BarFILL = new Engine::Image("bg/progressbar_fill.png", 16, 770, 282, 40);
     TXT_HPVal = new Engine::Label("HP: " + to_string(static_cast<int>(round(currentHP))), "pixel-font.ttf", 30, 20, 790, 255, 255, 255, 255, 0.0, 0.5);
@@ -84,8 +85,22 @@ void PlayerCharacter::ConstructPlayerHUD(){
 void PlayerCharacter::DrawPlayerHUD() const{
     if (LevelUpBG && LevelUpBG->Position.y > -300){
         LevelUpBG->Draw();
-        LevelUpBG->Position.y -= 1.5f;
+        LevelUpBG->Position.y -= 2.5f;
     }
+
+    if (ChestObtainBG && ChestObtainBG->Position.x > 0 && chestBGdelay > 0.0f){
+        chestBGdelay -= 0.01f;
+        ChestObtainBG->Draw();
+        // cout << "chest bg delay before animation : " << chestBGdelay << endl;
+    }
+    if (ChestObtainBG && ChestObtainBG->Position.x > -400 && chestBGdelay <= 0.0f){
+        ChestObtainBG->Draw();
+        ChestObtainBG->Position.x -= 4.0f;
+    } else if (ChestObtainBG->Position.x <= -400 && chestBGdelay <= 0.0f){
+        chestBGdelay = 1.5f;
+    }
+
+
     if (HP_BarBG) HP_BarBG->Draw();
 
     if (HP_BarFILL) {
