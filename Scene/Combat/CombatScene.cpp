@@ -150,7 +150,7 @@ void CombatScene::Initialize() {
 
     //Items
     Healing_Amount = playerChar_combat->healthPotion;
-    Missile_Amount = playerChar_combat->missile + 5;
+    Missile_Amount = playerChar_combat->missile;
     Shield_Amount = playerChar_combat->shield;
 
     // !DEBUG
@@ -179,6 +179,10 @@ void CombatScene::Initialize() {
     Auto_btn = new Engine::ImageButton("btn/btn_auto.png","btn/btn_auto.png", 1395 , 736 , 156, 60);
     AddNewControlObject(Auto_btn);
     Auto_btn->SetOnClickCallback(bind(&CombatScene::AutoOnClick, this));
+
+    No_Healing = new Engine::Image("bg/bg_health_no.png", 1154, 419, 315, 136, 0, 0);
+    No_Missile = new Engine::Image("bg/bg_missile_no.png", 1154, 419, 315, 136, 0, 0);
+    No_Shield = new Engine::Image("bg/bg_shield_no.png", 1154, 419, 315, 136, 0, 0);
 }
 
 void CombatScene::AutoOnClick() {
@@ -237,6 +241,7 @@ void CombatScene::RemoveReplace(){
     Shield->SetOnClickCallback(bind(&CombatScene::Empty, this));
 }
 void CombatScene::UseHealth(){
+    No_Healing->Position.x = 1154;
     std::cout << "Healing Amount: " << Healing_Amount << endl;
     if(Healing_Amount <= 0){
         std::cout << "Ran out of healing!...\n";
@@ -244,6 +249,7 @@ void CombatScene::UseHealth(){
         RemoveReplace();
         return;
     }
+    else Health_out = false;
     // int newHp = min(maxHP, currentHP + health_weight);
     // SetPlayerHP(newHp);
     isUsingHealth = true;
@@ -255,14 +261,15 @@ void CombatScene::UseHealth(){
 }
 void CombatScene::UseMissile(){
     std::cout << "Missile Amount: " << Missile_Amount << endl;
+    No_Missile->Position.x = 1154;
     if(Missile_Amount <= 0){
         std::cout << "Ran out of Missiles!...\n";
         Missile_out = true;
         RemoveReplace();
         return;
     }
+    else Missile_out = false;
     // Enemy_currentHP -= missile_weight;
-
     // UpdateEnemyHP();
     isUsingMissile = true;
     Missile_Amount -= 1;
@@ -270,17 +277,19 @@ void CombatScene::UseMissile(){
     std::cout << "Used Missile!...\n";
     RemoveReplace();
     // playerturn = false;
-    CombatScene::CheckState();
+    // CombatScene::CheckState();
 }
 
 void CombatScene::UseShield(){
     std::cout << "Shield Amount: " << Shield_Amount << endl;
+    No_Shield->Position.x = 1154;
     if(Shield_Amount <= 0){
         std::cout << "Ran out of Shields!...\n";
         Shield_out = true;
         RemoveReplace();
         return;
-    } 
+    }
+    else Shield_out = false; 
     IsUsingShield = true;
     Shield_Amount -= 1;
     Shield_num->Text = "x " + to_string(static_cast<int>(round(Shield_Amount)));
@@ -321,10 +330,29 @@ void CombatScene::VirtualDraw() const {
         if (Healing_num) Healing_num->Draw();
         if (Missile_num) Missile_num->Draw();
         if (Shield_num) Shield_num->Draw();
-        // if (Health_out);
-        // if (Missile_out);
-        // if (Shield_out);
+
     }
+    if (Health_out && No_Healing->Position.x < 1600){
+            
+            No_Healing->Draw();
+            No_Healing->Position.x += 5.0f;
+            
+    
+        }
+        if (Missile_out && No_Missile->Position.x < 1600){
+            
+            No_Missile->Draw();
+            No_Missile->Position.x += 5.0f;
+            
+            
+        }
+        if (Shield_out && No_Shield->Position.x < 1600){
+            
+            No_Shield->Draw();
+            No_Shield->Position.x += 5.0f;
+            
+            
+        }
 }
 
 void CombatScene::UpdateHP(){
@@ -415,7 +443,7 @@ void CombatScene::Update(float deltaTime) {
             }
         }
     }
-
+    //Player ATK
     else if(playerturn && isPlayerATK){
         currDelay -= 1.0f * deltaTime;
         temp += 1;
@@ -424,7 +452,8 @@ void CombatScene::Update(float deltaTime) {
             temp = 0;
             playerturn = false;
             isPlayerATK = false;
-            currDelay = delayDuration;  
+            currDelay = delayDuration;
+            cout <<"Here in Player ATK!...\n";  
             // std::cout<<"END! Curr_HP: " << currentHP << endl;
         }
     }

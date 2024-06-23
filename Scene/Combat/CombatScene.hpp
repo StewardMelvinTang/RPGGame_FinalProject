@@ -45,7 +45,7 @@ public:
     void UseShield();
     //SetEnemy
     void UpdateEnemyHP();
-private:
+public:
     //bools
     bool playerturn;
     bool enemydead;
