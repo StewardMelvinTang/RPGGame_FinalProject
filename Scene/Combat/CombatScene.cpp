@@ -333,26 +333,17 @@ void CombatScene::VirtualDraw() const {
 
     }
     if (Health_out && No_Healing->Position.x < 1600){
-            
-            No_Healing->Draw();
-            No_Healing->Position.x += 5.0f;
-            
-    
-        }
-        if (Missile_out && No_Missile->Position.x < 1600){
-            
-            No_Missile->Draw();
-            No_Missile->Position.x += 5.0f;
-            
-            
-        }
-        if (Shield_out && No_Shield->Position.x < 1600){
-            
-            No_Shield->Draw();
-            No_Shield->Position.x += 5.0f;
-            
-            
-        }
+        No_Healing->Draw();
+        No_Healing->Position.x += 5.0f;
+    }
+    if (Missile_out && No_Missile->Position.x < 1600){
+        No_Missile->Draw();
+        No_Missile->Position.x += 5.0f;
+    }
+    if (Shield_out && No_Shield->Position.x < 1600){    
+        No_Shield->Draw();
+        No_Shield->Position.x += 5.0f;
+    }
 }
 
 void CombatScene::UpdateHP(){
