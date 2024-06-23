@@ -1,5 +1,5 @@
-#ifndef GAMESCENE_HALL_HPP
-#define GAMESCENE_HALL_HPP
+#ifndef FORESTSCENE_HPP
+#define FORESTSCENE_HPP
 #include <allegro5/allegro_audio.h>
 #include <list>
 #include <memory>
@@ -15,8 +15,7 @@
 #include "PlayerCharacter/PlayerCharacter.hpp"
 using namespace std;
 
-
-class GameSceneHall final : public Engine::IScene {
+class ForestScene final : public Engine::IScene {
 private:
 	ALLEGRO_SAMPLE_ID bgmId;
 	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
@@ -49,8 +48,6 @@ public:
 
 	PlayerEntry playerEntryData;
 
-	std::string lastScene = "";
-
 	// * Used for Map Tiling and Grouping
 	Group* TileMapGroup;
 	Group* BlockGroup;
@@ -77,8 +74,10 @@ public:
 
 	Engine::DialogScreen * activeDialog;
 
+    std::string lastScene = "";
+
     // * Default Function Initialization
-	explicit GameSceneHall() = default;
+	explicit ForestScene() = default;
 	void Initialize() override;
 	void Terminate() override;
 	void Update(float deltaTime) override;
