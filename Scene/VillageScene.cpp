@@ -24,6 +24,7 @@
 #include "Scene/ForestSceneUp.hpp"
 #include "Scene/GameScene_Hall.hpp"
 #include "Scene/VillageScene.hpp"
+#include "Scene/BossArenaScene.hpp"
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
@@ -77,7 +78,7 @@ void VillageScene::Initialize() {
 
 
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
-	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
+	Engine::Point spawnPoint; spawnPoint.y = 10; spawnPoint.x = 6;
 	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 	}
@@ -87,6 +88,7 @@ void VillageScene::Initialize() {
     }
 
 	if (playerChar == nullptr){
+		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
 		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
@@ -109,17 +111,24 @@ void VillageScene::Update(float deltaTime) {
 		if (!village_mapAllInitialized) return;
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
 
-
 		// * Back into gamescene hall
-		if (playerPos.y == 11 && playerPos.x == 20 && playerChar->directionFacing == DIRECTION_DOWN){
-			// playerChar->canMove = false;
+		if (playerPos.y == 10 && playerPos.x == 0 && playerChar->directionFacing == DIRECTION_LEFT){
             playerChar->ResetMovementInput();
 			playerChar->CheckPointSave(mapItems, mapBlocks);
 			GameSceneHall * scene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
 			scene->playerChar = this->playerChar;
-			scene->lastScene = "forestscene_up";
+			scene->lastScene = "villagescene";
 			Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
 		}
+
+		// else if (playerPos.y == 0 && playerPos.x == 13 && playerChar->directionFacing == DIRECTION_UP){
+        //     playerChar->ResetMovementInput();
+		// 	playerChar->CheckPointSave(mapItems, mapBlocks);
+		// 	BossArenaScene * scene = dynamic_cast<BossArenaScene*>(Engine::GameEngine::GetInstance().GetScene("bossarenascene"));
+		// 	scene->playerChar = this->playerChar;
+		// 	scene->lastScene = "villagescene";
+		// 	Engine::GameEngine::GetInstance().ChangeScene("bossarenascene");
+		// }
 
         if (!mapItems.empty()) {
             if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
@@ -138,17 +147,21 @@ void VillageScene::Update(float deltaTime) {
 
 		// * Detect if Player is near NPC or Chest
 		if (!npcList.empty()){
+			bool foundNPC = false;
             for (auto & npc : npcList){
                 if ((playerPos.y >= npc.y - 1 && playerPos.y <= npc.y + 1) && (playerPos.x >= npc.x - 1 && playerPos.x <= npc.x + 1)){
                     playerChar->canInteract = true;
                     playerChar->objToInteract_PosX = npc.x;
                     playerChar->objToInteract_PosY = npc.y;
-                } else {
-                    playerChar->canInteract = false;
-                    playerChar->objToInteract_PosX = -1;
-                    playerChar->objToInteract_PosY = -1;
-                }
+					foundNPC = true;
+                } 
             }
+
+			if (foundNPC == false){
+				playerChar->canInteract = false;
+				playerChar->objToInteract_PosX = -1;
+				playerChar->objToInteract_PosY = -1;
+			}
         }
 
 		if (playerChar->canInteract) return;
@@ -221,8 +234,11 @@ void VillageScene::OnKeyDown(int keyCode) {
 		// * Interaction
 		if (playerChar->canInteract == true && activeDialog == nullptr) {
 			cout << "Interacted!\n";
-			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
+			if (playerChar->objToInteract_PosY == npcList[1].y && playerChar->objToInteract_PosX == npcList[1].x){
 				AddNewControlObject(activeDialog = new Engine::DialogScreen("Is that you Jason???", Engine::GameEngine::currentActivePlayerName ,1.0f, playerChar, 1));
+				activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
+			} else if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Intruder! How dare you enter our domain!", "Axolot" ,1.0f, playerChar, 10));
 				activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
 			}
 
@@ -336,6 +352,7 @@ void VillageScene::ConstructBlock(int locX, int locY, BlockType block) {
 		case NPC_INSPECTOR: blockImgPath = "char/npc/npc_idle_1.png"; break;
 		case ENEMY_KNIGHT: blockImgPath = "enemy/enemy_knight_idle.png"; break;
         case NPC_JASON : blockImgPath = "char/npc/npc2_idle.png"; break;
+        case ENEMY_AXOLOT : blockImgPath = "enemy/enemy_axolot_idle.png"; break;
 		default: break;
 	}
 	if (blockImgPath.empty()) return;
@@ -433,6 +450,8 @@ void VillageScene::ReadMap() {
 			case '7' : mapData.push_back(7); break; //NPC_Inspector
 			case '8' : mapData.push_back(8); break; // Enemy
 			case '9' : mapData.push_back(9); break; // NPC_Jason
+			case 'a' : mapData.push_back(10); break; // Enemy Axolot
+			case 'b' : mapData.push_back(11); break; // Enemy Boss
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -505,6 +524,22 @@ void VillageScene::ReadMap() {
 					npcList.push_back(p);
 					break;
 				}
+				case 10: {
+					mapBlocks[i][j] = ENEMY_AXOLOT; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
+				case 11: {
+					mapBlocks[i][j] = ENEMY_BOSS; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
 
 				default:
 			}
@@ -542,6 +577,32 @@ void VillageScene::OnDialogDone(IControl * currActiveDialog){
 		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am more than ready", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
 		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
 	} 
+
+
+	else if (activeDialog->dialogID == 10){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I’m here to defeat the Shadow King and bring peace to Eldoria. Step aside, or face me.", Engine::GameEngine::currentActivePlayerName, 1.35f, playerChar, 11));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));
+	} else if (activeDialog->dialogID == 11){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Foolish human! The Shadow King’s power is unmatched. If you wish to proceed, \nyou must first prove your worth against me!", "Axolot", 2.0f, playerChar, 12));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));		
+	} else if (activeDialog->dialogID == 12){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Then prepare yourself. I won’t back down.", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 13));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));		
+	}  else if (activeDialog->dialogID == 13){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Very well. Let’s see if you have the strength to challenge the might of the Shadow King!", "Axolot", 2.0f, playerChar, 14));
+		activeDialog->SetOnClickCallback(bind(&VillageScene::OnDialogDone, this, activeDialog));		
+	} else if (activeDialog->dialogID == 14){
+		// * Combat vs Axolot
+		playerChar->CheckPointSave(mapItems, mapBlocks);
+
+		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
+		loadingScene->InitLoadingScreen("combat-scene", 0.5f);
+		Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
+
+		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
+		Player->playerChar_combat = this->playerChar;
+		Player->enemy1 = true;
+	}
 	
 	else activeDialog = nullptr;
 }

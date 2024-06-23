@@ -22,12 +22,14 @@
 #include "PlayerCharacter/PlayerCharacter.hpp"
 
 #include "Scene/ForestSceneUp.hpp"
+#include "Scene/GameScene_Hall.hpp"
+#include "Scene/BossArenaScene.hpp"
+#include "Scene/VillageScene.hpp"
 
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include "Scene/Combat/CombatScene.hpp"
 #include "Scene/Loading/LoadingScene.hpp"
-#include "Scene/GameScene_Hall.hpp"
 using namespace std;
 
 
@@ -40,17 +42,17 @@ using namespace std;
 #define KEYBOARD_F 6
 
 
-const std::vector<Engine::Point> ForestScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
-const int ForestScene::MapWidth = 25, ForestScene::MapHeight = 13;
-const int ForestScene::BlockSize = 64;
+const std::vector<Engine::Point> BossArenaScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
+const int BossArenaScene::MapWidth = 25, BossArenaScene::MapHeight = 13;
+const int BossArenaScene::BlockSize = 64;
 
-bool forest_mapAllInitialized = false;
+bool boss_mapAllInitialized = false;
 
-Engine::Point ForestScene::GetClientSize() {
+Engine::Point BossArenaScene::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
-void ForestScene::Initialize() {
-	Engine::GameEngine::currentActiveScene = "forestscene_up";
+void BossArenaScene::Initialize() {
+	Engine::GameEngine::currentActiveScene = "bossarenascene";
 	mapState.clear();
     mapItems.clear();
 	mapBlocks.clear();
@@ -63,7 +65,7 @@ void ForestScene::Initialize() {
 	// * Group Initialization
 
 	AddNewObject(TileMapGroup = new Group());
-	AddNewObject(new Engine::Image("maps/forestsceneup_overlay.png", 0, 0, 1600, 832));
+	// AddNewObject(new Engine::Image("maps/bossarenascene_overlay.png", 0, 0, 1600, 832));
 	AddNewObject(ItemGroup = new Group());
 	AddNewObject(BlockGroup = new Group());
 
@@ -76,17 +78,17 @@ void ForestScene::Initialize() {
 
 
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
-	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
+	Engine::Point spawnPoint; spawnPoint.y = 10; spawnPoint.x = 6;
 	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 	}
 
-    if (lastScene == "gamescene_hall"){
-        spawnPoint.y = 11; spawnPoint.x = 20;
+    if (lastScene == "villagescene"){
+        spawnPoint.y = 11; spawnPoint.x = 12;
     }
 
 	if (playerChar == nullptr){
-		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
+        spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
 		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
@@ -95,208 +97,145 @@ void ForestScene::Initialize() {
 	}
 
     if (playerChar) playerChar->canMove = true;
-	forest_mapAllInitialized = true;
+	boss_mapAllInitialized = true;
+
+    playerChar->CheckPointSave(mapItems, mapBlocks); 
 }
 
 
-void ForestScene::Terminate() {
+void BossArenaScene::Terminate() {
 	IScene::Terminate();
 
 }
-void ForestScene::Update(float deltaTime) {
+void BossArenaScene::Update(float deltaTime) {
     if (playerChar != nullptr) {
 		playerChar->Update(deltaTime);
-		if (!forest_mapAllInitialized) return;
+
+		if (!boss_mapAllInitialized) return;
+        
+
 		Engine::Point playerPos = playerChar->GetPlayerPositionAtMap();
-
-
-		// * Back into gamescene hall
-		if (playerPos.y == 11 && playerPos.x == 20 && playerChar->directionFacing == DIRECTION_DOWN){
-			// playerChar->canMove = false;
-            playerChar->ResetMovementInput();
-			playerChar->CheckPointSave(mapItems, mapBlocks);
-			GameSceneHall * scene = dynamic_cast<GameSceneHall*>(Engine::GameEngine::GetInstance().GetScene("gamescene_hall"));
-			scene->playerChar = this->playerChar;
-			scene->lastScene = "forestscene_up";
-			Engine::GameEngine::GetInstance().ChangeScene("gamescene_hall");
-		}
-
-        if (!mapItems.empty()) {
-            if (mapItems[playerPos.y][playerPos.x] != ITEM_BLANK){
-                playerChar->OverlapWithItem(mapItems[playerPos.y][playerPos.x], playerPos.y, playerPos.x);
-                for (auto & item : ItemGroup->GetObjects()){
-                    if (item->Position.y == playerPos.y * BlockSize && item->Position.x == playerPos.x * BlockSize){
-                        ItemGroup->RemoveObject(item->GetObjectIterator());
-                        mapItems[playerPos.y][playerPos.x] = ITEM_BLANK;
-                        break;
-                    }
-                }
-            }
-
-        }
-
 
 		// * Detect if Player is near NPC or Chest
 		if (!npcList.empty()){
+			bool foundNPC = false;
             for (auto & npc : npcList){
                 if ((playerPos.y >= npc.y - 1 && playerPos.y <= npc.y + 1) && (playerPos.x >= npc.x - 1 && playerPos.x <= npc.x + 1)){
                     playerChar->canInteract = true;
                     playerChar->objToInteract_PosX = npc.x;
                     playerChar->objToInteract_PosY = npc.y;
+					foundNPC = true;
                 } else {
                     playerChar->canInteract = false;
-                    playerChar->objToInteract_PosX = -1;
-                    playerChar->objToInteract_PosY = -1;
+				    playerChar->objToInteract_PosX = -1;
+				    playerChar->objToInteract_PosY = -1;
                 }
             }
         }
-
-		if (playerChar->canInteract) return;
-
-		if (chestList.empty()) return;
-		bool foundChest = false;
-		for (auto & chest : chestList){
-			if (playerPos.y == chest.y + 1 && playerPos.x == chest.x && playerChar->directionFacing == DIRECTION_UP && mapBlocks[chest.y][chest.x] == BLOCK_CHEST){
-				playerChar->canInteract = true;
-				playerChar->objToInteract_PosX = chest.x;
-				playerChar->objToInteract_PosY = chest.y;
-				foundChest = true;
-			} 
-		}
-		if (foundChest == false) {
-			playerChar->canInteract = false;
-			playerChar->objToInteract_PosX = -1;
-			playerChar->objToInteract_PosY = -1;
-		}
 	}
 }
-void ForestScene::Draw() const {
+void BossArenaScene::Draw() const {
 	IScene::Draw();
     if (playerChar != nullptr && (!activeDialog || activeDialog->Enabled == false) && !isGamePaused){
 		playerChar->Draw();
 	} 
 }
-void ForestScene::OnMouseDown(int button, int mx, int my) {
+void BossArenaScene::OnMouseDown(int button, int mx, int my) {
 	IScene::OnMouseDown(button, mx, my);
 }
-void ForestScene::OnMouseMove(int mx, int my) {
+void BossArenaScene::OnMouseMove(int mx, int my) {
 	IScene::OnMouseMove(mx, my);
 	const int x = mx / BlockSize;
 	const int y = my / BlockSize;
 }
 
-void ForestScene::OnMouseUp(int button, int mx, int my) {
+void BossArenaScene::OnMouseUp(int button, int mx, int my) {
 	IScene::OnMouseUp(button, mx, my);
 }
-void ForestScene::OnKeyDown(int keyCode) {
+void BossArenaScene::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (playerChar != nullptr && playerChar->canMove) playerChar->SetMovementState(keyCode, true);
+
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
 		ToogleGamePaused(!isGamePaused);
-	}
-	if (keyCode == 3){
-		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
-		Player->playerChar_combat = this->playerChar;
-		Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
 	}
 
 	if (keyCode == KEYBOARD_F){
 		// * Interaction
 		if (playerChar->canInteract == true && activeDialog == nullptr) {
 			cout << "Interacted!\n";
-			if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
-				AddNewControlObject(activeDialog = new Engine::DialogScreen("Who are you?", Engine::GameEngine::currentActivePlayerName ,2.0f, playerChar, 1));
-				activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
+			if (playerChar->objToInteract_PosY == npcList[1].y && playerChar->objToInteract_PosX == npcList[1].x){
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Is that you Jason???", Engine::GameEngine::currentActivePlayerName ,1.0f, playerChar, 1));
+				activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));
+			} else if (playerChar->objToInteract_PosY == npcList[0].y && playerChar->objToInteract_PosX == npcList[0].x){
+				AddNewControlObject(activeDialog = new Engine::DialogScreen("Intruder! How dare you enter our domain!", "Axolot" ,1.0f, playerChar, 10));
+				activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));
 			}
 
-			else if (playerChar->objToInteract_PosY == chestList[0].y && playerChar->objToInteract_PosX == chestList[0].x){
-				mapBlocks[chestList[0].y][chestList[0].x] = CHEST_OPENED;
-				for (auto & block : BlockGroup->GetObjects()){
-					if (block->Position.y == chestList[0].y * BlockSize && block->Position.x == chestList[0].x * BlockSize){
-
-						BlockGroup->RemoveObject(block->GetObjectIterator());
-						ConstructBlock(chestList[0].x, chestList[0].y, CHEST_OPENED);
-						break;
-					}
-				}
-				if (playerChar->ChestObtainBG) delete playerChar->ChestObtainBG;
-				playerChar->ChestObtainBG = new Engine::Image("bg/chestobtain_02.png", 1, 0, 1600, 832);
-				playerChar->chestBGdelay = 1.5f;
-
-				playerChar->healthPotion++;
-				playerChar->shield++;
-				playerChar->missile++;
-				playerChar->AddEXP(120);
-				playerChar->UpdateItemHotBar();
-			} 
 		}
 	}
 }
 
-void ForestScene::OnKeyUp(int keyCode) {
+void BossArenaScene::OnKeyUp(int keyCode) {
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, false);
 }
 
-int ForestScene::ClampMapPos(int pos, int max){
+int BossArenaScene::ClampMapPos(int pos, int max){
 	if (pos >= max) {
 		return max;
 	} else return pos;
 }
-void ForestScene::ConstructGenerativeGrassTile(int locX, int locY){
+void BossArenaScene::ConstructGenerativeGrassTile(int locX, int locY){
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	int tileRandom = rand() % 10; // 10 % Grasses, 10% Flower, 60% Default Grass Tile
-	string grassTilePath = "play/grass_1.png";
+	string grassTilePath = "play/stage3/dirt_1.png";
 	switch (tileRandom) {
 		case 0:  // * Grasses
-			grassTilePath = "play/grass_2.png";
+			grassTilePath = "play/stage3/dirt_2.png";
 		break;
 		case 1: // * Flowers
-			grassTilePath = "play/grass_3.png";
+			grassTilePath = "play/stage3/dirt_3.png";
 		break;
 		default:
-			grassTilePath = "play/grass_1.png";
+			grassTilePath = "play/stage3/dirt_1.png";
 		break;
 	}
 
 	TileMapGroup->AddNewObject(new Engine::Image(grassTilePath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
-void ForestScene::ConstructGenerativePathTile(int locX, int locY){
+void BossArenaScene::ConstructGenerativePathTile(int locX, int locY){
 
 	// cout << "Curr Loc Y : " << locY << " Loc X : " << locX << " + Y : " << ClampMapPos(locY + 1, MapHeight - 1) << " : " << (mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_FLOOR ? " FLOOR " : " DIRT ") << endl;
 	if (locY == MapHeight - 1 && mapState[locY][locX] == TILE_DIRT){
 		int topBottomTileRand = rand() % 2;
-		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
-		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_leftright.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		else TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_leftright2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 	}
 	else if (mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_FLOOR && mapState[locY][locX] != TILE_CORNERBTMLEFT && mapState[locY][locX] != TILE_CORNERBTMRIGHT && mapState[locY][locX] != TILE_CORNERTOPLEFT && mapState[locY][locX] != TILE_CORNERTOPRIGHT) { // * Bottom is a floor, creating different tiles
 		int topBottomTileRand = rand() % 2;
-		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
-		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtTopBottom_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		if (topBottomTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_topdown_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		else TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_topdown_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 	} else if ((mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_DIRT || mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_CORNERBTMLEFT || mapState[ClampMapPos(locY + 1, MapHeight - 1)][locX] == TILE_CORNERBTMRIGHT)  && mapState[locY][locX] != TILE_CORNERBTMLEFT && mapState[locY][locX] != TILE_CORNERBTMRIGHT && mapState[locY][locX] != TILE_CORNERTOPLEFT && mapState[locY][locX] != TILE_CORNERTOPRIGHT){
-
 		int leftRightTileRand = rand() % 2;
-		if (leftRightTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_1.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
-		else TileMapGroup->AddNewObject(new Engine::Image("play/dirtLeftRight_2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		if (leftRightTileRand == 0) TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_leftright.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
+		else TileMapGroup->AddNewObject(new Engine::Image("play/stage3/path_leftright2.png", locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 	} else {
-		string imgPathFile = "play/dirt.png";
+		string imgPathFile = "play/stage3/dirt_2.png";
 		switch(mapState[locY][locX]){
 			case TILE_CORNERTOPRIGHT:
-				imgPathFile = "play/dirtCorner_TopRight.png";
+				imgPathFile = "play/stage3/dirt_2.png";
 			break;
 			case TILE_CORNERBTMRIGHT:
-				imgPathFile = "play/dirtCorner_BottomRight.png";
+				imgPathFile = "play/stage3/dirt_2.png";
 			break;
 			case TILE_CORNERTOPLEFT:
-				imgPathFile = "play/dirtCorner_TopLeft.png";
+				imgPathFile = "play/stage3/dirt_2.png";
 			break;
 			case TILE_CORNERBTMLEFT:
-				imgPathFile = "play/dirtCorner_BottomLeft.png";
-			break;
-			case TILE_MAR:
-				imgPathFile = "play/newgrass.png";
+				imgPathFile = "play/stage3/dirt_2.png";
 			break;
 			default:
-				imgPathFile = "play/dirt.png";
+				imgPathFile ="play/stage3/dirt_2.png";
 			break;
 		}
 
@@ -305,7 +244,7 @@ void ForestScene::ConstructGenerativePathTile(int locX, int locY){
 	
 }
 
-void ForestScene::ConstructBlock(int locX, int locY, BlockType block) {
+void BossArenaScene::ConstructBlock(int locX, int locY, BlockType block) {
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	string blockImgPath = "play/Base_blocks.png";
 	switch (block){
@@ -315,6 +254,9 @@ void ForestScene::ConstructBlock(int locX, int locY, BlockType block) {
 		case CHEST_OPENED: blockImgPath = "play/chest_opened.png"; break;
 		case NPC_INSPECTOR: blockImgPath = "char/npc/npc_idle_1.png"; break;
 		case ENEMY_KNIGHT: blockImgPath = "enemy/enemy_knight_idle.png"; break;
+        case NPC_JASON : blockImgPath = "char/npc/npc2_idle.png"; break;
+        case ENEMY_AXOLOT : blockImgPath = "enemy/enemy_axolot_idle.png"; break;
+        case ENEMY_BOSS : blockImgPath = "enemy/enemy_enemy1.png"; break;
 		default: break;
 	}
 	if (blockImgPath.empty()) return;
@@ -322,7 +264,7 @@ void ForestScene::ConstructBlock(int locX, int locY, BlockType block) {
 	
 }
 
-void ForestScene::ConstructItem(int locX, int locY, ItemType item){
+void BossArenaScene::ConstructItem(int locX, int locY, ItemType item){
 	if (locX < 0 || locX >= MapWidth || locY < 0 || locY >= MapHeight) return;
 	string itemImgPath = "play/Base_blocks.png";
 	switch (item){
@@ -338,7 +280,7 @@ void ForestScene::ConstructItem(int locX, int locY, ItemType item){
 	ItemGroup->AddNewObject(new Engine::Image(itemImgPath, locX * BlockSize, locY * BlockSize, BlockSize, BlockSize));
 }
 
-void ForestScene::ReadMap() {
+void BossArenaScene::ReadMap() {
 	std::string filename = std::string("Resource/map/") + Engine::GameEngine::currentActiveScene + "_path.txt";
 	// Read map file.
     cout << filename << endl;
@@ -410,7 +352,10 @@ void ForestScene::ReadMap() {
 			case '5': mapData.push_back(5); break; // Shield
 			case '6' : mapData.push_back(6); break; // Chest (Opened)
 			case '7' : mapData.push_back(7); break; //NPC_Inspector
-			case '8' : mapData.push_back(8); break;
+			case '8' : mapData.push_back(8); break; // Enemy
+			case '9' : mapData.push_back(9); break; // NPC_Jason
+			case 'a' : mapData.push_back(10); break; // Enemy Axolot
+			case 'b' : mapData.push_back(11); break; // Enemy Boss
 			case '\n':
 			case '\r':
 				if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -475,6 +420,30 @@ void ForestScene::ReadMap() {
 					npcList.push_back(p);
 					break;					
 				}
+                case 9: {
+					mapBlocks[i][j] = NPC_JASON; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;
+				}
+				case 10: {
+					mapBlocks[i][j] = ENEMY_AXOLOT; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
+				case 11: {
+					mapBlocks[i][j] = ENEMY_BOSS; 
+					Engine::Point p; 
+					p.x = j; 
+					p.y = i;
+					npcList.push_back(p);
+					break;					
+				}
 
 				default:
 			}
@@ -493,7 +462,7 @@ void ForestScene::ReadMap() {
 	}
 }
 
-void ForestScene::ConstructUI() {
+void BossArenaScene::ConstructUI() {
 	
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -501,23 +470,33 @@ void ForestScene::ConstructUI() {
 	
 }
 
-void ForestScene::OnDialogDone(IControl * currActiveDialog){
+void BossArenaScene::OnDialogDone(IControl * currActiveDialog){
 	if (currActiveDialog == nullptr) return;
 	RemoveControl(currActiveDialog->controlIterator);
 
 	if (activeDialog->dialogID == 1){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am the guardian of this forest, a sentinel sworn to protect the ancient shrine. \nNone shall pass without proving their worth.", "Gold Knight", 2.0f, playerChar, 2));
-		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I'm Jason, a friend of Old Man. I've been sent to assist you. \nHead forward if you are ready for the final boss fight...", "Jason", 2.0f, playerChar, 2));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));
 	} else if (activeDialog->dialogID == 2){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am " + Engine::GameEngine::currentActivePlayerName + ", sent by Old Man. I seek resources to defeat the monsters.", Engine::GameEngine::currentActivePlayerName, 1.5f, playerChar, 3));
-		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
-	} else if (activeDialog->dialogID == 3){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("The relic holds great power and must not fall into the wrong hands. \nTo claim it, you must first defeat me in combat. \nOnly then will you be deemed worthy. ", "Gold Knight", 3.0f, playerChar, 4));
-		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));		
-	} else if (activeDialog->dialogID == 4){
-		AddNewControlObject(activeDialog = new Engine::DialogScreen("Prepare yourself, brave one. \nLet us see if you have the strength and courage required.", "Gold Knight", 3.0f, playerChar, 5));
-		activeDialog->SetOnClickCallback(bind(&ForestScene::OnDialogDone, this, activeDialog));
-	} else if (activeDialog->dialogID == 5){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I am more than ready", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 3));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));
+	} 
+
+
+	else if (activeDialog->dialogID == 10){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("I’m here to defeat the Shadow King and bring peace to Eldoria. Step aside, or face me.", Engine::GameEngine::currentActivePlayerName, 1.35f, playerChar, 11));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));
+	} else if (activeDialog->dialogID == 11){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Foolish human! The Shadow King’s power is unmatched. If you wish to proceed, \nyou must first prove your worth against me!", "Axolot", 2.0f, playerChar, 12));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));		
+	} else if (activeDialog->dialogID == 12){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Then prepare yourself. I won’t back down.", Engine::GameEngine::currentActivePlayerName, 1.0f, playerChar, 13));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));		
+	}  else if (activeDialog->dialogID == 13){
+		AddNewControlObject(activeDialog = new Engine::DialogScreen("Very well. Let’s see if you have the strength to challenge the might of the Shadow King!", "Axolot", 2.0f, playerChar, 14));
+		activeDialog->SetOnClickCallback(bind(&BossArenaScene::OnDialogDone, this, activeDialog));		
+	} else if (activeDialog->dialogID == 14){
+		// * Combat vs Axolot
 		playerChar->CheckPointSave(mapItems, mapBlocks);
 
 		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(Engine::GameEngine::GetInstance().GetScene("loading-scene"));
@@ -532,7 +511,7 @@ void ForestScene::OnDialogDone(IControl * currActiveDialog){
 	else activeDialog = nullptr;
 }
 
-void ForestScene::ToogleGamePaused(bool newState){
+void BossArenaScene::ToogleGamePaused(bool newState){
 	if (isGameOver == true || !playerChar) return;
 	this->isGamePaused = newState;
 	std::cout << "Paused Function Called!\n";
@@ -542,9 +521,9 @@ void ForestScene::ToogleGamePaused(bool newState){
 		AddNewControlObject(BTNPause_LoadCP = new Engine::ImageButton("btn/btn_loadcheckpoint_normal.png", "btn/btn_loadcheckpoint_hover.png", 681, 311, 238, 57));
 		AddNewControlObject(BTNPause_BackMenu = new Engine::ImageButton("btn/btn_mainmenu_normal.png", "btn/btn_mainmenu_hover.png", 681, 388, 238, 57));
 
-		BTNPause_Resume->SetOnClickCallback(std::bind(&ForestScene::OnClickBTNResume, this));
-		BTNPause_LoadCP->SetOnClickCallback(std::bind(&ForestScene::OnClickBTNLoadCheckpoint, this));
-		BTNPause_BackMenu->SetOnClickCallback(std::bind(&ForestScene::OnClickBTNBackMenu, this));
+		BTNPause_Resume->SetOnClickCallback(std::bind(&BossArenaScene::OnClickBTNResume, this));
+		BTNPause_LoadCP->SetOnClickCallback(std::bind(&BossArenaScene::OnClickBTNLoadCheckpoint, this));
+		BTNPause_BackMenu->SetOnClickCallback(std::bind(&BossArenaScene::OnClickBTNBackMenu, this));
 	} else {
 		if (IMG_PauseMenuBG) RemoveObject(IMG_PauseMenuBG->GetObjectIterator());
 		if (BTNPause_LoadCP) RemoveObject(BTNPause_LoadCP->GetObjectIterator());
@@ -555,17 +534,17 @@ void ForestScene::ToogleGamePaused(bool newState){
 	
 }
 
-void ForestScene::OnClickBTNResume(){
+void BossArenaScene::OnClickBTNResume(){
 	ToogleGamePaused(false);
 }
-void ForestScene::OnClickBTNBackMenu(){
+void BossArenaScene::OnClickBTNBackMenu(){
     if (playerChar) {
         delete playerChar;
         playerChar = nullptr;
     }
 	Engine::GameEngine::GetInstance().ChangeScene("start-scene");
 }
-void ForestScene::OnClickBTNLoadCheckpoint(){
+void BossArenaScene::OnClickBTNLoadCheckpoint(){
 
 }
 

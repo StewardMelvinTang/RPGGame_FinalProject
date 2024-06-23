@@ -79,7 +79,7 @@ void GameSceneHall::Initialize() {
 
 	// * Load Player Data from Profile Based Saving System
 	playerEntryData = Engine::GameEngine::GetInstance().GetCurrentActivePlayer();
-	Engine::Point spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(10, 6, BlockSize);
+	Engine::Point spawnPoint; spawnPoint.y = 6; spawnPoint.x = 10;
 	if (playerEntryData.x != -1 && playerEntryData.y != -1 && playerEntryData.lastScene == Engine::GameEngine::currentActiveScene) {
 		spawnPoint.y = playerEntryData.y; spawnPoint.x = playerEntryData.x;
 	}
@@ -87,9 +87,13 @@ void GameSceneHall::Initialize() {
 	if (lastScene == "forestscene_up"){
         spawnPoint.y = 0; spawnPoint.x = 5;
 		playerChar->directionFacing = DIRECTION_DOWN;
-    }
+    } else if (lastScene == "villagescene"){
+        spawnPoint.y = 9; spawnPoint.x = 24;
+		playerChar->directionFacing = DIRECTION_LEFT;
+	}
 
 	if (playerChar == nullptr){
+		spawnPoint = Engine::GameEngine::GetInstance().GridToXYPosition(spawnPoint.x, spawnPoint.y, BlockSize);
 		playerChar = new PlayerCharacter(spawnPoint.x, spawnPoint.y , 3.0, 100, 50, BlockSize, Engine::GameEngine::currentActiveScene, playerEntryData);
 	} else {
 		playerChar->x = spawnPoint.x * BlockSize;
@@ -215,7 +219,7 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	if (playerChar != nullptr) playerChar->SetMovementState(keyCode, true);
 
 	if (keyCode == 28 && playerChar){
-		playerChar->SetCurrentHP(playerChar->GetCurrentHP() - 20);
+		playerChar->speed = 10.0f;
 	}
 
 	if (keyCode == KEYBOARD_ESC){ // * Pause Menu
@@ -232,9 +236,6 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 	}
 
 	if (keyCode == 3){
-<<<<<<< Updated upstream
-		playerChar->CheckPointSave(mapItems, mapBlocks);
-=======
 		// CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		// Player->playerChar_combat = this->playerChar;
 		// Engine::GameEngine::GetInstance().ChangeScene("combat-scene");
@@ -245,7 +246,6 @@ void GameSceneHall::OnKeyDown(int keyCode) {
 		loadingScene->InitLoadingScreen("combat-scene", 0.5f);
 		Engine::GameEngine::GetInstance().ChangeScene("loading-scene");
 
->>>>>>> Stashed changes
 		CombatScene *Player = dynamic_cast<CombatScene *>(Engine::GameEngine::GetInstance().GetScene("combat-scene"));
 		Player->playerChar_combat = this->playerChar;
 	}

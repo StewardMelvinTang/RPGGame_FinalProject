@@ -15,6 +15,7 @@ using namespace std;
 #include "Scene/Loading/LoadingScene.hpp"
 #include "Scene/GameScene_Hall.hpp"
 #include "Scene/ForestSceneUp.hpp"
+#include "Scene/BossArenaScene.hpp"
 #include "Scene/VillageScene.hpp"
 #include "PlayerCharacter.hpp"
 #include "Engine/Collider.hpp"
@@ -297,6 +298,9 @@ bool PlayerCharacter::CollisionCheck(float newX, float newY, Enum_Direction dir)
     } else if (Engine::GameEngine::currentActiveScene == "villagescene"){
         VillageScene* currScene = dynamic_cast<VillageScene*>(Engine::GameEngine::GetInstance().GetScene("villagescene"));
         blocks = currScene->BlockGroup->GetObjects();
+    } else if (Engine::GameEngine::currentActiveScene == "bossarenascene"){
+        BossArenaScene* currScene = dynamic_cast<BossArenaScene*>(Engine::GameEngine::GetInstance().GetScene("bossarenascene"));
+        blocks = currScene->BlockGroup->GetObjects();
     } 
 
     if (newX < 0 || newX > w || newY < 0 || newY > h) {
@@ -452,6 +456,7 @@ void PlayerCharacter::AddEXP(int amount){
         // Update stats and UI for each level up
         attackDamage *= 1.1f;
         maxHP += 10;
+        currentHP = maxHP;
 
         std::string expString = "LVL " + std::to_string(playerLevel) + " " + std::to_string(currentEXP) + "/" + std::to_string(maxEXP);
         TXT_EXPVal = new Engine::Label(expString, "pixel-font.ttf", 30, 20, 740, 255, 255, 255, 255, 0.0, 0.5);
@@ -506,6 +511,10 @@ void PlayerCharacter::SaveSceneItemBlockData(std::vector<std::vector<ItemType>> 
                 parseString[i][j] = '8';
             } else if (blockData[i][j] == NPC_JASON){
                 parseString[i][j] = '9';
+            } else if (blockData[i][j] == ENEMY_AXOLOT){
+                parseString[i][j] = 'a';
+            } else if (blockData[i][j] == ENEMY_BOSS){
+                parseString[i][j] = 'b';
             }
 
             file << parseString[i][j];
