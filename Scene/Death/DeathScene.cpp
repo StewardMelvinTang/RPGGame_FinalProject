@@ -40,7 +40,7 @@ void DeathScene::Initialize() {
 
 void DeathScene::BackOnClick(){
     Terminate();
-    Engine::GameEngine::GetInstance().ChangeScene(Engine::GameEngine::currentActiveScene);
+    Engine::GameEngine::GetInstance().ChangeScene(backMenuLevel);
 }
 
 void DeathScene::Terminate() {

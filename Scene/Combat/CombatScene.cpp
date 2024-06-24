@@ -52,15 +52,15 @@ void CombatScene::Initialize() {
     temp2 = 20.0f;
     targethealth = 25;
 
-    // isBoss = true; // !DEBUG
-    // boss_healing_amount = 10;
-    // boss_missile_amount = 4;
-    // boss_shield_amount = 2;
-    // boss_maxHp = 120;
-    // boss_currentHp = boss_maxHp;
-    // boss_attack_weight = 10;
-    // boss_healing_weight = 25;
-    // boss_missile_weight = 20;
+    isBoss = true; // !DEBUG
+    boss_healing_amount = 10;
+    boss_missile_amount = 4;
+    boss_shield_amount = 2;
+    boss_maxHp = 120;
+    boss_currentHp = boss_maxHp;
+    boss_attack_weight = 10;
+    boss_healing_weight = 25;
+    boss_missile_weight = 20;
 
     std::string difficulty = Engine::GameEngine::GetInstance().GetCurrentActivePlayer().difficulty;
 
@@ -69,19 +69,19 @@ void CombatScene::Initialize() {
         
     }
     else if(difficulty == "Easy"){
-        Enemy_ATK = Enemy_ATK_Easy;
-        Enemy_maxATK = Enemy_maxATK_Easy;
-        Enemy_currentHP = Enemy_currentHP_Easy;
-        Enemy_maxHP = Enemy_maxHP_Easy;
+        Enemy_ATK *= 1.7;
+        Enemy_maxATK *= 1.7;
+        Enemy_currentHP *= 1.1;
+        Enemy_maxHP *= 1.1;
     }
     else if(difficulty == "Hard"){
-        Enemy_ATK = Enemy_ATK_Hard;
-        Enemy_maxATK = Enemy_maxATK_Hard;
-        Enemy_currentHP = Enemy_currentHP_Hard;
-        Enemy_maxHP = Enemy_maxHP_Hard;
+        Enemy_ATK *= 2;
+        Enemy_maxATK *= 2;
+        Enemy_currentHP *= 1.5;
+        Enemy_maxHP *= 1.5;
     }
 
-    
+
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
 	int halfW = w / 2;
@@ -164,15 +164,15 @@ void CombatScene::Initialize() {
     PlayerSprite = new Engine::Image(avatarFilePath, 104, 440, 413, 392, 0, 0);
     AddNewObject(PlayerSprite);
 
+
     if(enemy1){
         EnemySprite = new Engine::Image("enemy/enemy_knight_combat.png", 1235, 290, 572, 319, 0.5, 0.5);
         AddNewObject(EnemySprite);
     }
     else if(enemy2){
         EnemySprite = new Engine::Image("enemy/enemy_axolot_combat.png", 1235, 290, 572, 319, 0.5, 0.5);
-        AddNewObject(EnemySprite);  
+        AddNewObject(EnemySprite);
     }
-    
     // cout << "Initializeed\n";
 
     //Items
@@ -225,10 +225,8 @@ void CombatScene::EscapeOnClick(){
     int num = rand() % 50;
     if (num % 2 == 0){
         CombatScene::Terminate();
-        enemy1 = false;
-        enemy2 = false;
         Engine::GameEngine::GetInstance().ChangeScene(Engine::GameEngine::currentActiveScene);
-
+        
         return;
     }
     playerturn = false;
@@ -242,15 +240,12 @@ void CombatScene::AttackOnClick(){
         return;
     }
     isPlayerATK = true;
-    // Enemy_currentHP -= playerATK - 1;
-    UpdateEnemyHP(playerATK);
-    // CheckState();
     // UpdateEnemyHP();
-    CombatScene::CheckState();
-    playerturn = false;
+    // CombatScene::CheckState();
+    // playerturn = false;
 }
-void CombatScene::UpdateEnemyHP(int dmg){
-    Enemy_currentHP -= dmg;
+void CombatScene::UpdateEnemyHP(){
+    Enemy_currentHP -= 1;
     if (Enemy_TXT_HPVal) Enemy_TXT_HPVal->Text = "HP: " + to_string(static_cast<int>(round(Enemy_currentHP)));
     if (Enemy_HP_BarFILL) {
         std::cout<<"Enemy_Curr_HP: " << currentHP << endl;
@@ -267,7 +262,7 @@ void CombatScene::ItemsOnClick(){
     Shield->SetOnClickCallback(bind(&CombatScene::UseShield, this));
 }
 void CombatScene::RemoveReplace(){
-    std::cout << "Removing Buttons on Items!..." << endl;
+    std::cout << "Removing Buttons on Items!../n" << endl;
     displayitems = false;
     Healing->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
     Missile->SetOnClickCallback(bind(&CombatScene::Empty, this)); 
@@ -283,14 +278,14 @@ void CombatScene::UseHealth(){
         return;
     }
     else Health_out = false;
-    int newHp = min(maxHP, currentHP + health_weight);
-    SetPlayerHP(newHp);
-    // isUsingHealth = true;
+    // int newHp = min(maxHP, currentHP + health_weight);
+    // SetPlayerHP(newHp);
+    isUsingHealth = true;
     Healing_Amount -= 1;
     Healing_num->Text = "x " + to_string(static_cast<int>(round(Healing_Amount)));
     std::cout << "Using Healing!...\n";
     RemoveReplace();
-    playerturn = false;
+    // playerturn = false;
 }
 void CombatScene::UseMissile(){
     std::cout << "Missile Amount: " << Missile_Amount << endl;
@@ -303,14 +298,14 @@ void CombatScene::UseMissile(){
     }
     else Missile_out = false;
     // Enemy_currentHP -= missile_weight;
-    UpdateEnemyHP(missile_weight);
-    // isUsingMissile = true;
+    // UpdateEnemyHP();
+    isUsingMissile = true;
     Missile_Amount -= 1;
     Missile_num->Text = "x " + to_string(static_cast<int>(round(Missile_Amount)));
     std::cout << "Used Missile!...\n";
     RemoveReplace();
-    playerturn = false;
-    CombatScene::CheckState();
+    // playerturn = false;
+    // CombatScene::CheckState();
 }
 
 void CombatScene::UseShield(){
@@ -337,9 +332,6 @@ void CombatScene::SetPlayerHP(float val){
     UpdateHP();
     if(this->currentHP <= 0){
         // playerdead = true;
-        CombatScene::Terminate();
-        enemy1 = false;
-        enemy2 = false;
         Engine::GameEngine::GetInstance().ChangeScene("death-scene");
     }
 }
@@ -393,35 +385,28 @@ void CombatScene::UpdateHP(){
         TXT_HPVal->Text = "HP: " + to_string(static_cast<int>(round(currentHP)));
     }
 }
-
 void CombatScene::Terminate() {
     IScene::Terminate();
     cout << "Terminated\n";
 }
-
 void CombatScene::CheckState(){
     if(currentHP <= 0){
-        CombatScene::Terminate();
-        enemy1 = false;
-        enemy2 = false;
         Engine::GameEngine::GetInstance().ChangeScene("death-scene");
     }
 
     if(Enemy_currentHP <= 0){
-        CombatScene::Terminate();
         enemy1 = false;
         enemy2 = false;
         Engine::GameEngine::GetInstance().ChangeScene(Engine::GameEngine::currentActiveScene);
     }
 }
-
 void CombatScene::Update(float deltaTime) {
     currDelay -= 1.0f * deltaTime;
     if(isAuto && currDelay <= 0.0f) {
         currDelay = delayDuration;
         
         Move toMove = search(10);
-        
+
         cout << ">>>>>>>>> used: ";
         switch(toMove) {
             case USE_MISSILE: cout << "missile!\n"; break;
@@ -445,27 +430,19 @@ void CombatScene::Update(float deltaTime) {
     CombatScene::CheckState();
 
     if(!playerturn && !isUsingHealth && !isUsingMissile){
-        // currDelay -= 1.0f * deltaTime;
+        
+        currDelay -= 1.0f * deltaTime;
         // cout << "currdelay: " << currDelay << endl;
         //Used Shield Actions!
         if(IsUsingShield){
-            // temp += 1;
-            // SetPlayerHP(currentHP - 1);
-            // if(currDelay <= 0 || temp == Enemy_ATK/2){
-            //     temp = 0;
-            //     IsUsingShield = false;
-            //     playerturn = true;
-            //     currDelay = delayDuration;
-            //     std::cout << "Shield Used!...\n";
-            //     return;
-            // }
-            cout << "currdelay: "<<currDelay<<endl;
-            if(currDelay <= 0){
-                SetPlayerHP(currentHP - Enemy_ATK/2);
-                playerturn = true;
+            temp += 1;
+            SetPlayerHP(currentHP - 1);
+            if(currDelay <= 0 || temp == Enemy_ATK/2){
+                temp = 0;
                 IsUsingShield = false;
-                CombatScene::CheckState();
+                playerturn = true;
                 currDelay = delayDuration;
+                std::cout << "Shield Used!...\n";
                 return;
             }
         }
@@ -476,73 +453,67 @@ void CombatScene::Update(float deltaTime) {
             // std::cout<<"END! Curr_HP: " << currentHP << endl;
         // }
         else if(!playerturn && !isUsingMissile){
-            // temp += 1;
-            // // cout << "temp is: " << temp << endl;
-            // if(currDelay <= 0 || temp == Enemy_ATK){
-            //     playerturn = true;
-            //     temp = 0;
-            //     // std::cout<<"END! Curr_HP: " << currentHP << endl;
-            // }
-            cout << "currdelay: "<<currDelay<<endl;
-            if(currDelay <= 0){
-                SetPlayerHP(currentHP - Enemy_ATK);
+            SetPlayerHP(currentHP - 1);
+            temp += 1;
+            // cout << "temp is: " << temp << endl;
+            if(currDelay <= 0 || temp == Enemy_ATK){
                 playerturn = true;
                 currDelay = delayDuration;  
+                temp = 0;
+                // std::cout<<"END! Curr_HP: " << currentHP << endl;
             }
         }
     }
-
     //Player ATK
-    // else if(playerturn && isPlayerATK){
-    //     currDelay -= 1.0f * deltaTime;
-    //     temp += 1;
-    //     UpdateEnemyHP();
-    //     if(currDelay <= 0 || temp == playerATK){
-    //         temp = 0;
-    //         playerturn = false;
-    //         isPlayerATK = false;
-    //         currDelay = delayDuration;
-    //         cout <<"Here in Player ATK!...\n";  
-    //         // std::cout<<"END! Curr_HP: " << currentHP << endl;
-    //     }
-    // }
+    else if(playerturn && isPlayerATK){
+        currDelay -= 1.0f * deltaTime;
+        temp += 1;
+        UpdateEnemyHP();
+        if(currDelay <= 0 || temp == playerATK){
+            temp = 0;
+            playerturn = false;
+            isPlayerATK = false;
+            currDelay = delayDuration;
+            cout <<"Here in Player ATK!...\n";  
+            // std::cout<<"END! Curr_HP: " << currentHP << endl;
+        }
+    }
 
     // HealthPotion
-    // else if(playerturn && isUsingHealth){
-    //     if(temp == health_weight || currentHP >= maxHP){
-    //         // currDelay -= 1.0f * deltaTime;
-    //         temp2 -= 50.0f*deltaTime;
-    //         std::cout<<"temp2!: " << temp2 << endl;
-    //         temp = 0;
-    //         CombatScene::CheckState();
-    //         if(temp2 <= 0){//melvin linji gas 
-    //             isUsingHealth = false;
-    //             playerturn = false;
-    //             currDelay = delayDuration; 
-    //             temp2 = 20; 
-    //             return;
-    //         }
-    //     }
-    //     else{
-    //         SetPlayerHP(currentHP + 1);
-    //         temp += 1;
-    //     }
-    // }
+    else if(playerturn && isUsingHealth){
+        if(temp == health_weight || currentHP >= maxHP){
+            // currDelay -= 1.0f * deltaTime;
+            temp2 -= 50.0f*deltaTime;
+            std::cout<<"temp2!: " << temp2 << endl;
+            temp = 0;
+            CombatScene::CheckState();
+            if(temp2 <= 0){
+                isUsingHealth = false;
+                playerturn = false;
+                currDelay = delayDuration; 
+                temp2 = 20; 
+                return;
+            }
+        }
+        else{
+            SetPlayerHP(currentHP + 1);
+            temp += 1;
+        }
+    }
     // Missile
-    // else if(playerturn && isUsingMissile){
-    //     currDelay -= 1.0f * deltaTime;
-    //     temp += 1;
-    //     UpdateEnemyHP();
-    //     if(currDelay <= 0 || temp == missile_weight){
-    //         temp = 0;
-    //         playerturn = false;
-    //         isUsingMissile = false;
-    //         currDelay = delayDuration;  
-    //     }
-    // }
+    else if(playerturn && isUsingMissile){
+        currDelay -= 1.0f * deltaTime;
+        temp += 1;
+        UpdateEnemyHP();
+        if(currDelay <= 0 || temp == missile_weight){
+            temp = 0;
+            playerturn = false;
+            isUsingMissile = false;
+            currDelay = delayDuration;  
+        }
+    }
     CombatScene::CheckState();
 }
-
 void CombatScene::Empty(){
     // Haha
 }
